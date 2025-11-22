@@ -8,33 +8,6 @@ using UnityEngine.UI;
 
 public class CardsMenu : MonoBehaviour, IDataPersistence
 {
-    [System.Serializable]
-    public struct CardTypePair
-    {
-        public CardType type;
-        public Sprite typeIcon;
-        public Sprite typeOutline;
-    }
-
-    public CardTypePair[] CardSpritePairs;
-    private Dictionary<CardType, CardTypePair> CardTypeDictionary;
-    public Sprite GetIconFromType(CardType type) { return CardTypeDictionary[type].typeIcon; }
-    public Sprite GetOutlineFromType(CardType type) { return CardTypeDictionary[type].typeOutline; }
-
-    [System.Serializable]
-    public struct CardRarityPair
-    {
-        public CardRarity rarity;
-        public Sprite rairtyIcon;
-        public int maxCopies;
-    }
-
-    public CardRarityPair[] CardRarityPairs;
-    private Dictionary<CardRarity, CardRarityPair> CardRarityDictionary;
-
-    public Sprite GetIconFromRarity(CardRarity rairty) { return CardRarityDictionary[rairty].rairtyIcon; }
-    public int GetMaxCopiesFromRarity(CardRarity rairty) { return CardRarityDictionary[rairty].maxCopies; }
-
     [SerializeField] FirebasePlayerInfo FirebasePlayer;
     [SerializeField] TMP_InputField[] DeckNameInputs;
     [SerializeField] private int NumOfDecks = 3;
@@ -42,19 +15,17 @@ public class CardsMenu : MonoBehaviour, IDataPersistence
     [SerializeField] private CanvasGroup SelectDeckCanvasGroup;
     [SerializeField] private CanvasGroup EditDeckCanvasGroup;
 
+    [SerializeField] private VisibleCard VisibleCardPreview;
+    [SerializeField] private BaseCard[] CaptainLibrary;
+    [SerializeField] private BaseCard[] CardLibrary;
+
+    [SerializeField] private Transform CardLibraryTransform;
+
+    [SerializeField] private LibraryCardPreview CardPreviewPrefab;
+    private List<LibraryCardPreview> CardPreviewLibrary = new List<LibraryCardPreview>();
+
     private int currentDeckIndex;
-
-    public void Start()
-    {
-        CardTypeDictionary = new Dictionary<CardType, CardTypePair>();
-        foreach (var pair in CardSpritePairs)
-            CardTypeDictionary[pair.type] = pair;
-
-        CardRarityDictionary = new Dictionary<CardRarity, CardRarityPair>();
-        foreach (var pairRarity in CardRarityPairs)
-            CardRarityDictionary[pairRarity.rarity] = pairRarity;
-    }
-
+    private List<BaseCard> currentDeck = new List<BaseCard>();
 
     private void SetMenuCanvasGroups(bool showSelectDeckMenu)
     {
@@ -71,8 +42,8 @@ public class CardsMenu : MonoBehaviour, IDataPersistence
     {
         currentDeckIndex = index;
         SetMenuCanvasGroups(false);
+        UpdateCardLibrary();
     }
-
     public void OnEndEditDeckIndex(int index)
     {
         currentDeckIndex = index;
@@ -82,6 +53,33 @@ public class CardsMenu : MonoBehaviour, IDataPersistence
     {
         StartCoroutine(FirebasePlayer.UpdateObject("DeckName" + currentDeckIndex, deckName)); // This will be decks 0 - 2 on firebase
         //currentTeam.UpdateTeamName(deckName);
+    }
+
+    private void UpdateCardLibrary()
+    {
+        foreach(LibraryCardPreview cardPreview in CardPreviewLibrary)
+        {
+            Destroy(cardPreview.gameObject);
+        }
+        CardPreviewLibrary.Clear();
+
+        AddCardsToLibrary(CaptainLibrary);
+        AddCardsToLibrary(CardLibrary);
+    }
+
+    private void AddCardsToLibrary(BaseCard[] cardGroup)
+    {
+        foreach (BaseCard card in cardGroup)
+        {
+            LibraryCardPreview newCaptain = Instantiate(CardPreviewPrefab, CardLibraryTransform);
+            newCaptain.Init(this, card);
+            CardPreviewLibrary.Add(newCaptain);
+        }
+    }
+
+    public void ShowCardEffect(BaseCard cardToShow)
+    {
+        VisibleCardPreview.SetCard(cardToShow);
     }
 
     public IEnumerator LoadData(DataSnapshot data)

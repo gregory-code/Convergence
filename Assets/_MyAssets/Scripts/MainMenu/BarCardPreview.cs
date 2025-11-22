@@ -10,15 +10,12 @@ public class BarCardPreview : MonoBehaviour
     [SerializeField] TextMeshProUGUI CopiesText;
     [SerializeField] TextMeshProUGUI NameText;
 
-    private CardsMenu OwnerMenu;
-
-    public void Init(CardsMenu ownerMenu, BaseCard card)
+    public void Init(BaseCard card)
     {
-        this.OwnerMenu = ownerMenu;
-        Outline.sprite = ownerMenu.GetOutlineFromType(card.Type);
-        CardType.sprite = ownerMenu.GetIconFromType(card.Type);
+        Outline.sprite = card.Type.outline;
+        CardType.sprite = card.Type.icon;
         NameText.text = card.CardName;
 
-        CopiesText.text = "1/" + ownerMenu.GetMaxCopiesFromRarity(card.Rarity);
+        CopiesText.text = "1/" + card.Rarity.maxCopies;
     }
 }

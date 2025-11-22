@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: de8162671fb488349b28bfc4ad7fa9b4, type: 3}
+  m_Name: Invention
+  m_EditorClassIdentifier: 
+  type: 5
+  icon: {fileID: 21300000, guid: 14386a9f93640c347a40f10f15ef56bc, type: 3}
+  templateOutline: {fileID: 21300000, guid: 40bab86e3cd08834d92d60af5ac9fcbf, type: 3}
+  outline: {fileID: 21300000, guid: dcf0000801fab1d48960a7b4f8a85e2e, type: 3}
+  squareOutline: {fileID: 21300000, guid: 6e9bc44f3fc97f54b9b108d9a6ea3d0e, type: 3}

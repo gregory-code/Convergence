@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2dd0a5b538c855e46b8551e5e19eba0f, type: 3}
-  m_Name: Prince
+  m_Name: Prince_HeartBreaker
   m_EditorClassIdentifier: 
-  CardName: Prince
-  Type: {fileID: 11400000, guid: 7e379874b3426c546ae1a3a615a3ef70, type: 2}
-  Rarity: {fileID: 11400000, guid: b1e478010c8d91d4d9e3393c5ffeaf18, type: 2}
+  CardName: Heart Breaker
+  Type: {fileID: 11400000, guid: 067b8d4f5ee7d7d4db9abaab0a0a0c46, type: 2}
+  Rarity: {fileID: 11400000, guid: 10f3481ff2e893245a2600427e96d2bd, type: 2}
   CaptainCard: 6
   SeriesOverlay: {fileID: 21300000, guid: 73a0f5082a4a2584594d9309801360f2, type: 3}
-  CardArt: {fileID: 21300000, guid: 0d6fe620d82ecec48bc763948728f301, type: 3}
-  CardArtAdjustment: {x: -39.36, y: -8.9}
-  CardPreviewArt: {fileID: 21300000, guid: a35e8249059844946870f87318ae21fe, type: 3}
+  CardArt: {fileID: 21300000, guid: bfb2603cad9d3eb45866b35bd48bd026, type: 3}
+  CardArtAdjustment: {x: 0, y: 0}
+  CardPreviewArt: {fileID: 21300000, guid: e77075ba006a2cd4699330a9260578f2, type: 3}

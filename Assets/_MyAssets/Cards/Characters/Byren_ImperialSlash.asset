@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2dd0a5b538c855e46b8551e5e19eba0f, type: 3}
+  m_Name: Byren_ImperialSlash
+  m_EditorClassIdentifier: 
+  CardName: Imperial Slash
+  Type: {fileID: 11400000, guid: 724df9a1411ec954ebc6263a1c337930, type: 2}
+  Rarity: {fileID: 11400000, guid: 10f3481ff2e893245a2600427e96d2bd, type: 2}
+  CaptainCard: 1
+  SeriesOverlay: {fileID: 21300000, guid: 0cf8a2009c66b5144b21755bf40ace98, type: 3}
+  CardArt: {fileID: 21300000, guid: 448279148792d5442a4493bb49c34f3b, type: 3}
+  CardArtAdjustment: {x: 0, y: 0}
+  CardPreviewArt: {fileID: 21300000, guid: dfb4573530723b64983f6533ebaaa85b, type: 3}

@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2dd0a5b538c855e46b8551e5e19eba0f, type: 3}
+  m_Name: HealingWind
+  m_EditorClassIdentifier: 
+  CardName: Healing Wind
+  Type: {fileID: 11400000, guid: 724df9a1411ec954ebc6263a1c337930, type: 2}
+  Rarity: {fileID: 11400000, guid: 4d89e1e08f97ead4bb80c04b5453801a, type: 2}
+  CaptainCard: 0
+  CaptainSeries: 0
+  CardArt: {fileID: 21300000, guid: b7fbe57c20d3608409fe2a89bf0b5615, type: 3}
+  CardArtAdjustment: {x: 0, y: 0}
+  CardPreviewArt: {fileID: 21300000, guid: 4a039e77848268c46853933f1854e697, type: 3}
