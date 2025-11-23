@@ -23,21 +23,33 @@ public class VisibleCard : MonoBehaviour
             EquipmentText.text = "";
 
             LeftVial.sprite = card.Rarity.icon;
-            Overlay.gameObject.SetActive(false);
         }
         else
         {
-            Overlay.sprite = card.SeriesOverlay;
-            Overlay.gameObject.SetActive(true);
+            HealthText.text = "" + card.maxHealth;
+            EquipmentText.text = "" + card.maxEquipment;
 
             LeftVial.sprite = card.Type.outline;
         }
 
+        if(card.SeriesOverlay == null)
+        {
+            CardTemplate.sprite = card.Type.templateOutline;
+            Overlay.gameObject.SetActive(false);
+        }
+        else
+        {
+            CardTemplate.sprite = card.Type.templateCaptain;
+            Overlay.sprite = card.SeriesOverlay;
+            Overlay.gameObject.SetActive(true);
+        }
+
+
         CardArt.transform.localPosition = card.CardArtAdjustment;
+        CardArt.transform.localScale = card.CardArtSize;
 
         CardArt.sprite = card.CardArt;
         CardName.text = card.CardName;
-        CardTemplate.sprite = card.Type.templateOutline;
         RightVial.sprite = card.Type.icon;
 
     }

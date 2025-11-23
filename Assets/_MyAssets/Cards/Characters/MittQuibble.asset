@@ -17,6 +17,9 @@ MonoBehaviour:
   Rarity: {fileID: 11400000, guid: b1e478010c8d91d4d9e3393c5ffeaf18, type: 2}
   CaptainCard: 10
   SeriesOverlay: {fileID: 21300000, guid: c658b0989cc96c64eaf067201fabaed0, type: 3}
+  maxHealth: 9
+  maxEquipment: 3
   CardArt: {fileID: 21300000, guid: 72a0f66660bec614f91e3c7ce4c23ca6, type: 3}
   CardArtAdjustment: {x: -39.36, y: 10.3}
+  CardArtSize: {x: 0.16, y: 0.34}
   CardPreviewArt: {fileID: 21300000, guid: da481280e608ec047b70169b41d89f4c, type: 3}

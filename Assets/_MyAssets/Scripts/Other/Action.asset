@@ -15,5 +15,6 @@ MonoBehaviour:
   type: 1
   icon: {fileID: 21300000, guid: 72257c74b6cbdb647bc7edbe7dd8ea96, type: 3}
   templateOutline: {fileID: 21300000, guid: 40bab86e3cd08834d92d60af5ac9fcbf, type: 3}
+  templateCaptain: {fileID: 21300000, guid: df989d2bf512e394b8e57e00fb95fb8d, type: 3}
   outline: {fileID: 21300000, guid: e814b9d158be86342aa55524c81b2fad, type: 3}
   squareOutline: {fileID: 21300000, guid: 86bfb7afb25903247aac6644a46f4bd3, type: 3}

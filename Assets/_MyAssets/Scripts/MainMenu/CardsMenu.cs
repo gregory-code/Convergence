@@ -24,7 +24,17 @@ public class CardsMenu : MonoBehaviour, IDataPersistence
     [SerializeField] private LibraryCardPreview CardPreviewPrefab;
     private List<LibraryCardPreview> CardPreviewLibrary = new List<LibraryCardPreview>();
 
+    [SerializeField] private Transform CardBarTransform;
+
+    [SerializeField] private BarCardPreview BarCardPreviewPrefab;
+    private List<BarCardPreview> CardPreviewBar = new List<BarCardPreview>();
+
+    [SerializeField] TextMeshProUGUI CardsInDeckText;
+    [SerializeField] TextMeshProUGUI CaptainsInDeckText;
+
     private int currentDeckIndex;
+    private int cardsIndeck;
+    private int captainsInDeck;
     private List<BaseCard> currentDeck = new List<BaseCard>();
 
     private void SetMenuCanvasGroups(bool showSelectDeckMenu)
@@ -75,6 +85,56 @@ public class CardsMenu : MonoBehaviour, IDataPersistence
             newCaptain.Init(this, card);
             CardPreviewLibrary.Add(newCaptain);
         }
+    }
+
+    public void AddCard(BaseCard cardToAdd)
+    {
+        int copies = 1;
+        foreach(BaseCard card in currentDeck)
+        {
+            if(card.CardName == cardToAdd.CardName)
+                copies++;
+        }
+
+        if (copies > cardToAdd.Rarity.maxCopies)
+            return;
+
+        if (captainsInDeck >= 3 || cardsIndeck >= 30)
+            return; // Stop any cards from being added here
+
+        currentDeck.Add(cardToAdd);
+
+        if(cardToAdd.Type.type == CardType.Captain)
+        {
+            captainsInDeck++;
+            CaptainsInDeckText.text = captainsInDeck + "/3";
+        }
+        else
+        {
+            cardsIndeck++;
+            CardsInDeckText.text = cardsIndeck + "/40";
+        }
+
+        if (copies > 1)
+        {
+            foreach (BarCardPreview barCard in CardPreviewBar)
+            {
+                if (barCard.MatchingName(cardToAdd.CardName))
+                {
+                    barCard.UpdateCopes(copies);
+                    return;
+                }
+            }
+        }
+
+        BarCardPreview newbarCard = Instantiate(BarCardPreviewPrefab, CardBarTransform);
+        newbarCard.Init(this, cardToAdd, copies);
+        CardPreviewBar.Add(newbarCard);
+    }
+
+    public void RemoveCard(BaseCard cardToRemove)
+    {
+
     }
 
     public void ShowCardEffect(BaseCard cardToShow)

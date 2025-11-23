@@ -74,8 +74,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4287861651
-  m_fontColor: {r: 0.5754717, g: 0.5754717, b: 0.5754717, a: 1}
+    rgba: 4294967295
+  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -309,7 +309,7 @@ MonoBehaviour:
   m_Transition: 1
   m_Colors:
     m_NormalColor: {r: 1, g: 0.07075471, b: 0.07075471, a: 1}
-    m_HighlightedColor: {r: 0.8396226, g: 0.3035906, b: 0.20990565, a: 1}
+    m_HighlightedColor: {r: 1, g: 0.6970814, b: 0.6462264, a: 1}
     m_PressedColor: {r: 1, g: 0.07058824, b: 0.07058824, a: 1}
     m_SelectedColor: {r: 1, g: 0.07058824, b: 0.07058824, a: 1}
     m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
@@ -424,7 +424,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 211c440c328176a45be517c61eb77daf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  CardType: {fileID: 8706270419308155225}
+  CardTypeIcon: {fileID: 8706270419308155225}
   Outline: {fileID: 8391788408438362816}
   CopiesText: {fileID: 4386418260273092934}
   NameText: {fileID: 134274116456854564}
@@ -577,8 +577,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4278190080
-  m_fontColor: {r: 0, g: 0, b: 0, a: 1}
+    rgba: 4294046193
+  m_fontColor: {r: 0.9433962, g: 0.9433962, b: 0.9433962, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:

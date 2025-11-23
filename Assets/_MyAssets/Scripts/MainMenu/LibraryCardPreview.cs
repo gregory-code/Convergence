@@ -24,6 +24,11 @@ public class LibraryCardPreview : MonoBehaviour, IPointerEnterHandler, IPointerE
 
     }
 
+    public void AddCard()
+    {
+        OwnerMenu.AddCard(Card);
+    }
+
     public void OnPointerEnter(PointerEventData eventData)
     {
         OwnerMenu.ShowCardEffect(Card);

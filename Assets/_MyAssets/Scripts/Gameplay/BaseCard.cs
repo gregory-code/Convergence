@@ -10,7 +10,11 @@ public class BaseCard : ScriptableObject
     public CaptainCard CaptainCard;
     public Sprite SeriesOverlay;
 
+    public int maxHealth;
+    public int maxEquipment;
+
     public Sprite CardArt;
     public Vector2 CardArtAdjustment;
+    public Vector2 CardArtSize;
     public Sprite CardPreviewArt;
 }
