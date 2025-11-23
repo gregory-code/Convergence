@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2dd0a5b538c855e46b8551e5e19eba0f, type: 3}
-  m_Name: SilverLight
+  m_Name: Silver Light
   m_EditorClassIdentifier: 
   CardName: Silver Light
   Type: {fileID: 11400000, guid: 724df9a1411ec954ebc6263a1c337930, type: 2}

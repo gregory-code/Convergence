@@ -29,6 +29,11 @@ public class LibraryCardPreview : MonoBehaviour, IPointerEnterHandler, IPointerE
         OwnerMenu.AddCard(Card);
     }
 
+    public bool MatchingName(string cardNameToCheck)
+    {
+        return cardNameToCheck == Card.CardName;
+    }
+
     public void OnPointerEnter(PointerEventData eventData)
     {
         OwnerMenu.ShowCardEffect(Card);

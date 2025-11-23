@@ -16,8 +16,9 @@ public class CardsMenu : MonoBehaviour, IDataPersistence
     [SerializeField] private CanvasGroup EditDeckCanvasGroup;
 
     [SerializeField] private VisibleCard VisibleCardPreview;
-    [SerializeField] private BaseCard[] CaptainLibrary;
-    [SerializeField] private BaseCard[] CardLibrary;
+    [SerializeField] private List<BaseCard> CaptainLibrary = new List<BaseCard>();
+    [SerializeField] private List<BaseCard> CaptainCardsLibrary = new List<BaseCard>();
+    [SerializeField] private List<BaseCard> CardLibrary = new List<BaseCard>();
 
     [SerializeField] private Transform CardLibraryTransform;
 
@@ -36,6 +37,28 @@ public class CardsMenu : MonoBehaviour, IDataPersistence
     private int cardsIndeck;
     private int captainsInDeck;
     private List<BaseCard> currentDeck = new List<BaseCard>();
+    [SerializeField] private DeckLists deckLists;
+
+    [System.Serializable]
+    public struct DeckLists
+    {
+        public List<string> Deck1;
+        public List<string> Deck2;
+        public List<string> Deck3;
+
+        public List<string> GetList(int index)
+        {
+            switch (index)
+            {
+                case 0: return Deck1;
+                case 1: return Deck2;
+                case 2: return Deck3;
+                default:
+                    Debug.LogError("Index out of range (0-2)");
+                    return null;
+            }
+        }
+    }
 
     private void SetMenuCanvasGroups(bool showSelectDeckMenu)
     {
@@ -52,8 +75,45 @@ public class CardsMenu : MonoBehaviour, IDataPersistence
     {
         currentDeckIndex = index;
         SetMenuCanvasGroups(false);
-        UpdateCardLibrary();
+        DeleteCardLibrary();
+
+        AddCardsToLibrary(CaptainLibrary);
+        AddCardsToLibrary(CardLibrary);
+
+        if (deckLists.GetList(currentDeckIndex).Count > 0)
+        {
+            foreach(string cardID in deckLists.GetList(currentDeckIndex))
+            {
+                if (AddCardFromID(cardID, CardLibrary))
+                    continue;
+
+                if(AddCardFromID(cardID, CaptainLibrary))
+                    continue;
+
+                if (AddCardFromID(cardID, CaptainCardsLibrary))
+                    continue;
+            }
+        }
     }
+
+    private bool AddCardFromID(string cardID, List<BaseCard> libraryToSearch)
+    {
+        foreach (BaseCard cardSearch in libraryToSearch)
+        {
+            if (cardID == cardSearch.CardName)
+            {
+                AddCard(cardSearch);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void FinishEdittingDeck()
+    {
+        SetMenuCanvasGroups(true);
+    }
+
     public void OnEndEditDeckIndex(int index)
     {
         currentDeckIndex = index;
@@ -65,25 +125,69 @@ public class CardsMenu : MonoBehaviour, IDataPersistence
         //currentTeam.UpdateTeamName(deckName);
     }
 
-    private void UpdateCardLibrary()
+    private void DeleteCardLibrary()
     {
         foreach(LibraryCardPreview cardPreview in CardPreviewLibrary)
         {
             Destroy(cardPreview.gameObject);
         }
         CardPreviewLibrary.Clear();
-
-        AddCardsToLibrary(CaptainLibrary);
-        AddCardsToLibrary(CardLibrary);
     }
 
-    private void AddCardsToLibrary(BaseCard[] cardGroup)
+    private void AddCardsToLibrary(List<BaseCard> cardGroup)
     {
         foreach (BaseCard card in cardGroup)
         {
             LibraryCardPreview newCaptain = Instantiate(CardPreviewPrefab, CardLibraryTransform);
             newCaptain.Init(this, card);
             CardPreviewLibrary.Add(newCaptain);
+        }
+    }
+
+    private void RemoveCaptainCardsFromLibrary(List<BaseCard> cardGroup)
+    {
+        for(int i = 0; i < CardPreviewLibrary.Count; i++) // LibraryCardPreview cardPreview in CardPreviewLibrary)
+        {
+            for(int j = 0; j < cardGroup.Count; j++)
+            {
+                if (CardPreviewLibrary[i].MatchingName(cardGroup[j].CardName))
+                {
+                    Destroy(CardPreviewLibrary[i].gameObject);
+                    CardPreviewLibrary.Remove(CardPreviewLibrary[i]);
+                }
+            }
+        }
+    }
+
+    private List<BaseCard> GetCaptainsSignatureCards(CaptainCard captain)
+    {
+        List<BaseCard> newLibrary = new List<BaseCard>();
+
+        foreach(BaseCard card in CaptainCardsLibrary)
+        {
+            if(card.CaptainCard == captain)
+            {
+                newLibrary.Add(card);
+            }
+        }
+
+        return newLibrary;
+    }
+
+    private void RemoveCaptain(CaptainCard captain)
+    {
+        List<BaseCard> newCaptainCardLibrary = GetCaptainsSignatureCards(captain);
+        RemoveCaptainCardsFromLibrary(newCaptainCardLibrary);
+
+        for(int i = 0; i < currentDeck.Count; i++) // BaseCard card in currentDeck)
+        {
+            for (int j = 0; j < newCaptainCardLibrary.Count; j++)
+            {
+                if (currentDeck[i].CardName == newCaptainCardLibrary[j].CardName)
+                {
+                    RemoveCard(currentDeck[i]);
+                }
+            }
         }
     }
 
@@ -99,15 +203,18 @@ public class CardsMenu : MonoBehaviour, IDataPersistence
         if (copies > cardToAdd.Rarity.maxCopies)
             return;
 
-        if (captainsInDeck >= 3 || cardsIndeck >= 30)
+        if ((captainsInDeck >= 3 && cardToAdd.Type.type == CardType.Captain) || (cardsIndeck >= 30 && cardToAdd.Type.type != CardType.Captain))
             return; // Stop any cards from being added here
 
-        currentDeck.Add(cardToAdd);
+        BaseCard newCardCopy = ScriptableObject.Instantiate(cardToAdd);
+        currentDeck.Add(newCardCopy);
+        CloudUpdateDeck();
 
-        if(cardToAdd.Type.type == CardType.Captain)
+        if (cardToAdd.Type.type == CardType.Captain)
         {
             captainsInDeck++;
             CaptainsInDeckText.text = captainsInDeck + "/3";
+            AddCardsToLibrary(GetCaptainsSignatureCards(cardToAdd.CaptainCard));
         }
         else
         {
@@ -119,7 +226,7 @@ public class CardsMenu : MonoBehaviour, IDataPersistence
         {
             foreach (BarCardPreview barCard in CardPreviewBar)
             {
-                if (barCard.MatchingName(cardToAdd.CardName))
+                if (barCard.MatchingName(newCardCopy.CardName))
                 {
                     barCard.UpdateCopes(copies);
                     return;
@@ -128,18 +235,66 @@ public class CardsMenu : MonoBehaviour, IDataPersistence
         }
 
         BarCardPreview newbarCard = Instantiate(BarCardPreviewPrefab, CardBarTransform);
-        newbarCard.Init(this, cardToAdd, copies);
+        newbarCard.Init(this, newCardCopy, copies);
         CardPreviewBar.Add(newbarCard);
     }
 
     public void RemoveCard(BaseCard cardToRemove)
     {
+        BarCardPreview barCardToRemove = null;
+        foreach (BarCardPreview barCard in CardPreviewBar)
+        {
+            if (barCard.MatchingName(cardToRemove.CardName))
+            {
+                barCardToRemove = barCard;
+                break;
+            }
+        }
 
+        if(barCardToRemove != null)
+        {
+            Destroy(barCardToRemove.gameObject);
+            CardPreviewBar.Remove(barCardToRemove);
+
+            for (int i = 0; i < currentDeck.Count; i++)
+            {
+                if (currentDeck[i].CardName == cardToRemove.CardName)
+                {
+                    if (currentDeck[i].Type.type == CardType.Captain)
+                    {
+                        captainsInDeck--;
+                        CaptainsInDeckText.text = captainsInDeck + "/3";
+                        RemoveCaptain(currentDeck[i].CaptainCard);
+                    }
+                    else
+                    {
+                        cardsIndeck--;
+                        CardsInDeckText.text = cardsIndeck + "/40";
+                    }
+                    DestroyImmediate(currentDeck[i], true);
+                    currentDeck.Remove(currentDeck[i]);
+                    i--;
+                }
+            }
+        }
+
+        CloudUpdateDeck();
     }
 
     public void ShowCardEffect(BaseCard cardToShow)
     {
         VisibleCardPreview.SetCard(cardToShow);
+    }
+
+    private void CloudUpdateDeck()
+    {
+        List<String> cardIDs = new List<string>();
+        for (int i = 0; i < currentDeck.Count; i++)
+        {
+            cardIDs.Add(currentDeck[i].CardName);
+        }
+
+        StartCoroutine(FirebasePlayer.UpdateObject("Deck" + currentDeckIndex, cardIDs));
     }
 
     public IEnumerator LoadData(DataSnapshot data)
@@ -156,6 +311,14 @@ public class CardsMenu : MonoBehaviour, IDataPersistence
             {
                 DeckNameInputs[i].text = data.Child("DeckName" + i).Value.ToString();
             }
+
+            if (data.Child("Deck" + i).Exists)
+            {
+                for (int j = 0; j < data.Child("Deck" + i).ChildrenCount; ++j)
+                {
+                    deckLists.GetList(i).Add(data.Child("Deck" + i).Child("" + j).Value.ToString());
+                }
+            }
         }
 
         yield return new WaitForEndOfFrame();
@@ -165,4 +328,5 @@ public class CardsMenu : MonoBehaviour, IDataPersistence
     {
 
     }
+
 }

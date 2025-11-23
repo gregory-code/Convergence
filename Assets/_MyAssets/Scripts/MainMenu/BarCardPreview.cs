@@ -9,6 +9,7 @@ public class BarCardPreview : MonoBehaviour
     [SerializeField] TextMeshProUGUI CopiesText;
     [SerializeField] TextMeshProUGUI NameText;
 
+    private BaseCard Card;
     private CardsMenu OwnerMenu;
     private int maxCopies;
 
@@ -22,6 +23,8 @@ public class BarCardPreview : MonoBehaviour
 
         GetComponent<Image>().sprite = card.CardPreviewArt;
 
+        this.Card = card;
+
         cardName = card.CardName;
 
         if (card.Type.type != CardType.Captain)
@@ -33,6 +36,11 @@ public class BarCardPreview : MonoBehaviour
         NameText.text = card.CardName;
 
         UpdateCopes(copies);
+    }
+
+    public void RemoveCard()
+    {
+        OwnerMenu.RemoveCard(Card);
     }
 
     public void UpdateCopes(int copies)
