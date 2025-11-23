@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2dd0a5b538c855e46b8551e5e19eba0f, type: 3}
+  m_Name: MittQuibble_MittsStash
+  m_EditorClassIdentifier: 
+  CardName: Mitt's Stash
+  Type: {fileID: 11400000, guid: e24ba17bf00a2c84d8bf10383f710fed, type: 2}
+  Rarity: {fileID: 11400000, guid: 10f3481ff2e893245a2600427e96d2bd, type: 2}
+  CaptainCard: 10
+  SeriesOverlay: {fileID: 21300000, guid: c658b0989cc96c64eaf067201fabaed0, type: 3}
+  maxHealth: 0
+  maxEquipment: 0
+  CardArt: {fileID: 21300000, guid: d478d6a5f3bf44a449d7717d5d391cc6, type: 3}
+  CardArtAdjustment: {x: -70.85, y: 0}
+  CardArtSize: {x: 0.16, y: 0.34}
+  CardPreviewArt: {fileID: 21300000, guid: 816d4801537ea0f4c8cc479e5368197d, type: 3}

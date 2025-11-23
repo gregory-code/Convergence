@@ -26,7 +26,7 @@ public class LibraryCardPreview : MonoBehaviour, IPointerEnterHandler, IPointerE
 
     public void AddCard()
     {
-        OwnerMenu.AddCard(Card);
+        OwnerMenu.AddCard(Card, true);
     }
 
     public bool MatchingName(string cardNameToCheck)

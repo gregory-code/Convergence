@@ -202,14 +202,14 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: AuthManager, Assembly-CSharp
-        m_MethodName: RegisterButton
-        m_Mode: 1
+      - m_Target: {fileID: 899563068}
+        m_TargetAssemblyTypeName: CardsMenu, Assembly-CSharp
+        m_MethodName: DeleteDeck
+        m_Mode: 3
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
+          m_IntArgument: 2
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
@@ -1517,10 +1517,10 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: AuthManager, Assembly-CSharp
-        m_MethodName: RegisterButton
-        m_Mode: 1
+      - m_Target: {fileID: 899563068}
+        m_TargetAssemblyTypeName: CardsMenu, Assembly-CSharp
+        m_MethodName: DeleteDeck
+        m_Mode: 3
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -4125,8 +4125,14 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 76e7d421298496546bc3c14285e7a550, type: 2}
   CaptainCardsLibrary:
   - {fileID: 11400000, guid: 067cf101fcb00484f853500382b04700, type: 2}
+  - {fileID: 11400000, guid: 7a008839bdb228d43922c243293882d2, type: 2}
+  - {fileID: 11400000, guid: cb3395afe406ef643beea2e124b0e617, type: 2}
   - {fileID: 11400000, guid: c3ce7c15f408efc44bbe9ba2620b5772, type: 2}
+  - {fileID: 11400000, guid: c853de1bd9c144944aab0df665a505f4, type: 2}
+  - {fileID: 11400000, guid: 8780c0b85bb865446a7b8050fe1c700d, type: 2}
   - {fileID: 11400000, guid: 885a31e91b0c2424b8edb7e4d67b6ffc, type: 2}
+  - {fileID: 11400000, guid: b76d70c8fb983484793752b4823f4c96, type: 2}
+  - {fileID: 11400000, guid: b5d746913634dc1458696385c75bd400, type: 2}
   CardLibrary:
   - {fileID: 11400000, guid: 821a19e38fbcace4dbd6228968ea73cc, type: 2}
   - {fileID: 11400000, guid: c5e16139ee5dffe4bb5a6e48b9e026e3, type: 2}
@@ -4135,13 +4141,22 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 2680fce2ef7d4c44686d364fcfc8e878, type: 2}
   - {fileID: 11400000, guid: 9b3fd4f4f91440b42b1e1a31c263ea11, type: 2}
   - {fileID: 11400000, guid: e870bb8ba67b96446979251d1981789c, type: 2}
+  - {fileID: 11400000, guid: c56c2126c9f036042accf0f68675a250, type: 2}
+  - {fileID: 11400000, guid: 55414cad690aa904280554800f1240ce, type: 2}
+  - {fileID: 11400000, guid: ed3788cf219e9734da343239b82affda, type: 2}
+  - {fileID: 11400000, guid: 4e6f37ff61dce564ebcec8d2e17507dd, type: 2}
+  - {fileID: 11400000, guid: 7bbd78741af982043b21dbd888e9154e, type: 2}
+  - {fileID: 11400000, guid: b6411b0aae17e0a4184e48af06acf67d, type: 2}
   CardLibraryTransform: {fileID: 158896872}
   CardPreviewPrefab: {fileID: 2450607815523520782, guid: db57ee80dd977914ab43f7855c527a7e, type: 3}
   CardBarTransform: {fileID: 556933579}
   BarCardPreviewPrefab: {fileID: 1330130366420257467, guid: bb3875e872303a644ad42e012fe81b3b, type: 3}
   CardsInDeckText: {fileID: 957196417}
   CaptainsInDeckText: {fileID: 1666797239}
-  currentDeck: []
+  deckLists:
+    Deck1: []
+    Deck2: []
+    Deck3: []
 --- !u!1 &920509544
 GameObject:
   m_ObjectHideFlags: 0
@@ -6247,14 +6262,14 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: AuthManager, Assembly-CSharp
-        m_MethodName: RegisterButton
-        m_Mode: 1
+      - m_Target: {fileID: 899563068}
+        m_TargetAssemblyTypeName: CardsMenu, Assembly-CSharp
+        m_MethodName: DeleteDeck
+        m_Mode: 3
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
+          m_IntArgument: 1
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0

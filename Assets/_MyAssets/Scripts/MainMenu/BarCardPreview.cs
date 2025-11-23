@@ -1,8 +1,9 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class BarCardPreview : MonoBehaviour
+public class BarCardPreview : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
     [SerializeField] Image CardTypeIcon;
     [SerializeField] Image Outline;
@@ -52,5 +53,15 @@ public class BarCardPreview : MonoBehaviour
     public bool MatchingName(string cardNameToCheck)
     {
         return cardNameToCheck == cardName;
+    }
+
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        OwnerMenu.ShowCardEffect(Card);
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+
     }
 }

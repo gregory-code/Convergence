@@ -74,6 +74,7 @@ public class CardsMenu : MonoBehaviour, IDataPersistence
     public void EditDeck(int index)
     {
         currentDeckIndex = index;
+
         SetMenuCanvasGroups(false);
         DeleteCardLibrary();
 
@@ -96,13 +97,24 @@ public class CardsMenu : MonoBehaviour, IDataPersistence
         }
     }
 
+    public void DeleteDeck(int index)
+    {
+        currentDeckIndex = index;
+
+        deckLists.GetList(index).Clear();
+        DeckNameInputs[index].text = "";
+
+        StartCoroutine(FirebasePlayer.UpdateObject("DeckName" + currentDeckIndex, "")); // This will be decks 0 - 2 on firebase
+        CloudUpdateDeck();
+    }
+
     private bool AddCardFromID(string cardID, List<BaseCard> libraryToSearch)
     {
         foreach (BaseCard cardSearch in libraryToSearch)
         {
             if (cardID == cardSearch.CardName)
             {
-                AddCard(cardSearch);
+                AddCard(cardSearch, false);
                 return true;
             }
         }
@@ -111,6 +123,29 @@ public class CardsMenu : MonoBehaviour, IDataPersistence
 
     public void FinishEdittingDeck()
     {
+        deckLists.GetList(currentDeckIndex).Clear();
+        for (int i = 0; i < currentDeck.Count; i++)
+        {
+            deckLists.GetList(currentDeckIndex).Add(currentDeck[i].CardName);
+        }
+
+        for (int i = 0; i < currentDeck.Count; i++)
+        {
+            DestroyImmediate(currentDeck[i], true);
+        }
+        currentDeck.Clear();
+
+        for (int i = 0; i < CardPreviewBar.Count; i++)
+        {
+            Destroy(CardPreviewBar[i].gameObject);
+        }
+        CardPreviewBar.Clear();
+
+        CaptainsInDeckText.text = "0/3";
+        CardsInDeckText.text = "0/40";
+        captainsInDeck = 0;
+        cardsIndeck = 0;
+
         SetMenuCanvasGroups(true);
     }
 
@@ -191,7 +226,7 @@ public class CardsMenu : MonoBehaviour, IDataPersistence
         }
     }
 
-    public void AddCard(BaseCard cardToAdd)
+    public void AddCard(BaseCard cardToAdd, bool updateCloud)
     {
         int copies = 1;
         foreach(BaseCard card in currentDeck)
@@ -203,12 +238,14 @@ public class CardsMenu : MonoBehaviour, IDataPersistence
         if (copies > cardToAdd.Rarity.maxCopies)
             return;
 
-        if ((captainsInDeck >= 3 && cardToAdd.Type.type == CardType.Captain) || (cardsIndeck >= 30 && cardToAdd.Type.type != CardType.Captain))
+        if ((captainsInDeck >= 3 && cardToAdd.Type.type == CardType.Captain) || (cardsIndeck >= 40 && cardToAdd.Type.type != CardType.Captain))
             return; // Stop any cards from being added here
 
         BaseCard newCardCopy = ScriptableObject.Instantiate(cardToAdd);
         currentDeck.Add(newCardCopy);
-        CloudUpdateDeck();
+
+        if(updateCloud)
+            CloudUpdateDeck();
 
         if (cardToAdd.Type.type == CardType.Captain)
         {
@@ -236,6 +273,10 @@ public class CardsMenu : MonoBehaviour, IDataPersistence
 
         BarCardPreview newbarCard = Instantiate(BarCardPreviewPrefab, CardBarTransform);
         newbarCard.Init(this, newCardCopy, copies);
+
+        if (cardToAdd.Type.type == CardType.Captain)
+            newbarCard.transform.SetAsFirstSibling();
+
         CardPreviewBar.Add(newbarCard);
     }
 
@@ -288,7 +329,7 @@ public class CardsMenu : MonoBehaviour, IDataPersistence
 
     private void CloudUpdateDeck()
     {
-        List<String> cardIDs = new List<string>();
+        List<string> cardIDs = new List<string>();
         for (int i = 0; i < currentDeck.Count; i++)
         {
             cardIDs.Add(currentDeck[i].CardName);
