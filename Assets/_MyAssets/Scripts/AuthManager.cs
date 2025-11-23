@@ -13,6 +13,8 @@ public class AuthManager : MonoBehaviour
 {
     [Header("Firebase Data")]
     public FirebasePlayerInfo FirebasePlayer;
+    public Material Transition1Material;
+    public Image Transition1Image;
 
     //PlayerPref
     private string savedEmail;
@@ -23,13 +25,11 @@ public class AuthManager : MonoBehaviour
     [SerializeField] private FirebaseAuth auth;
     [SerializeField] private FirebaseUser user;
 
-    //Login
-    [SerializeField] TMP_InputField usernameField;
-    [SerializeField] TMP_InputField emailField;
-    [SerializeField] TMP_InputField passwordField;
-
     private void Awake()
     {
+        Transition1Image.gameObject.SetActive(true);
+        Transition1Material.SetFloat("_Transition", 0);
+
         FirebaseApp.CheckAndFixDependenciesAsync().ContinueWith(task =>
         {
             _dependentStatus = task.Result;
@@ -68,13 +68,8 @@ public class AuthManager : MonoBehaviour
         }
         else
         {
-            //loading.hide();
+            SignOut();
         }
-    }
-
-    public void LoginButton()
-    {
-        StartCoroutine(Login(emailField.text, passwordField.text));
     }
 
     private IEnumerator Login(string email, string password)
@@ -117,88 +112,27 @@ public class AuthManager : MonoBehaviour
             PlayerPrefs.SetString("password", password);
 
             FirebasePlayer.LoadCloudData();
+
+            StartCoroutine(FadeOut());
         }
     }
 
-    public void RegisterButton()
+    private IEnumerator FadeOut()
     {
-        StartCoroutine(Register(emailField.text, passwordField.text, usernameField.text));
-    }
-
-    private IEnumerator Register(string email, string password, string username)
-    {
-        if (username == "")
+        float time = 0.0f;
+        while (time < 1.0f)
         {
-            //NotificationScript.createNotif($"Missing Username", Color.red);
+            time += Time.deltaTime;
+            Transition1Material.SetFloat("_Transition", time);
+            yield return new WaitForEndOfFrame();
         }
-        else
-        {
-            var registerTask = auth.CreateUserWithEmailAndPasswordAsync(email, password);
-
-            //loading.show();
-
-            yield return new WaitUntil(predicate: () => registerTask.IsCompleted);
-
-            if (registerTask.Exception != null)
-            {
-                Debug.Log(message: $"Failed: {registerTask.Exception}");
-                FirebaseException firebaseException = registerTask.Exception.GetBaseException() as FirebaseException;
-                AuthError errorCode = (AuthError)firebaseException.ErrorCode;
-
-                string message = "Failed";
-                switch (errorCode)
-                {
-                    case AuthError.MissingEmail: message = "Missing Email"; break;
-                    case AuthError.MissingPassword: message = "Missing Password"; break;
-                    case AuthError.WeakPassword: message = "Weak Password"; break;
-                    case AuthError.EmailAlreadyInUse: message = "Email Already in use"; break;
-                    case AuthError.NetworkRequestFailed: message = "There's no internet"; break;
-                }
-                //NotificationScript.createNotif($"Failed register: {message}", Color.red);
-                //loading.hide();
-            }
-            else
-            {
-                user = registerTask.Result.User;
-                if (user != null)
-                {
-                    FirebasePlayer.GetUser(user);
-
-                    UserProfile profile = new UserProfile();
-                    profile.DisplayName = username;
-
-                    var profileTask = user.UpdateUserProfileAsync(profile);
-                    yield return new WaitUntil(predicate: () => profileTask.IsCompleted);
-
-                    if (profileTask.Exception != null)
-                    {
-                        Debug.Log(message: $"Failed: {profileTask.Exception}");
-                        FirebaseException firebaseException = profileTask.Exception.GetBaseException() as FirebaseException;
-                        AuthError error = (AuthError)firebaseException.ErrorCode;
-                        //NotificationScript.createNotif($"Username failed", Color.red);
-
-                    }
-                    else
-                    {
-                        //NotificationScript.createNotif($"You Registered!", Color.green);
-                        StartCoroutine(FirebasePlayer.UpdateUsernameAuth(username));
-                        StartCoroutine(FirebasePlayer.UpdateObject("username", username));
-                        //GameObject.FindGameObjectWithTag("Online").GetComponent<onlineScript>().setNickName(username);
-                        //GameObject.FindGameObjectWithTag("Canvas").transform.Find("menu").GetComponent<menuScript>().UsernameField.text = username;
-                        StartCoroutine(Login(email, password));
-                    }
-                }
-            }
-        }
+        Transition1Image.gameObject.SetActive(false);
+        Transition1Material.SetFloat("_Transition", 1);
     }
 
     public void SignOut()
     {
         auth.SignOut();
-        usernameField.text = "";
-        emailField.text = "";
-        passwordField.text = "";
-
-        SceneManager.LoadScene(0);
+        SceneManager.LoadScene(1);
     }
 }
