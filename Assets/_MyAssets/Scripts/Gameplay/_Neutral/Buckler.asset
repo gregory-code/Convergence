@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0570cd4ea4a0b2c48a13b56c4aa669af, type: 3}
+  m_Name: Buckler
+  m_EditorClassIdentifier: 
+  CardName: Buckler
+  Type: {fileID: 11400000, guid: e24ba17bf00a2c84d8bf10383f710fed, type: 2}
+  Rarity: {fileID: 11400000, guid: 4d89e1e08f97ead4bb80c04b5453801a, type: 2}
+  Captain: 0
+  SeriesOverlay: {fileID: 0}
+  CardArt: {fileID: 21300000, guid: efd6714bf0e9f624181f02ceb4d98c1c, type: 3}
+  CardArtAdjustment: {x: 42, y: 0}
+  CardArtSize: {x: 0.13, y: 0.15}
+  CardPreviewArt: {fileID: 21300000, guid: 8f33d910fa3888b4b87298be70cb64a2, type: 3}
+  bSwift: 0
+  bPrestige: 0
+  equipmentType: 2

@@ -194,13 +194,13 @@ public class CardsMenu : MonoBehaviour, IDataPersistence
         }
     }
 
-    private List<BaseCard> GetCaptainsSignatureCards(CaptainCard captain)
+    private List<BaseCard> GetCaptainsSignatureCards(CardCaptain captain)
     {
         List<BaseCard> newLibrary = new List<BaseCard>();
 
         foreach(BaseCard card in CaptainCardsLibrary)
         {
-            if(card.CaptainCard == captain)
+            if(card.Captain == captain)
             {
                 newLibrary.Add(card);
             }
@@ -209,7 +209,7 @@ public class CardsMenu : MonoBehaviour, IDataPersistence
         return newLibrary;
     }
 
-    private void RemoveCaptain(CaptainCard captain)
+    private void RemoveCaptain(CardCaptain captain)
     {
         List<BaseCard> newCaptainCardLibrary = GetCaptainsSignatureCards(captain);
         RemoveCaptainCardsFromLibrary(newCaptainCardLibrary);
@@ -251,7 +251,7 @@ public class CardsMenu : MonoBehaviour, IDataPersistence
         {
             captainsInDeck++;
             CaptainsInDeckText.text = captainsInDeck + "/3";
-            AddCardsToLibrary(GetCaptainsSignatureCards(cardToAdd.CaptainCard));
+            AddCardsToLibrary(GetCaptainsSignatureCards(cardToAdd.Captain));
         }
         else
         {
@@ -305,7 +305,7 @@ public class CardsMenu : MonoBehaviour, IDataPersistence
                     {
                         captainsInDeck--;
                         CaptainsInDeckText.text = captainsInDeck + "/3";
-                        RemoveCaptain(currentDeck[i].CaptainCard);
+                        RemoveCaptain(currentDeck[i].Captain);
                     }
                     else
                     {

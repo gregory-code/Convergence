@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70faf0a1c8b0a62489627f95f0cf974d, type: 3}
+  m_Name: Byren
+  m_EditorClassIdentifier: 
+  CardName: Byren
+  Type: {fileID: 11400000, guid: 7e379874b3426c546ae1a3a615a3ef70, type: 2}
+  Rarity: {fileID: 11400000, guid: b1e478010c8d91d4d9e3393c5ffeaf18, type: 2}
+  Captain: 1
+  SeriesOverlay: {fileID: 21300000, guid: 0cf8a2009c66b5144b21755bf40ace98, type: 3}
+  CardArt: {fileID: 21300000, guid: 6d327f5a64890db49b8c7fdf1f923dc3, type: 3}
+  CardArtAdjustment: {x: -70.85, y: 0}
+  CardArtSize: {x: 0.16, y: 0.34}
+  CardPreviewArt: {fileID: 21300000, guid: fac06cd3a8fc010408d57eb5bda2819e, type: 3}
+  bSwift: 0
+  maxHealth: 9
+  maxEquipment: 2

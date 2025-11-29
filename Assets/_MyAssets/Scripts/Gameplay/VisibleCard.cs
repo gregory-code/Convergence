@@ -1,4 +1,5 @@
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -26,8 +27,12 @@ public class VisibleCard : MonoBehaviour
         }
         else
         {
-            HealthText.text = "" + card.maxHealth;
-            EquipmentText.text = "" + card.maxEquipment;
+            CaptainCard captain = card as CaptainCard;
+            if(captain)
+            {
+                HealthText.text = "" + captain.maxHealth;
+                EquipmentText.text = "" + captain.maxEquipment;
+            }
 
             LeftVial.sprite = card.Type.outline;
         }

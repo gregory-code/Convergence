@@ -4195,33 +4195,33 @@ MonoBehaviour:
   EditDeckCanvasGroup: {fileID: 827518443}
   VisibleCardPreview: {fileID: 1604476371}
   CaptainLibrary:
-  - {fileID: 11400000, guid: b45d89ebbe268894db3a0895ec15bd83, type: 2}
-  - {fileID: 11400000, guid: 167295e44c107564a83c1f3f47f5e9b0, type: 2}
-  - {fileID: 11400000, guid: 76e7d421298496546bc3c14285e7a550, type: 2}
+  - {fileID: 11400000, guid: 9525ea9fabfe95445a3b98c7861bba35, type: 2}
+  - {fileID: 11400000, guid: 9a051f7140dd2934ba16d0c848d4c3f2, type: 2}
+  - {fileID: 11400000, guid: 0667a70247c54b84ea1ae09848aaae1c, type: 2}
   CaptainCardsLibrary:
-  - {fileID: 11400000, guid: 067cf101fcb00484f853500382b04700, type: 2}
-  - {fileID: 11400000, guid: 7a008839bdb228d43922c243293882d2, type: 2}
-  - {fileID: 11400000, guid: cb3395afe406ef643beea2e124b0e617, type: 2}
-  - {fileID: 11400000, guid: c3ce7c15f408efc44bbe9ba2620b5772, type: 2}
-  - {fileID: 11400000, guid: c853de1bd9c144944aab0df665a505f4, type: 2}
-  - {fileID: 11400000, guid: 8780c0b85bb865446a7b8050fe1c700d, type: 2}
-  - {fileID: 11400000, guid: 885a31e91b0c2424b8edb7e4d67b6ffc, type: 2}
-  - {fileID: 11400000, guid: b76d70c8fb983484793752b4823f4c96, type: 2}
-  - {fileID: 11400000, guid: b5d746913634dc1458696385c75bd400, type: 2}
+  - {fileID: 11400000, guid: 8a38af1188c326a4d8a11fe641a2318c, type: 2}
+  - {fileID: 11400000, guid: 3c9c4a75f2a511d408cf0fb92b91ca06, type: 2}
+  - {fileID: 11400000, guid: 420ae0322ba6fb349bbb5fd61270796c, type: 2}
+  - {fileID: 11400000, guid: 3fe4fca95a9bbf8449290c79c08aad25, type: 2}
+  - {fileID: 11400000, guid: ea1dc383f54ca974092a538a956a18df, type: 2}
+  - {fileID: 11400000, guid: 1f6e5973c897397459e7287529d503cb, type: 2}
+  - {fileID: 11400000, guid: 6eb88eb0489d7f84e9d433297bc515eb, type: 2}
+  - {fileID: 11400000, guid: baa7a53ba580cb84ab2593383a604be6, type: 2}
+  - {fileID: 11400000, guid: 6ef7641e8b2e7c8499c21bb5a7cadbef, type: 2}
   CardLibrary:
-  - {fileID: 11400000, guid: 821a19e38fbcace4dbd6228968ea73cc, type: 2}
-  - {fileID: 11400000, guid: c5e16139ee5dffe4bb5a6e48b9e026e3, type: 2}
-  - {fileID: 11400000, guid: 340e2394c60786b43bd53a2f6a259272, type: 2}
-  - {fileID: 11400000, guid: dec7de36136c9ad4c833d4af02ce9be2, type: 2}
-  - {fileID: 11400000, guid: 2680fce2ef7d4c44686d364fcfc8e878, type: 2}
-  - {fileID: 11400000, guid: 9b3fd4f4f91440b42b1e1a31c263ea11, type: 2}
-  - {fileID: 11400000, guid: e870bb8ba67b96446979251d1981789c, type: 2}
-  - {fileID: 11400000, guid: c56c2126c9f036042accf0f68675a250, type: 2}
-  - {fileID: 11400000, guid: 55414cad690aa904280554800f1240ce, type: 2}
-  - {fileID: 11400000, guid: ed3788cf219e9734da343239b82affda, type: 2}
-  - {fileID: 11400000, guid: 4e6f37ff61dce564ebcec8d2e17507dd, type: 2}
-  - {fileID: 11400000, guid: 7bbd78741af982043b21dbd888e9154e, type: 2}
-  - {fileID: 11400000, guid: b6411b0aae17e0a4184e48af06acf67d, type: 2}
+  - {fileID: 11400000, guid: ee6ef29608136ba4b9564ca955982143, type: 2}
+  - {fileID: 11400000, guid: 61c9e250889c6294ba092079e62ede7f, type: 2}
+  - {fileID: 11400000, guid: bf734b758379c8242ab7ca7c34f8d714, type: 2}
+  - {fileID: 11400000, guid: 2f340278946fbee4abf67bca795de43e, type: 2}
+  - {fileID: 11400000, guid: 55f2a2f6b45b0af45a62c8a67b25c20b, type: 2}
+  - {fileID: 11400000, guid: e33b1648d12251d48a3a8aefbf624c62, type: 2}
+  - {fileID: 11400000, guid: d1840541b9282a340b2ae6630c641162, type: 2}
+  - {fileID: 11400000, guid: 6946e891e80604b47a3f59ea168e74d9, type: 2}
+  - {fileID: 11400000, guid: a16e39b17860262498ae6d936d1a4fdb, type: 2}
+  - {fileID: 11400000, guid: c8d259aaa573a284da7e92be1d4cc59c, type: 2}
+  - {fileID: 11400000, guid: aa9940e3e4b4d724abf2fa5c18c37ad2, type: 2}
+  - {fileID: 11400000, guid: 5487ff9f1ced39549875c6e6531a1a1a, type: 2}
+  - {fileID: 11400000, guid: 2d0efb8d3149d374994b0d16a84b4e87, type: 2}
   CardLibraryTransform: {fileID: 158896872}
   CardPreviewPrefab: {fileID: 2450607815523520782, guid: db57ee80dd977914ab43f7855c527a7e, type: 3}
   CardBarTransform: {fileID: 556933579}
