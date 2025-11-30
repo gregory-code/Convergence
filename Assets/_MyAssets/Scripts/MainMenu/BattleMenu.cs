@@ -28,8 +28,10 @@ public class BattleMenu : MonoBehaviourPunCallbacks, IDataPersistence
 
     [SerializeField] private List<string> standardRoomIDs = new List<string>();
 
+
     private void Start()
     {
+        PhotonNetwork.AutomaticallySyncScene = true;
         ChosenDeckIndex(PlayerPrefs.GetInt("SelectedDeck"));
     }
 
@@ -98,7 +100,6 @@ public class BattleMenu : MonoBehaviourPunCallbacks, IDataPersistence
         }
 
         List<string> RoomIDs = new List<string>();
-        int formatID = 0;
 
         RoomIDs = standardRoomIDs;
 
@@ -108,18 +109,18 @@ public class BattleMenu : MonoBehaviourPunCallbacks, IDataPersistence
         {
             if (roomID == myID && bSearchingForMatch == false)
             {
-                this.photonView.RPC("UpdateRoomIDsRPC", RpcTarget.AllBufferedViaServer, myID, false, formatID);
+                this.photonView.RPC("UpdateRoomIDsRPC", RpcTarget.AllBufferedViaServer, myID, false);
                 return;
             }
             else if (roomID != myID) // do some MMR matchmaking here
             {
-                this.photonView.RPC("UpdateRoomIDsRPC", RpcTarget.AllBufferedViaServer, roomID, false, formatID);
+                this.photonView.RPC("UpdateRoomIDsRPC", RpcTarget.AllBufferedViaServer, roomID, false);
                 this.photonView.RPC("MatchFoundRPC", RpcTarget.All, myID, roomID);
                 return;
             }
         }
 
-        this.photonView.RPC("UpdateRoomIDsRPC", RpcTarget.AllBufferedViaServer, myID, true, formatID);
+        this.photonView.RPC("UpdateRoomIDsRPC", RpcTarget.AllBufferedViaServer, myID, true);
     }
 
     public override void OnJoinedLobby()
@@ -154,6 +155,7 @@ public class BattleMenu : MonoBehaviourPunCallbacks, IDataPersistence
             //gameMenu.SetPlayerIDs(playerIDs[0], playerIDs[1]);
             //StartCoroutine(gameMenu.SetUpGame(format));
 
+            PhotonNetwork.LoadLevel(2);
         }
     }
 

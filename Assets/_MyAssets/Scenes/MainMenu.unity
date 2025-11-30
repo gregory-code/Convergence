@@ -7182,6 +7182,7 @@ GameObject:
   - component: {fileID: 1245693090}
   - component: {fileID: 1245693091}
   - component: {fileID: 1245693092}
+  - component: {fileID: 1245693093}
   m_Layer: 5
   m_Name: BattleMenu
   m_TagString: Untagged
@@ -7220,7 +7221,7 @@ CanvasGroup:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1245693089}
   m_Enabled: 1
-  m_Alpha: 1
+  m_Alpha: 0
   m_Interactable: 0
   m_BlocksRaycasts: 0
   m_IgnoreParentGroups: 0
@@ -7236,7 +7237,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 48ebf6fe3c2ac144baa7bd59a69e111e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  FirebasePlayer: {fileID: 0}
+  FirebasePlayer: {fileID: 945713498}
   DeckChecks:
   - {fileID: 1941198533}
   - {fileID: 984997683}
@@ -7258,6 +7259,28 @@ MonoBehaviour:
   emptyCheck: {fileID: 21300000, guid: 7c19400e6a494374f9953813ccc51c7a, type: 3}
   check: {fileID: 21300000, guid: bdff1acfdd4ca2443bc9c3d760b1b135, type: 3}
   standardRoomIDs: []
+--- !u!114 &1245693093
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1245693089}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ObservedComponentsFoldoutOpen: 1
+  Group: 0
+  prefixField: -1
+  Synchronization: 3
+  OwnershipTransfer: 0
+  observableSearch: 2
+  ObservedComponents: []
+  sceneViewId: 1
+  InstantiationId: 0
+  isRuntimeInstantiated: 0
 --- !u!1 &1249806922
 GameObject:
   m_ObjectHideFlags: 0
@@ -8244,9 +8267,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 899563068}
-        m_TargetAssemblyTypeName: CardsMenu, Assembly-CSharp
-        m_MethodName: FinishEdittingDeck
+      - m_Target: {fileID: 945713500}
+        m_TargetAssemblyTypeName: AuthManager, Assembly-CSharp
+        m_MethodName: SignOut
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
