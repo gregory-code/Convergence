@@ -8,6 +8,7 @@ using UnityEngine.UI;
 
 public class CardsMenu : MonoBehaviour, IDataPersistence
 {
+    [SerializeField] BattleMenu battleMenu;
     [SerializeField] FirebasePlayerInfo FirebasePlayer;
     [SerializeField] TMP_InputField[] DeckNameInputs;
     [SerializeField] private int NumOfDecks = 3;
@@ -146,6 +147,10 @@ public class CardsMenu : MonoBehaviour, IDataPersistence
         captainsInDeck = 0;
         cardsIndeck = 0;
 
+        battleMenu.SetDeckCaptains(0, GetCaptainPreviewsFromDeckList(deckLists.GetList(0)));
+        battleMenu.SetDeckCaptains(1, GetCaptainPreviewsFromDeckList(deckLists.GetList(1)));
+        battleMenu.SetDeckCaptains(2, GetCaptainPreviewsFromDeckList(deckLists.GetList(2)));
+
         SetMenuCanvasGroups(true);
     }
 
@@ -157,6 +162,7 @@ public class CardsMenu : MonoBehaviour, IDataPersistence
     public void OnEndEditDeckName(string deckName)
     {
         StartCoroutine(FirebasePlayer.UpdateObject("DeckName" + currentDeckIndex, deckName)); // This will be decks 0 - 2 on firebase
+        battleMenu.SetDeckNames(currentDeckIndex, deckName);
         //currentTeam.UpdateTeamName(deckName);
     }
 
@@ -338,6 +344,25 @@ public class CardsMenu : MonoBehaviour, IDataPersistence
         StartCoroutine(FirebasePlayer.UpdateObject("Deck" + currentDeckIndex, cardIDs));
     }
 
+    private Sprite[] GetCaptainPreviewsFromDeckList(List<string> deckList)
+    {
+        Sprite[] captainSprites = new Sprite[3];
+        captainSprites[0] = null;
+        captainSprites[1] = null;
+        captainSprites[2] = null;
+        int index = 0;
+        for(int i = 0; i < CaptainLibrary.Count; i++)
+        {
+            if (deckList.Contains(CaptainLibrary[i].CardName))
+            {
+                captainSprites[index] = CaptainLibrary[i].CardPreviewArt;
+                index++;
+                continue;
+            }
+        }
+        return captainSprites;
+    }
+
     public IEnumerator LoadData(DataSnapshot data)
     {
 
@@ -351,6 +376,7 @@ public class CardsMenu : MonoBehaviour, IDataPersistence
             if (data.Child("DeckName" + i).Exists)
             {
                 DeckNameInputs[i].text = data.Child("DeckName" + i).Value.ToString();
+                battleMenu.SetDeckNames(i, data.Child("DeckName" + i).Value.ToString());
             }
 
             if (data.Child("Deck" + i).Exists)
@@ -359,6 +385,7 @@ public class CardsMenu : MonoBehaviour, IDataPersistence
                 {
                     deckLists.GetList(i).Add(data.Child("Deck" + i).Child("" + j).Value.ToString());
                 }
+                battleMenu.SetDeckCaptains(i, GetCaptainPreviewsFromDeckList(deckLists.GetList(i)));
             }
         }
 
