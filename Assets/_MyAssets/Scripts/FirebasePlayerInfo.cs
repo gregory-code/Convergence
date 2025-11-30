@@ -32,6 +32,7 @@ public class FirebasePlayerInfo : MonoBehaviour
     }
 
     public void GetUser(FirebaseUser user) { this.user = user; }
+
     public string GetUserID() { return user.UserId; }
 
     public void LoadCloudData()

@@ -16,8 +16,12 @@ public class VisibleCard : MonoBehaviour
     [SerializeField] private TextMeshProUGUI HealthText;
     [SerializeField] private TextMeshProUGUI EquipmentText;
 
+    private BaseCard myCard;
+
     public void SetCard(BaseCard card) // <--- OwnerMenu will have to change
     {
+        myCard = card;
+
         if(card.Type.type != CardType.Captain)
         {
             HealthText.text = "";

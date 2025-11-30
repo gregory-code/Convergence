@@ -1,5 +1,6 @@
 using Firebase.Database;
 using Photon.Pun;
+using Photon.Pun.Demo.PunBasics;
 using Photon.Realtime;
 using System.Collections;
 using System.Collections.Generic;
@@ -152,8 +153,11 @@ public class BattleMenu : MonoBehaviourPunCallbacks, IDataPersistence
             isLobbyRoom = true;
 
             List<string> playerIDs = gameRoomID.ToString().Split('õ').ToList();
-            //gameMenu.SetPlayerIDs(playerIDs[0], playerIDs[1]);
-            //StartCoroutine(gameMenu.SetUpGame(format));
+
+            ExitGames.Client.Photon.Hashtable hash = new ExitGames.Client.Photon.Hashtable();
+            hash["P1"] = playerIDs[0];
+            hash["P2"] = playerIDs[1];
+            PhotonNetwork.CurrentRoom.SetCustomProperties(hash);
 
             PhotonNetwork.LoadLevel(2);
         }
@@ -210,10 +214,12 @@ public class BattleMenu : MonoBehaviourPunCallbacks, IDataPersistence
     [PunRPC]
     void MatchFoundRPC(string player1ID, string player2ID)
     {
-        if (FirebasePlayer.GetUserID() != player1ID && FirebasePlayer.GetUserID() != player2ID) return;
+        if (FirebasePlayer.GetUserID() != player1ID && FirebasePlayer.GetUserID() != player2ID) 
+            return;
 
         isLobbyRoom = false;
         gameRoomID = player1ID + "õ" + player2ID;
+
         PhotonNetwork.LeaveRoom();
     }
 
