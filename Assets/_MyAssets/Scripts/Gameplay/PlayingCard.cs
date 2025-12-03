@@ -1,4 +1,5 @@
 using System.Collections;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -6,79 +7,74 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 {
 
     private int originalIndex;
-    private BaseCard myCard;
-    [SerializeField] private Hand ownerHand;
+    public BaseCard myCard { get; private set; }
+    [SerializeField] private UserPlayer ownerPlayer;
 
     [SerializeField] private GameObject mulliganOverlay;
     private bool bMulliganThis;
 
-    public void Init(Hand ownerHand, BaseCard card)
+    private Vector3 desiredPos;
+
+    public void Init(UserPlayer ownerplayer, BaseCard card)
     {
-        this.ownerHand = ownerHand;
+        desiredPos = Vector3.zero;
+
+        this.ownerPlayer = ownerplayer;
         myCard = card;
         GetComponent<VisibleCard>().SetCard(card);
 
     }
 
-    public IEnumerator MoveCardUpToPlace()
+    public void StartMoveCard(float pos, bool X, float duration)
     {
-        Vector3 desiredSpot = new Vector3(0, -5, 0);
-
-        /*float duration = 1.0f;
-        while (duration > 0)
-        {
-            transform.localPosition = Vector3.Lerp(transform.localPosition, desiredSpot, 5 * Time.deltaTime);
-            yield return new WaitForEndOfFrame();
-        }*/
-
-        transform.localPosition = desiredSpot;
-
-        yield return new WaitForEndOfFrame();
+        StartCoroutine(MoveCard(pos, X, duration));
     }
 
-    private IEnumerator MoveCard(Vector3 handPos)
+    public IEnumerator MoveCard(float pos, bool X, float duration)
     {
-        float duration = 0.5f;
+        if (X)
+            desiredPos.x = pos;
+        else
+            desiredPos.y = pos;
+
         while (duration > 0)
         {
             duration -= Time.deltaTime;
-            transform.localPosition = Vector3.Lerp(transform.localPosition, handPos, Time.deltaTime * 10.0f);
+            transform.localPosition = Vector3.Lerp(transform.localPosition, desiredPos, Time.deltaTime * 10.0f);
             yield return new WaitForEndOfFrame();
         }
-        transform.localPosition = handPos;
+        transform.localPosition = desiredPos;
     }
-
-    public BaseCard GetCard() { return myCard; }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        if (ownerHand.GetBlockHand())
+        if (ownerPlayer.bBlockHand)
             return;
 
         originalIndex = transform.GetSiblingIndex();
         transform.SetAsLastSibling();
 
         StopAllCoroutines();
-        StartCoroutine(MoveCard(new Vector3(transform.localPosition.x, 50, transform.localPosition.z)));
+        StartCoroutine(MoveCard(50, false, 0.5f));
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        if (ownerHand.GetBlockHand())
-            return;
+        if (ownerPlayer.bBlockHand)
+           return;
 
         transform.SetSiblingIndex(originalIndex);
 
         StopAllCoroutines();
-        StartCoroutine(MoveCard(new Vector3(transform.localPosition.x, -5, transform.localPosition.z)));
+        StartCoroutine(MoveCard(-5, false, 0.5f));
     }
 
     public void OnBeginDrag(PointerEventData eventData)
     {
-        if (ownerHand.GetBlockHand())
-            return;
+        if (ownerPlayer.bBlockHand)
+          return;
 
-        ownerHand.BlockHand(true);
+        ownerPlayer.BlockHand(true);
     }
 
     public void OnDrag(PointerEventData eventData)
@@ -88,17 +84,28 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        ownerHand.BlockHand(false);
+        ownerPlayer.BlockHand(false);
     }
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        if(ownerHand.GetMulligan())
+        if(ownerPlayer.bInMulligan)
         {
             bMulliganThis = !bMulliganThis;
             mulliganOverlay.SetActive(bMulliganThis);
-            ownerHand.AddOrRemoveCardToMulligan(this, bMulliganThis);
+            ownerPlayer.AddOrRemoveCardToMulligan(this, bMulliganThis);
             return;
         }
+    }
+
+    public void CleanupDestroy()
+    {
+        StopAllCoroutines();
+        Destroy(this.gameObject);
+    }
+
+    void OnDestroy()
+    {
+        StopAllCoroutines();
     }
 }

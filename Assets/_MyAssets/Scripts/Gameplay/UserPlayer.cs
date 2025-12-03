@@ -1,16 +1,19 @@
 using Firebase.Database;
+using Photon.Realtime;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using static UnityEngine.Rendering.DebugUI;
 
-public class UserPlayer : MonoBehaviour, IDataPersistence
+public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler, IPointerExitHandler
 {
     [SerializeField] private GameMaster gameMaster;
     [SerializeField] private VisualDeck visualDeck;
-    [SerializeField] private Hand playerHand;
+
     [SerializeField] private List<BaseCard> UserCaptains = new List<BaseCard>();
     [SerializeField] private List<BaseCard> UserDeck = new List<BaseCard>();
 
@@ -21,6 +24,16 @@ public class UserPlayer : MonoBehaviour, IDataPersistence
 
     private int DeckIndex;
 
+    [SerializeField] private Vector3 hiddenHand;
+    [SerializeField] private Vector3 hoverHand;
+
+    public bool bBlockHand { get; private set; }
+    public bool bInMulligan { get; private set; }
+
+    [SerializeField] private PlayingCard playingCardPrefab;
+    private List<PlayingCard> PlayingCardsInHand = new List<PlayingCard>();
+    private List<PlayingCard> CardsToMulligan = new List<PlayingCard>();
+
     private void Start()
     {
         DeckIndex = PlayerPrefs.GetInt("SelectedDeck");
@@ -28,23 +41,28 @@ public class UserPlayer : MonoBehaviour, IDataPersistence
 
     public void StartMulligan()
     {
-        playerHand.SetMulligan(true);
         MullgianPanel.SetActive(true);
-        StartCoroutine(DrawCards(5));
+        bInMulligan = true;
+
+        StartCoroutine(DrawCardsToHand(5));
     }
 
     public void ConfirmMulligan()
     {
         MullgianPanel.SetActive(false);
-        StartCoroutine(DrawCards(playerHand.ConfirmMulligan()));
+        bInMulligan = false;
+
+        bBlockHand = true;
+        StartCoroutine(DrawCardsToHand(CardsToMulligan.Count));
+        StartCoroutine(MullgianWrapUp());
     }
 
-    private IEnumerator DrawCards(int cardsToDraw)
+    private IEnumerator DrawCardsToHand(int cardsToDraw)
     {
         for(int i = 0; i < cardsToDraw; i++)
         {
             visualDeck.DrawTopCard();
-            yield return new WaitForSeconds(0.1f);
+            yield return new WaitForSeconds(0.04f);
         }
 
         yield return new WaitForSeconds(0.3f);
@@ -54,21 +72,125 @@ public class UserPlayer : MonoBehaviour, IDataPersistence
             int index = UnityEngine.Random.Range(0, UserDeck.Count);
             BaseCard randomCard = UserDeck[index];
             UserDeck.RemoveAt(index);
-            playerHand.AddCard(randomCard);
+            AddCardToHand(randomCard);
             yield return new WaitForSeconds(0.1f);
         }
     }
 
-    public void AddCard(BaseCard cardsToAdd)
+    public void AddCardToDeck(BaseCard cardsToAdd)
     {
         BaseCard newCard = ScriptableObject.Instantiate(cardsToAdd);
         UserDeck.Add(newCard);
         visualDeck.AddCardToVisualDeck();
     }
+    public void AddCardToHand(BaseCard newCardToadd)
+    {
+        PlayingCard newPlayingCard = Instantiate(playingCardPrefab, this.transform);
+        newPlayingCard.Init(this, newCardToadd);
+        newPlayingCard.transform.localPosition = new Vector3(0, -150, 0);
+        PlayingCardsInHand.Add(newPlayingCard);
+        newPlayingCard.StartMoveCard(-5, false, 0.5f);
+
+        ReOrganizeHand();
+    }
+
+    private void ReOrganizeHand()
+    {
+
+        int count = PlayingCardsInHand.Count;
+
+        const float minCount = 2f;
+        const float maxCount = 10f;
+
+        const float maxValue = 250f;
+        const float minValue = 150f;
+
+        float c = Mathf.Clamp(count, minCount, maxCount);
+        float t = (c - minCount) / (maxCount - minCount);
+
+        float spacing = Mathf.Lerp(maxValue, minValue, t);
+
+        for (int i = 0; i < count; i++)
+        {
+            if (PlayingCardsInHand[i] == null)
+                continue;
+
+            float offset = (i - (count - 1) / 2f) * spacing;
+
+            PlayingCardsInHand[i].transform.SetAsFirstSibling();
+            PlayingCardsInHand[i].StartMoveCard(offset, true, 0.5f);
+        }
+    }
 
     public void AddCaptainToFight()
     {
         SelectCaptain.SetActive(true);
+    }
+
+
+    private IEnumerator ReenableHand()
+    {
+        yield return new WaitForSeconds(1.0f);
+        bBlockHand = false;
+    }
+
+    private IEnumerator MoveHand(Vector3 handPos)
+    {
+        float duration = 0.8f;
+        while (duration > 0)
+        {
+            duration -= Time.deltaTime;
+            transform.localPosition = Vector3.Lerp(transform.localPosition, handPos, Time.deltaTime * 15.0f);
+            yield return new WaitForEndOfFrame();
+        }
+        transform.localPosition = handPos;
+    }
+
+    public void AddOrRemoveCardToMulligan(PlayingCard card, bool bMullgianThis)
+    {
+        if (bMullgianThis)
+        {
+            CardsToMulligan.Add(card);
+        }
+        else if (bMullgianThis == false && CardsToMulligan.Contains(card))
+        {
+            CardsToMulligan.Remove(card);
+        }
+    }
+
+    private IEnumerator MullgianWrapUp()
+    {
+        yield return new WaitForSeconds(1.0f);
+
+        for (int i = 0; i < CardsToMulligan.Count; i++)
+        {
+            if (CardsToMulligan[i] == null)
+                continue;
+
+            CardsToMulligan[i].StartMoveCard(-350, false, 0.2f);
+            yield return new WaitForSeconds(0.1f);
+            AddCardToDeck(CardsToMulligan[i].myCard);
+            PlayingCardsInHand.Remove(CardsToMulligan[i]);
+            yield return new WaitForSeconds(0.1f);
+            CardsToMulligan[i].CleanupDestroy();
+        }
+
+        ReOrganizeHand();
+        StartCoroutine(ReenableHand());
+        CardsToMulligan.Clear();
+
+        yield return new WaitForSeconds(0.1f);
+        StartCoroutine(visualDeck.ShuffleAnimation());
+    }
+
+    public void BlockHand(bool bState)
+    {
+        bBlockHand = bState;
+        if (bState)
+        {
+            StopAllCoroutines();
+            StartCoroutine(MoveHand(hiddenHand));
+        }
     }
 
     public IEnumerator LoadData(DataSnapshot data)
@@ -101,7 +223,7 @@ public class UserPlayer : MonoBehaviour, IDataPersistence
             {
                 if (decklist[j] == cardLibrary[i].CardName)
                 {
-                    AddCard(cardLibrary[i]);
+                    AddCardToDeck(cardLibrary[i]);
                 }
             }
         }
@@ -112,5 +234,23 @@ public class UserPlayer : MonoBehaviour, IDataPersistence
     public void LoadOtherPlayersData(string key, object data)
     {
 
+    }
+
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        if (bBlockHand)
+            return;
+
+        StopAllCoroutines();
+        StartCoroutine(MoveHand(hoverHand));
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        if (bBlockHand)
+            return;
+
+        StopAllCoroutines();
+        StartCoroutine(MoveHand(hiddenHand));
     }
 }

@@ -17,10 +17,10 @@ MonoBehaviour:
   Rarity: {fileID: 11400000, guid: b1e478010c8d91d4d9e3393c5ffeaf18, type: 2}
   Captain: 6
   SeriesOverlay: {fileID: 21300000, guid: 73a0f5082a4a2584594d9309801360f2, type: 3}
-  CardArt: {fileID: 21300000, guid: 0c2f894f11bbf9c448e65c1b1151ea2d, type: 3}
+  CardArt: {fileID: 21300000, guid: 9843599ff2681144e9246371f4d0da55, type: 3}
   CardArtAdjustment: {x: -70.85, y: 0}
   CardArtSize: {x: 0.16, y: 0.34}
-  CardPreviewArt: {fileID: 21300000, guid: 19d2acb30a55d10479cf65b1f5d7d4fe, type: 3}
+  CardPreviewArt: {fileID: 21300000, guid: 7e3ca2fc802e6b140892964c1537ab71, type: 3}
   bSwift: 0
   bPrestige: 1
   equipmentType: 4
