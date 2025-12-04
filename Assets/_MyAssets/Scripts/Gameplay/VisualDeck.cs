@@ -57,8 +57,8 @@ public class VisualDeck : MonoBehaviour
         newSpot.z -= 0.3f;
         while (duration > 0)
         {
-            if (duration < 0.7f)
-                newSpot.z -= 0.02f;
+            if (duration < 0.9f)
+                newSpot.z -= 0.01f;
 
             duration -= Time.deltaTime;
             cardToDraw.transform.localPosition = Vector3.Lerp(cardToDraw.transform.localPosition, newSpot, 10 * Time.deltaTime);
@@ -70,7 +70,7 @@ public class VisualDeck : MonoBehaviour
 
     public IEnumerator ShuffleAnimation()
     {
-        float duration = 0.3f; // shuffle duration
+        float duration = 0.5f; // shuffle duration
         float elapsed = 0f;
 
         // Capture original positions and rotations
