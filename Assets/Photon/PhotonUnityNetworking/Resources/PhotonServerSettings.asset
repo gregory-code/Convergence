@@ -41,6 +41,8 @@ MonoBehaviour:
   - RespawnSpaceship
   - MatchFoundRPC
   - UpdateRoomIDsRPC
+  - WhoGoesFirst
+  - PlayerLocksIn
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1

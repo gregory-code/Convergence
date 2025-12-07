@@ -16,7 +16,7 @@ public class VisibleCard : MonoBehaviour
     [SerializeField] private TextMeshProUGUI HealthText;
     [SerializeField] private TextMeshProUGUI EquipmentText;
 
-    private BaseCard myCard;
+    public BaseCard myCard { get; private set; }
 
     public void SetCard(BaseCard card) // <--- OwnerMenu will have to change
     {
@@ -53,7 +53,7 @@ public class VisibleCard : MonoBehaviour
             Overlay.gameObject.SetActive(true);
         }
 
-
+        CardEffectText.text = card.DescriptionText;
         CardArt.transform.localPosition = card.CardArtAdjustment;
         CardArt.transform.localScale = card.CardArtSize;
 

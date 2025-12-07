@@ -21,6 +21,7 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
     [SerializeField] private VisibleCard[] SelectCaptainsVisible;
 
     [SerializeField] private GameObject MullgianPanel;
+    [SerializeField] private GameObject CaptainPanel;
 
     private int DeckIndex;
 
@@ -36,7 +37,7 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
 
     private void Start()
     {
-        DeckIndex = PlayerPrefs.GetInt("SelectedDeck");
+
     }
 
     public void StartMulligan()
@@ -55,6 +56,25 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
         bBlockHand = true;
         StartCoroutine(DrawCardsToHand(CardsToMulligan.Count));
         StartCoroutine(MullgianWrapUp());
+        StartPickNewCaptain();
+    }
+
+    public void StartPickNewCaptain()
+    {
+        StartCoroutine(PickNewCaptain());
+    }
+
+    private IEnumerator PickNewCaptain()
+    {
+        yield return new WaitForSeconds(3);
+
+        CaptainPanel.SetActive(true);
+    }
+
+    public void ConfirmNewCaptain(int captainIndex)
+    {
+        CaptainPanel.SetActive(false);
+        gameMaster.PlayerConfirmedNewCaptain(SelectCaptainsVisible[captainIndex].myCard);
     }
 
     private IEnumerator DrawCardsToHand(int cardsToDraw)
@@ -195,6 +215,10 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
 
     public IEnumerator LoadData(DataSnapshot data)
     {
+        DeckIndex = (data.Child("DeckIndex").Exists) ? DeckIndex = int.Parse(data.Child("DeckIndex").Value.ToString()) : 0;
+
+        yield return new WaitForEndOfFrame();
+
         List<string> decklist = new List<string>();
         if (data.Child("Deck" + DeckIndex).Exists)
         {
@@ -233,7 +257,10 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
 
     public void LoadOtherPlayersData(string key, object data)
     {
-
+        if (key == "username")
+        {
+            //foundUsername = data.ToString();
+        }
     }
 
     public void OnPointerEnter(PointerEventData eventData)

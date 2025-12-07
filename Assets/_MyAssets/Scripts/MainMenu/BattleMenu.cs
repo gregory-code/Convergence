@@ -33,13 +33,12 @@ public class BattleMenu : MonoBehaviourPunCallbacks, IDataPersistence
     private void Start()
     {
         PhotonNetwork.AutomaticallySyncScene = true;
-        ChosenDeckIndex(PlayerPrefs.GetInt("SelectedDeck"));
     }
 
     public void ChosenDeckIndex(int index)
     {
         selectedDeckIndex = index;
-        PlayerPrefs.SetInt("SelectedDeck", index);
+        StartCoroutine(FirebasePlayer.UpdateObject("DeckIndex", index));
 
         foreach (Image image in DeckChecks)
         {
@@ -203,6 +202,17 @@ public class BattleMenu : MonoBehaviourPunCallbacks, IDataPersistence
 
     public IEnumerator LoadData(DataSnapshot data)
     {
+        if (data.Child("DeckIndex").Exists)
+        {
+            selectedDeckIndex = int.Parse(data.Child("DeckIndex").Value.ToString());
+            ChosenDeckIndex(selectedDeckIndex); // index for DeckIndex
+        }
+        else
+        {
+            selectedDeckIndex = 0;
+            ChosenDeckIndex(0); // index for DeckIndex
+        }
+
         yield return new WaitForEndOfFrame();
     }
 

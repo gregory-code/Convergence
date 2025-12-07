@@ -22,5 +22,6 @@ MonoBehaviour:
   CardArtSize: {x: 0.13, y: 0.15}
   CardPreviewArt: {fileID: 21300000, guid: 6a00e45f1a4fb1a4eb70ac34196be1e0, type: 3}
   bSwift: 1
+  DescriptionText: Attack for 1 physical
   bAttacking: 1
   Damage: 1

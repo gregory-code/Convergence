@@ -15,4 +15,7 @@ public class BaseCard : ScriptableObject
     public Sprite CardPreviewArt;
 
     public bool bSwift;
+
+    [TextArea(3, 10)]
+    public string DescriptionText;
 }
