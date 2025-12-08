@@ -13,11 +13,15 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     [SerializeField] private GameObject mulliganOverlay;
     private bool bMulliganThis;
 
+    private bool bIsPlayer1;
+
     private Vector3 desiredPos;
 
-    public void Init(UserPlayer ownerplayer, BaseCard card)
+    public void Init(UserPlayer ownerplayer, BaseCard card, bool bIsPlayer1)
     {
         desiredPos = Vector3.zero;
+
+        this.bIsPlayer1 = bIsPlayer1;
 
         this.ownerPlayer = ownerplayer;
         myCard = card;

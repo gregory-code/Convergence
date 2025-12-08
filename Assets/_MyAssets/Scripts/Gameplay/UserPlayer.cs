@@ -23,7 +23,11 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
     [SerializeField] private GameObject MullgianPanel;
     [SerializeField] private GameObject CaptainPanel;
 
+    [SerializeField] private CanvasGroup playerOptionsCanvasGroup;
+
     private int DeckIndex;
+
+    private bool bIsPlayer1;
 
     [SerializeField] private Vector3 hiddenHand;
     [SerializeField] private Vector3 hoverHand;
@@ -40,8 +44,10 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
 
     }
 
-    public void StartMulligan()
+    public void StartMulligan(bool isPlayer1)
     {
+        bIsPlayer1 = isPlayer1;
+
         MullgianPanel.SetActive(true);
         bInMulligan = true;
 
@@ -77,6 +83,37 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
         gameMaster.PlayerConfirmedNewCaptain(SelectCaptainsVisible[captainIndex].myCard);
     }
 
+    public void StartTurn(bool shouldDraw)
+    {
+        StartCoroutine(GetPlayerOptions(true));
+        bBlockHand = false;
+        StartCoroutine(DrawCardsToHand(1));
+    }
+
+    private IEnumerator GetPlayerOptions(bool bShow)
+    {
+        float time = 0.2f;
+        float alpha = (bShow) ? 1 : 0 ;
+        while (time > 0)
+        {
+            yield return new WaitForEndOfFrame();
+            time -= Time.deltaTime;
+
+            playerOptionsCanvasGroup.alpha = Mathf.Lerp(playerOptionsCanvasGroup.alpha, alpha, 20 * Time.deltaTime);
+        }
+
+        playerOptionsCanvasGroup.interactable = bShow;
+        playerOptionsCanvasGroup.blocksRaycasts = bShow;
+        playerOptionsCanvasGroup.alpha = alpha;
+
+    }
+
+    public void EndTurn()
+    {
+        StartCoroutine(GetPlayerOptions(false));
+        gameMaster.RequestSwitchTurns();
+    }
+
     private IEnumerator DrawCardsToHand(int cardsToDraw)
     {
         for(int i = 0; i < cardsToDraw; i++)
@@ -106,7 +143,7 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
     public void AddCardToHand(BaseCard newCardToadd)
     {
         PlayingCard newPlayingCard = Instantiate(playingCardPrefab, this.transform);
-        newPlayingCard.Init(this, newCardToadd);
+        newPlayingCard.Init(this, newCardToadd, bIsPlayer1);
         newPlayingCard.transform.localPosition = new Vector3(0, -150, 0);
         PlayingCardsInHand.Add(newPlayingCard);
         newPlayingCard.StartMoveCard(-5, false, 0.5f);

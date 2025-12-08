@@ -1024,7 +1024,7 @@ RectTransform:
   m_GameObject: {fileID: 8968164372214747970}
   m_LocalRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.0499511, y: 2.255584, z: 0.51721704}
+  m_LocalScale: {x: 0.83072096, y: 1.7846173, z: 0.40922195}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5584074330604115734}
@@ -1128,5 +1128,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2ca077e5e7d293e40a4a58097da5b1c3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ownerHand: {fileID: 0}
+  ownerPlayer: {fileID: 0}
   mulliganOverlay: {fileID: 8658477933471779940}
