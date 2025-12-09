@@ -53,7 +53,7 @@ public class VisibleCard : MonoBehaviour
             Overlay.gameObject.SetActive(true);
         }
 
-        CardEffectText.text = card.DescriptionText;
+        RichTextFormatter.ApplyFormatting(CardEffectText, card.DescriptionText);
         CardArt.transform.localPosition = card.CardArtAdjustment;
         CardArt.transform.localScale = card.CardArtSize;
 

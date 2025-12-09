@@ -52,6 +52,7 @@ public class GameMaster : MonoBehaviourPunCallbacks, IDataPersistence
     private BaseCard captainHolder;
 
     [SerializeField] bool bDevTest;
+    [SerializeField] bool bSkipMulligan;
 
     void Start()
     {
@@ -80,7 +81,11 @@ public class GameMaster : MonoBehaviourPunCallbacks, IDataPersistence
 
         yield return new WaitForSeconds(1);
 
-        player.StartMulligan(bIsPlayer1);
+        if(bIsPlayer1)
+            player.SetIsPlayer1();
+
+        if(bSkipMulligan == false)
+            player.StartMulligan();
 
         StartCoroutine(PlayersAddingNewCaptains());
     }

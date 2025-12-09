@@ -44,10 +44,10 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
 
     }
 
-    public void StartMulligan(bool isPlayer1)
-    {
-        bIsPlayer1 = isPlayer1;
+    public void SetIsPlayer1() { bIsPlayer1 = true; }
 
+    public void StartMulligan()
+    {
         MullgianPanel.SetActive(true);
         bInMulligan = true;
 
@@ -87,7 +87,11 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
     {
         StartCoroutine(GetPlayerOptions(true));
         bBlockHand = false;
-        StartCoroutine(DrawCardsToHand(1));
+
+        if(shouldDraw)
+        {
+            StartCoroutine(DrawCardsToHand(1));
+        }
     }
 
     private IEnumerator GetPlayerOptions(bool bShow)
