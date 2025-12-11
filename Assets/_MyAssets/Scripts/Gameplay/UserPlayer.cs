@@ -13,6 +13,7 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
 {
     [SerializeField] private GameMaster gameMaster;
     [SerializeField] private VisualDeck visualDeck;
+    [SerializeField] private LineScript lineRenderer;
 
     [SerializeField] private List<BaseCard> UserCaptains = new List<BaseCard>();
     [SerializeField] private List<BaseCard> UserDeck = new List<BaseCard>();
@@ -34,6 +35,7 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
 
     public bool bBlockHand { get; private set; }
     public bool bInMulligan { get; private set; }
+    public bool bChoosingCard { get; private set; }
 
     [SerializeField] private PlayingCard playingCardPrefab;
     private List<PlayingCard> PlayingCardsInHand = new List<PlayingCard>();
@@ -42,6 +44,18 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
     private void Start()
     {
 
+    }
+
+    private void Update()
+    {
+        if (bChoosingCard == false)
+            return;
+
+        Vector3 mousePos = Input.mousePosition;
+        mousePos.z = 2.9f;
+        Vector3 worldMousePos = Camera.main.ScreenToWorldPoint(mousePos);
+
+        lineRenderer.UpdateReticleLocation(worldMousePos);
     }
 
     public void SetIsPlayer1() { bIsPlayer1 = true; }
@@ -252,6 +266,18 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
             StopAllCoroutines();
             StartCoroutine(MoveHand(hiddenHand));
         }
+    }
+
+    public void StartStopLineRenderer(bool bStart, PlayingCard cardToStart)
+    {
+        bChoosingCard = bStart;
+
+        Vector3 mousePos = Input.mousePosition;
+        mousePos.z = 2.9f;
+        Vector3 world = Camera.main.ScreenToWorldPoint(mousePos);
+        Vector3 startingPos = new Vector3(world.x, -3.2f, -10); // hard coded lul
+
+        lineRenderer.enable(bStart, startingPos);
     }
 
     public IEnumerator LoadData(DataSnapshot data)

@@ -58,7 +58,6 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         originalIndex = transform.GetSiblingIndex();
         transform.SetAsLastSibling();
 
-        StopAllCoroutines();
         StartCoroutine(MoveCard(50, false, 0.5f));
     }
 
@@ -69,7 +68,6 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
         transform.SetSiblingIndex(originalIndex);
 
-        StopAllCoroutines();
         StartCoroutine(MoveCard(-5, false, 0.5f));
     }
 
@@ -78,16 +76,19 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         if (ownerPlayer.bBlockHand)
           return;
 
+        ownerPlayer.StartStopLineRenderer(true, this);
         ownerPlayer.BlockHand(true);
     }
 
     public void OnDrag(PointerEventData eventData)
     {
-
+        
     }
 
     public void OnEndDrag(PointerEventData eventData)
     {
+        StartCoroutine(MoveCard(-5, false, 0.5f));
+        ownerPlayer.StartStopLineRenderer(false, this);
         ownerPlayer.BlockHand(false);
     }
 
@@ -106,10 +107,5 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     {
         StopAllCoroutines();
         Destroy(this.gameObject);
-    }
-
-    void OnDestroy()
-    {
-        StopAllCoroutines();
     }
 }
