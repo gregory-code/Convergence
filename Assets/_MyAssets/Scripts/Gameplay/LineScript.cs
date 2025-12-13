@@ -17,6 +17,7 @@ public class LineScript : MonoBehaviour
 
     [SerializeField] private Sprite selectingReticle;
     [SerializeField] private Sprite hoveringCardReticle;
+    [SerializeField] private Sprite finalizeReticle;
 
     [SerializeField] private Material dottedMAT;
 
@@ -101,7 +102,7 @@ public class LineScript : MonoBehaviour
 
     public void FocusTarget(bool state, Transform target)
     {
-        reticle.GetComponent<SpriteRenderer>().sprite = (state) ? hoveringCardReticle : selectingReticle;
+        reticle.GetComponent<SpriteRenderer>().sprite = (state) ? finalizeReticle : selectingReticle;
 
         bFocusTarget = state;
         targetTransform = target;

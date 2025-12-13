@@ -11,6 +11,7 @@ using UnityEngine;
 public class GameMaster : MonoBehaviourPunCallbacks, IDataPersistence
 {
     [SerializeField] private UserPlayer player;
+    [SerializeField] private EnemyPlayer enemy;
 
     [SerializeField] TextMeshProUGUI WhoGoesFirstText;
 
@@ -101,6 +102,8 @@ public class GameMaster : MonoBehaviourPunCallbacks, IDataPersistence
         player2_ID = props["P2"] as string;
 
         bIsPlayer1 = (player1_ID == FirebasePlayer.GetUserID());
+
+        enemy.LoadOpponentID((bIsPlayer1) ? player2_ID : player1_ID, bIsPlayer1);
     }
 
     public void Crossroads()
@@ -203,6 +206,44 @@ public class GameMaster : MonoBehaviourPunCallbacks, IDataPersistence
 
             playerAllies[i].transform.SetAsFirstSibling();
             playerAllies[i].StartMoveCard(offset, true, 0.5f);
+        }
+    }
+
+    public void RequestDrawCards(int cardsToDraw)
+    {
+        this.photonView.RPC("DrawCards", RpcTarget.AllBuffered, bIsPlayer1, cardsToDraw);
+    }
+
+    [PunRPC]
+    void DrawCards(bool isPlayer1, int cardsToDraw)
+    {
+        if(isPlayer1 == bIsPlayer1) // Owner, this client
+        {
+            player.RequestDrawCards(cardsToDraw);
+        }
+        else // other player
+        {
+            enemy.RequestDrawCards(cardsToDraw);
+        }
+    }
+
+    public void RequestFinishMulligan(int cardsToMulligan)
+    {
+        this.photonView.RPC("RequestFinishMulligan", RpcTarget.AllBuffered, bIsPlayer1, cardsToMulligan);
+    }
+
+    [PunRPC]
+    void RequestFinishMulligan(bool isPlayer1, int cardsToMulligan)
+    {
+        if (isPlayer1 == bIsPlayer1) // Owner, this client
+        {
+            player.RequestDrawCards(cardsToMulligan);
+            StartCoroutine(player.MullgianWrapUp());
+        }
+        else // other player
+        {
+            enemy.RequestDrawCards(cardsToMulligan);
+            StartCoroutine(enemy.MullgianWrapUp(cardsToMulligan));
         }
     }
 

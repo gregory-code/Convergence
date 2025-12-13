@@ -25,18 +25,32 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
         this.ownerPlayer = ownerplayer;
         myCard = card;
-        GetComponent<VisibleCard>().SetCard(card);
 
+        if(myCard != null)
+        {
+            GetComponent<VisibleCard>().SetCard(card);
+        }
+        else
+        {
+            GetComponent<VisibleCard>().SetAsCardBack();
+        }
     }
 
     private bool DoIOwnThis()
     {
+        if (ownerPlayer == null) // for enemy cards
+            return false;
+
         return (ownerPlayer.bIsPlayer1 == bIsPlayer1);
     }
 
     private bool EligableTarget(PlayingCard cardTryingToUse)
     {
-        if(DoIOwnThis())
+        if (ownerPlayer == null) // for enemy cards
+            return false;
+
+
+        if (DoIOwnThis())
         {
             if (cardTryingToUse.myCard.bTargetsAllies)
             {
@@ -88,14 +102,18 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
     public void OnPointerEnter(PointerEventData eventData)
     {
+        if (ownerPlayer == null) // for enemy cards
+            return;
+
         if (myCard.Type.type == CardType.Captain && ownerPlayer.bChoosingCaptain && DoIOwnThis())
         {
             ownerPlayer.HoveringCard(true, this);
+
         }
 
         if (myCard.Type.type == CardType.Captain && ownerPlayer.bChoosingTarget)
         {
-            if(EligableTarget(ownerPlayer.currentCard))
+            if(EligableTarget(ownerPlayer.currentCard) || (ownerPlayer.bSkipCaptainChoice && ownerPlayer.currentCard.myCard.bTargetsSelf && DoIOwnThis()))
             {
                 ownerPlayer.HoveringTarget(true, this); 
             }
@@ -112,6 +130,10 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
     public void OnPointerExit(PointerEventData eventData)
     {
+        if (ownerPlayer == null) // for enemy cards
+            return;
+
+
         if (myCard.Type.type == CardType.Captain && ownerPlayer.bChoosingCaptain && DoIOwnThis())
         {
             ownerPlayer.HoveringCard(false, this);
@@ -132,6 +154,10 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
     public void OnBeginDrag(PointerEventData eventData)
     {
+        if (ownerPlayer == null) // for enemy cards
+            return;
+
+
         if (ownerPlayer.bBlockHand || ownerPlayer.IsMyTurn() == false)
           return;
 
@@ -146,6 +172,10 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
     public void OnEndDrag(PointerEventData eventData)
     {
+        if (ownerPlayer == null) // for enemy cards
+            return;
+
+
         if (ownerPlayer.bChoosingCaptain && ownerPlayer.currentCaptain != null)
         {
             ownerPlayer.ChooseCaptainWhileLineIsRendering();
@@ -164,7 +194,11 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        if(ownerPlayer.bInMulligan)
+        if (ownerPlayer == null) // for enemy cards
+            return;
+
+
+        if (ownerPlayer.bInMulligan)
         {
             bMulliganThis = !bMulliganThis;
             mulliganOverlay.SetActive(bMulliganThis);

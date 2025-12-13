@@ -11,6 +11,8 @@ public class VisibleCard : MonoBehaviour
     [SerializeField] private Image RightVial;
     [SerializeField] private Image LeftVial;
 
+    [SerializeField] private GameObject CardBack;
+
     [SerializeField] private TextMeshProUGUI CardName;
     [SerializeField] private TextMeshProUGUI CardEffectText;
     [SerializeField] private TextMeshProUGUI HealthText;
@@ -18,11 +20,19 @@ public class VisibleCard : MonoBehaviour
 
     public BaseCard myCard { get; private set; }
 
+    public void SetAsCardBack()
+    {
+        CardBack.SetActive(true);
+    }
+
     public void SetCard(BaseCard card) // <--- OwnerMenu will have to change
     {
         myCard = card;
 
-        if(card.Type.type != CardType.Captain)
+        if(CardBack != null)
+            CardBack.SetActive(false);
+
+        if (card.Type.type != CardType.Captain)
         {
             HealthText.text = "";
             EquipmentText.text = "";

@@ -7,7 +7,6 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using static UnityEngine.Rendering.DebugUI;
 
 public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler, IPointerExitHandler
 {
@@ -37,8 +36,9 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
     public bool bInMulligan { get; private set; }
     public bool bChoosingCaptain { get; private set; }
     public bool bChoosingTarget { get; private set; }
+    public bool bSkipCaptainChoice { get; private set; }
 
-    public PlayingCard currentCaptain { get; private set; }
+    public PlayingCard currentCaptain;
     public PlayingCard currentTarget { get; private set; }
     public PlayingCard currentCard { get; private set; }
 
@@ -72,31 +72,6 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
     public void SetIsPlayer1() { bIsPlayer1 = true; }
     public bool IsMyTurn() { return gameMaster.bPlayer1sTurn == bIsPlayer1; }
 
-    public void StartMulligan()
-    {
-        MullgianPanel.SetActive(true);
-        bInMulligan = true;
-
-        StartCoroutine(DrawCardsToHand(5));
-    }
-
-    public void ConfirmMulligan()
-    {
-        MullgianPanel.SetActive(false);
-        bInMulligan = false;
-
-        bBlockHand = true;
-        StartCoroutine(DrawCardsToHand(CardsToMulligan.Count));
-        StartCoroutine(MullgianWrapUp());
-        StartPickNewCaptain();
-    }
-
-    public void SkipMulligan(int cardsToStartWith)
-    {
-        StartCoroutine(DrawCardsToHand(cardsToStartWith));
-        StartPickNewCaptain();
-    }
-
     public void StartPickNewCaptain()
     {
         StartCoroutine(PickNewCaptain());
@@ -122,7 +97,7 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
 
         if(shouldDraw)
         {
-            StartCoroutine(DrawCardsToHand(1));
+            gameMaster.RequestDrawCards(1);
         }
     }
 
@@ -148,6 +123,11 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
     {
         StartCoroutine(GetPlayerOptions(false));
         gameMaster.RequestSwitchTurns();
+    }
+
+    public void RequestDrawCards(int cardsToDraw)
+    {
+        StartCoroutine(DrawCardsToHand(cardsToDraw));
     }
 
     private IEnumerator DrawCardsToHand(int cardsToDraw)
@@ -251,8 +231,33 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
         }
     }
 
-    private IEnumerator MullgianWrapUp()
+    public void StartMulligan()
     {
+        MullgianPanel.SetActive(true);
+        bInMulligan = true;
+
+        gameMaster.RequestDrawCards(5);
+    }
+    public void SkipMulligan(int cardsToStartWith)
+    {
+        gameMaster.RequestDrawCards(cardsToStartWith);
+        StartPickNewCaptain();
+    }
+
+    public void ConfirmMulligan()
+    {
+        gameMaster.RequestFinishMulligan(CardsToMulligan.Count);
+
+        StartPickNewCaptain();
+    }
+
+
+    public IEnumerator MullgianWrapUp()
+    {
+        MullgianPanel.SetActive(false);
+        bInMulligan = false;
+        bBlockHand = true;
+
         yield return new WaitForSeconds(1.0f);
 
         for (int i = 0; i < CardsToMulligan.Count; i++)
@@ -290,12 +295,20 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
     {
         bChoosingCaptain = bStart;
         bChoosingTarget = false;
-
+        bSkipCaptainChoice = false;
         currentCaptain = null;
-
         currentCard = cardToStart;
-
         lineRenderer.FirstEnable(bStart, GetUIToWorldPoint(Input.mousePosition), theme);
+
+        if (cardToStart != null && bStart)
+        {
+            if (cardToStart.myCard.bTargetsSelf)
+            {
+                bSkipCaptainChoice = true;
+                bChoosingCaptain = false;
+                bChoosingTarget = true;
+            }
+        }
     }
 
     public void ChooseCaptainWhileLineIsRendering()

@@ -11,6 +11,8 @@ public class VisualDeck : MonoBehaviour
     [SerializeField] GameObject VisualCardBackPrefab;
     private List<GameObject> VisualCardList = new List<GameObject>();
 
+    [SerializeField] private bool bEnemyDeck;
+
     private Vector3 OriginalPos;
 
     void Start()
@@ -24,7 +26,14 @@ public class VisualDeck : MonoBehaviour
         float randomY = UnityEngine.Random.Range(177f, 184f);
 
         newCard.transform.rotation = Quaternion.Euler(0f, randomY, 0f);
-        newCard.transform.localPosition = new Vector3(0.0f, 0.005f * VisualCardList.Count, -5.0f);
+        if(bEnemyDeck)
+        {
+            newCard.transform.localPosition = new Vector3(0.0f, 0.005f * VisualCardList.Count, 5.0f);
+        }
+        else
+        {
+            newCard.transform.localPosition = new Vector3(0.0f, 0.005f * VisualCardList.Count, -5.0f);
+        }
 
         StartCoroutine(AddCardAnimation(newCard, new Vector3(0.0f, 0.005f * VisualCardList.Count, 0.0f)));
 
@@ -54,16 +63,34 @@ public class VisualDeck : MonoBehaviour
 
         float duration = 1.1f;
         Vector3 newSpot = cardToDraw.transform.localPosition;
-        newSpot.z -= 0.3f;
-        while (duration > 0)
-        {
-            if (duration < 0.9f)
-                newSpot.z -= 0.01f;
 
-            duration -= Time.deltaTime;
-            cardToDraw.transform.localPosition = Vector3.Lerp(cardToDraw.transform.localPosition, newSpot, 10 * Time.deltaTime);
-            yield return new WaitForEndOfFrame();
+        if(bEnemyDeck)
+        {
+            newSpot.z += 0.3f;
+            while (duration > 0)
+            {
+                if (duration < 0.9f)
+                    newSpot.z += 0.01f;
+
+                duration -= Time.deltaTime;
+                cardToDraw.transform.localPosition = Vector3.Lerp(cardToDraw.transform.localPosition, newSpot, 10 * Time.deltaTime);
+                yield return new WaitForEndOfFrame();
+            }
         }
+        else
+        {
+            newSpot.z -= 0.3f;
+            while (duration > 0)
+            {
+                if (duration < 0.9f)
+                    newSpot.z -= 0.01f;
+
+                duration -= Time.deltaTime;
+                cardToDraw.transform.localPosition = Vector3.Lerp(cardToDraw.transform.localPosition, newSpot, 10 * Time.deltaTime);
+                yield return new WaitForEndOfFrame();
+            }
+        }
+
 
         Destroy(cardToDraw.gameObject);
     }
