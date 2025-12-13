@@ -22,6 +22,11 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
 
     [SerializeField] private GameObject MullgianPanel;
     [SerializeField] private GameObject CaptainPanel;
+    [SerializeField] private GameObject InspectionPanel;
+    [SerializeField] private VisibleCard InspectionCard;
+    [SerializeField] private Transform InspectionTransform;
+    [SerializeField] private InspectionItem InspectionItemPrefab;
+    private List<InspectionItem> InspectionItemList = new List<InspectionItem>();
 
     [SerializeField] private CanvasGroup playerOptionsCanvasGroup;
 
@@ -46,6 +51,11 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
     private List<PlayingCard> PlayingCardsInHand = new List<PlayingCard>();
     private List<PlayingCard> CardsToMulligan = new List<PlayingCard>();
 
+    private bool bIsInspecting;
+
+    public delegate void OnInspect();
+    public event OnInspect onInspect;
+
     private void Start()
     {
 
@@ -53,13 +63,26 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
 
     private void Update()
     {
-        if(Input.GetKeyDown(KeyCode.Mouse1))
+        if(Input.GetKeyDown(KeyCode.Mouse0))
         {
             if(bChoosingTarget)
             {
                 // check if it's actually an enemy captain
                 BlockHand(false);
                 StartStopLineRenderer(false, null, Color.white);
+            }
+        }
+
+        if (Input.GetKeyDown(KeyCode.Mouse1))
+        {
+            if(bIsInspecting)
+            {
+                bIsInspecting = false;
+                InspectionPanel.SetActive(false);
+            }
+            else
+            {
+                onInspect?.Invoke();
             }
         }
 
@@ -238,6 +261,7 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
 
         gameMaster.RequestDrawCards(5);
     }
+
     public void SkipMulligan(int cardsToStartWith)
     {
         gameMaster.RequestDrawCards(cardsToStartWith);
@@ -279,6 +303,14 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
 
         yield return new WaitForSeconds(0.4f);
         StartCoroutine(visualDeck.ShuffleAnimation());
+    }
+
+    public void InspectCard(BaseCard cardToInspect, bool IOwnit)
+    {
+        bIsInspecting = true;
+        InspectionPanel.SetActive(true);
+
+        InspectionCard.SetCard(cardToInspect);
     }
 
     public void BlockHand(bool bState)

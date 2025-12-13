@@ -16,6 +16,7 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     private bool bIsPlayer1;
 
     private Vector3 desiredPos;
+    private Vector3 originalPosBeforeInspection;
 
     public void Init(UserPlayer ownerplayer, BaseCard card, bool bIsPlayer1)
     {
@@ -24,8 +25,12 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         this.bIsPlayer1 = bIsPlayer1;
 
         this.ownerPlayer = ownerplayer;
-        myCard = card;
+        if(ownerplayer != null)
+        {
+            ownerplayer.onInspect += InspectCard;
+        }
 
+        myCard = card;
         if(myCard != null)
         {
             GetComponent<VisibleCard>().SetCard(card);
@@ -98,6 +103,11 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
             yield return new WaitForEndOfFrame();
         }
         transform.localPosition = desiredPos;
+    }
+
+    private void InspectCard()
+    {
+        ownerPlayer.InspectCard(myCard, DoIOwnThis());
     }
 
     public void OnPointerEnter(PointerEventData eventData)
@@ -209,6 +219,12 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
     public void CleanupDestroy()
     {
+        if (ownerPlayer != null)
+        {
+            ownerPlayer.onInspect -= InspectCard;
+        }
+
+
         StopAllCoroutines();
         Destroy(this.gameObject);
     }

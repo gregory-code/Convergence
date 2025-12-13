@@ -15,15 +15,15 @@ public class EnemyPlayer : MonoBehaviour
     [SerializeField] protected FirebasePlayerInfo firebasePlayerInfo;
 
     [SerializeField] private PlayingCard playingCardPrefab;
-    private List<PlayingCard> PlayingCardsInHand = new List<PlayingCard>();
+    private List<PlayingCard> PlayingCardsInHand = new List<PlayingCard>(); // these are for testing you can remove them
 
     private bool bIsPlayer1;
 
     private int DeckIndex;
     private bool bObtainedDeck = false;
     private string enemyID;
-    private List<BaseCard> UserCaptains = new List<BaseCard>();
-    private List<BaseCard> UserDeck = new List<BaseCard>();
+    private List<BaseCard> UserCaptains = new List<BaseCard>(); // these are for testing you can remove them
+    private List<BaseCard> UserDeck = new List<BaseCard>(); // these are for testing you can remove them
 
     void Start()
     {
@@ -81,28 +81,25 @@ public class EnemyPlayer : MonoBehaviour
 
     public IEnumerator MullgianWrapUp(int cardsToMulligan)
     {
-        yield return new WaitForSeconds(1.0f);
+        yield return new WaitForSeconds(1.4f);
 
-        for (int i = 0; i < cardsToMulligan; i++)
+        int desiredAmountInHand = PlayingCardsInHand.Count - cardsToMulligan;
+
+        while(PlayingCardsInHand.Count != desiredAmountInHand)
         {
-            if (PlayingCardsInHand[i] == null)
-                continue;
-
-            PlayingCardsInHand[i].StartMoveCard(350, false, 0.2f);
+            PlayingCardsInHand[0].StartMoveCard(350, false, 0.2f);
             yield return new WaitForSeconds(0.1f);
-            AddCardToDeck(PlayingCardsInHand[i].myCard);
-            PlayingCardsInHand.Remove(PlayingCardsInHand[i]);
+            AddCardToDeck(PlayingCardsInHand[0].myCard);
             yield return new WaitForSeconds(0.1f);
-            PlayingCardsInHand[i].CleanupDestroy();
-            i--;
-            cardsToMulligan--;
-            if (cardsToMulligan <= 0)
-                break;
+            PlayingCardsInHand[0].CleanupDestroy();
+            PlayingCardsInHand.RemoveAt(0);
         }
+
+        yield return new WaitForSeconds(0.4f);
 
         ReOrganizeHand();
 
-        yield return new WaitForSeconds(0.4f);
+        yield return new WaitForSeconds(0.2f);
         StartCoroutine(enemyDeck.ShuffleAnimation());
     }
 
