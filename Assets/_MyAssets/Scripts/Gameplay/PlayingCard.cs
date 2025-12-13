@@ -29,6 +29,42 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
     }
 
+    private bool DoIOwnThis()
+    {
+        return (ownerPlayer.bIsPlayer1 == bIsPlayer1);
+    }
+
+    private bool EligableTarget(PlayingCard cardTryingToUse)
+    {
+        if(DoIOwnThis())
+        {
+            if (cardTryingToUse.myCard.bTargetsAllies)
+            {
+                return true;
+            }
+
+            if (cardTryingToUse.myCard.bTargetsAlliesExceptSelf && ownerPlayer.currentCaptain != this)
+            {
+                return true;
+            }
+
+            if (cardTryingToUse.myCard.bTargetsSelf && ownerPlayer.currentCaptain == this)
+            {
+                return true;
+            }
+        }
+        
+        if(DoIOwnThis() == false)
+        {
+            if (cardTryingToUse.myCard.bTargetsEnemies)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public void StartMoveCard(float pos, bool X, float duration)
     {
         StartCoroutine(MoveCard(pos, X, duration));
@@ -52,6 +88,19 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
     public void OnPointerEnter(PointerEventData eventData)
     {
+        if (myCard.Type.type == CardType.Captain && ownerPlayer.bChoosingCaptain && DoIOwnThis())
+        {
+            ownerPlayer.HoveringCard(true, this);
+        }
+
+        if (myCard.Type.type == CardType.Captain && ownerPlayer.bChoosingTarget)
+        {
+            if(EligableTarget(ownerPlayer.currentCard))
+            {
+                ownerPlayer.HoveringTarget(true, this); 
+            }
+        }
+
         if (ownerPlayer.bBlockHand)
             return;
 
@@ -63,6 +112,16 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
     public void OnPointerExit(PointerEventData eventData)
     {
+        if (myCard.Type.type == CardType.Captain && ownerPlayer.bChoosingCaptain && DoIOwnThis())
+        {
+            ownerPlayer.HoveringCard(false, this);
+        }
+
+        if (myCard.Type.type == CardType.Captain && ownerPlayer.bChoosingTarget)
+        {
+            ownerPlayer.HoveringTarget(false, this);
+        }
+
         if (ownerPlayer.bBlockHand)
            return;
 
@@ -73,10 +132,10 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
     public void OnBeginDrag(PointerEventData eventData)
     {
-        if (ownerPlayer.bBlockHand)
+        if (ownerPlayer.bBlockHand || ownerPlayer.IsMyTurn() == false)
           return;
 
-        ownerPlayer.StartStopLineRenderer(true, this);
+        ownerPlayer.StartStopLineRenderer(true, this, myCard.Type.color);
         ownerPlayer.BlockHand(true);
     }
 
@@ -87,8 +146,19 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
     public void OnEndDrag(PointerEventData eventData)
     {
+        if (ownerPlayer.bChoosingCaptain && ownerPlayer.currentCaptain != null)
+        {
+            ownerPlayer.ChooseCaptainWhileLineIsRendering();
+            return;
+        }
+
+        CancelUsingCard();
+    }
+
+    public void CancelUsingCard()
+    {
         StartCoroutine(MoveCard(-5, false, 0.5f));
-        ownerPlayer.StartStopLineRenderer(false, this);
+        ownerPlayer.StartStopLineRenderer(false, this, Color.white);
         ownerPlayer.BlockHand(false);
     }
 

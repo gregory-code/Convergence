@@ -41,7 +41,7 @@ public class GameMaster : MonoBehaviourPunCallbacks, IDataPersistence
 
     private bool bIsPlayer1;
 
-    private bool bPlayer1sTurn;
+    public bool bPlayer1sTurn { get; private set; }
 
     private string player1_ID; // SerializeField just for testing of course
     private string player2_ID;
@@ -84,8 +84,10 @@ public class GameMaster : MonoBehaviourPunCallbacks, IDataPersistence
         if(bIsPlayer1)
             player.SetIsPlayer1();
 
-        if(bSkipMulligan == false)
+        if (bSkipMulligan == false)
             player.StartMulligan();
+        else
+            player.SkipMulligan(8);
 
         StartCoroutine(PlayersAddingNewCaptains());
     }
@@ -130,7 +132,7 @@ public class GameMaster : MonoBehaviourPunCallbacks, IDataPersistence
 
         yield return new WaitForSeconds(0.5f);
 
-        if(bIsPlayer1 && bPlayer1sTurn || (bIsPlayer1 == false && bPlayer1sTurn == false))
+        if(bIsPlayer1 == bPlayer1sTurn)
         {
             player.StartTurn(false);
         }
@@ -159,7 +161,7 @@ public class GameMaster : MonoBehaviourPunCallbacks, IDataPersistence
 
     public void AddAllyToBoard(BaseCard cardToAdd)
     {
-        bool bIsCaptain = (cardToAdd.Captain != CardCaptain.None);
+        bool bIsCaptain = (cardToAdd.Type.type == CardType.Captain);
         int cardIndex = (bIsCaptain) ? GetCardIndexForLibrary(cardToAdd, CaptainLibrary) : GetCardIndexForLibrary(cardToAdd, CardAndCaptainCardLibrary);
         this.photonView.RPC("AddAllyToBoard", RpcTarget.AllBuffered, bIsPlayer1, bIsCaptain, cardIndex);
     }
@@ -169,13 +171,13 @@ public class GameMaster : MonoBehaviourPunCallbacks, IDataPersistence
     {
         List<PlayingCard> playerAllies = (isPlayer1) ? Player1Allies : Player2Allies;
         List<BaseCard> cardLibrary = (IsCaptain) ? CaptainLibrary : CardAndCaptainCardLibrary ;
-        Transform side = (isPlayer1 && bIsPlayer1 || (isPlayer1 == false && bIsPlayer1 == false)) ? allySide : enemySide;
+        Transform side = (isPlayer1 == bIsPlayer1) ? allySide : enemySide;
 
         BaseCard newCardCopy = ScriptableObject.Instantiate(cardLibrary[cardLibraryIndex]);
 
         PlayingCard card = Instantiate(PlayingCardPrefab, side.transform);
-        float startingYPos = (isPlayer1 && bIsPlayer1 || (isPlayer1 == false && bIsPlayer1 == false)) ? -500.0f : 500.0f ;
-        card.Init(player, newCardCopy, bIsPlayer1);
+        float startingYPos = (isPlayer1 == bIsPlayer1) ? -500.0f : 500.0f ;
+        card.Init(player, newCardCopy, isPlayer1);
         card.transform.localPosition = new Vector3(0, startingYPos, 0);
         playerAllies.Add(card);
 
@@ -213,7 +215,7 @@ public class GameMaster : MonoBehaviourPunCallbacks, IDataPersistence
     void SwitchTurns()
     {
         bPlayer1sTurn = !bPlayer1sTurn;
-        if (bIsPlayer1 && bPlayer1sTurn || (bIsPlayer1 == false && bPlayer1sTurn == false))
+        if (bIsPlayer1 == bPlayer1sTurn)
         {
             player.StartTurn(true);
         }
@@ -242,7 +244,7 @@ public class GameMaster : MonoBehaviourPunCallbacks, IDataPersistence
     {
         bPlayer1sTurn = Player1GoesFirst;
 
-        if (Player1GoesFirst && bIsPlayer1 || (Player1GoesFirst == false && bIsPlayer1 == false))
+        if (Player1GoesFirst == bIsPlayer1)
         {
             WhoGoesFirstText.text = "Going First";
             WhoGoesFirstText.color = Color.lightGreen;

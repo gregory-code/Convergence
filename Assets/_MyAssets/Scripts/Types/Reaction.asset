@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   type: 2
   icon: {fileID: 21300000, guid: db2c92a16b4e12f40b02cd2ca8b5954e, type: 3}
+  color: {r: 1, g: 0, b: 0.94516706, a: 1}
   templateOutline: {fileID: 21300000, guid: 40bab86e3cd08834d92d60af5ac9fcbf, type: 3}
   templateCaptain: {fileID: 21300000, guid: df989d2bf512e394b8e57e00fb95fb8d, type: 3}
   outline: {fileID: 21300000, guid: f470eec9ec2a70648be4505ae5ccd748, type: 3}

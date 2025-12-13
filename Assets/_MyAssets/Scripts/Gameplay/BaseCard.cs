@@ -14,6 +14,11 @@ public class BaseCard : ScriptableObject
     public Vector2 CardArtSize;
     public Sprite CardPreviewArt;
 
+    public bool bTargetsSelf;
+    public bool bTargetsAllies;
+    public bool bTargetsAlliesExceptSelf;
+    public bool bTargetsEnemies;
+
     public bool bSwift;
 
     [TextArea(3, 10)]

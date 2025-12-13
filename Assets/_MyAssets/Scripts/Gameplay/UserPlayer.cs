@@ -28,14 +28,19 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
 
     private int DeckIndex;
 
-    private bool bIsPlayer1;
+    public bool bIsPlayer1 { get; private set; }
 
     [SerializeField] private Vector3 hiddenHand;
     [SerializeField] private Vector3 hoverHand;
 
     public bool bBlockHand { get; private set; }
     public bool bInMulligan { get; private set; }
-    public bool bChoosingCard { get; private set; }
+    public bool bChoosingCaptain { get; private set; }
+    public bool bChoosingTarget { get; private set; }
+
+    public PlayingCard currentCaptain { get; private set; }
+    public PlayingCard currentTarget { get; private set; }
+    public PlayingCard currentCard { get; private set; }
 
     [SerializeField] private PlayingCard playingCardPrefab;
     private List<PlayingCard> PlayingCardsInHand = new List<PlayingCard>();
@@ -48,17 +53,24 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
 
     private void Update()
     {
-        if (bChoosingCard == false)
+        if(Input.GetKeyDown(KeyCode.Mouse1))
+        {
+            if(bChoosingTarget)
+            {
+                // check if it's actually an enemy captain
+                BlockHand(false);
+                StartStopLineRenderer(false, null, Color.white);
+            }
+        }
+
+        if ((bChoosingCaptain == false && bChoosingTarget == false) || lineRenderer.IsHoveringOverCard())
             return;
 
-        Vector3 mousePos = Input.mousePosition;
-        mousePos.z = 2.9f;
-        Vector3 worldMousePos = Camera.main.ScreenToWorldPoint(mousePos);
-
-        lineRenderer.UpdateReticleLocation(worldMousePos);
+        lineRenderer.UpdateReticleLocation(GetUIToWorldPoint(Input.mousePosition));
     }
 
     public void SetIsPlayer1() { bIsPlayer1 = true; }
+    public bool IsMyTurn() { return gameMaster.bPlayer1sTurn == bIsPlayer1; }
 
     public void StartMulligan()
     {
@@ -76,6 +88,12 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
         bBlockHand = true;
         StartCoroutine(DrawCardsToHand(CardsToMulligan.Count));
         StartCoroutine(MullgianWrapUp());
+        StartPickNewCaptain();
+    }
+
+    public void SkipMulligan(int cardsToStartWith)
+    {
+        StartCoroutine(DrawCardsToHand(cardsToStartWith));
         StartPickNewCaptain();
     }
 
@@ -268,16 +286,43 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
         }
     }
 
-    public void StartStopLineRenderer(bool bStart, PlayingCard cardToStart)
+    public void StartStopLineRenderer(bool bStart, PlayingCard cardToStart, Color theme)
     {
-        bChoosingCard = bStart;
+        bChoosingCaptain = bStart;
+        bChoosingTarget = false;
 
-        Vector3 mousePos = Input.mousePosition;
-        mousePos.z = 2.9f;
-        Vector3 world = Camera.main.ScreenToWorldPoint(mousePos);
-        Vector3 startingPos = new Vector3(world.x, -3.2f, -10); // hard coded lul
+        currentCaptain = null;
 
-        lineRenderer.enable(bStart, startingPos);
+        currentCard = cardToStart;
+
+        lineRenderer.FirstEnable(bStart, GetUIToWorldPoint(Input.mousePosition), theme);
+    }
+
+    public void ChooseCaptainWhileLineIsRendering()
+    {
+        bChoosingCaptain = false;
+        bChoosingTarget = true;
+
+        lineRenderer.SelectCaptain();
+    }
+
+    private Vector3 GetUIToWorldPoint(Vector3 referencePoint)
+    {
+        referencePoint.z = 2.9f;
+        Vector3 worldMousePos = Camera.main.ScreenToWorldPoint(referencePoint);
+        return worldMousePos;
+    }
+
+    public void HoveringCard(bool bHovering, PlayingCard cardHovered)
+    {
+        currentCaptain = (bHovering) ? cardHovered : null;
+        lineRenderer.FocusCaptain(bHovering, cardHovered.transform);
+    }
+
+    public void HoveringTarget(bool bHovering, PlayingCard cardHovered)
+    {
+        currentTarget = (bHovering) ? cardHovered : null;
+        lineRenderer.FocusTarget(bHovering, cardHovered.transform);
     }
 
     public IEnumerator LoadData(DataSnapshot data)

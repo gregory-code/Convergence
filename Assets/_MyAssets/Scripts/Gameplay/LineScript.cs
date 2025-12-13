@@ -4,6 +4,8 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering.Universal;
+using UnityEngine.UI;
+using static UnityEngine.GraphicsBuffer;
 
 public class LineScript : MonoBehaviour
 {
@@ -11,19 +13,27 @@ public class LineScript : MonoBehaviour
 
     [SerializeField] private Vector3 startPoint;
     [SerializeField] private GameObject reticle;
+    [SerializeField] private GameObject reticleSecondary;
+
+    [SerializeField] private Sprite selectingReticle;
+    [SerializeField] private Sprite hoveringCardReticle;
 
     [SerializeField] private Material dottedMAT;
 
     private Vector3 previousScale;
 
+    private bool bFocusCaptain;
     private bool bFocusTarget;
+    private bool bSelectedCaptain;
+
+    private Transform targetCaptainTransform;
     private Transform targetTransform;
 
     private void Awake()
     {
         lr = GetComponent<LineRenderer>();
-        lr.positionCount = 2;
-        enable(false, new Vector3(0, 0, 0));
+        lr.positionCount = 3;
+        FirstEnable(false, new Vector3(0, 0, 0), Color.white);
     }
 
     private void Start()
@@ -35,11 +45,21 @@ public class LineScript : MonoBehaviour
         //lr.material = new Material(Shader.Find("Legacy Shaders/Particles/Alpha Blended Premultiply"));
     }
 
-    public void enable(bool state, Vector3 start)
+    public void FirstEnable(bool state, Vector3 start, Color theme)
     {
         lr.sortingOrder = -5;
         reticle.SetActive(state);
+        reticleSecondary.SetActive(false);
         lr.enabled = state;
+
+        dottedMAT.SetColor("_Theme", theme);
+        reticle.GetComponent<SpriteRenderer>().color = theme;
+        reticleSecondary.GetComponent<SpriteRenderer>().color = theme;
+
+        reticle.GetComponent<SpriteRenderer>().sprite = selectingReticle;
+
+        bFocusTarget = false;
+        bSelectedCaptain = false;
 
         if (state)
         {
@@ -47,35 +67,55 @@ public class LineScript : MonoBehaviour
             startPoint = start;
             reticle.transform.position = startPoint;
             lr.SetPosition(0, startPoint);
+            lr.SetPosition(1, startPoint);
         }
     }
 
-    public void resetReticle(Vector3 start)
+    public void FocusCaptain(bool state, Transform captain)
     {
-        reticle.transform.position = start;
+        reticle.GetComponent<SpriteRenderer>().sprite = (state) ? hoveringCardReticle : selectingReticle;
+
+        bFocusCaptain = state;
+        targetCaptainTransform = captain;
+    }
+    public bool IsHoveringOverCard()
+    {
+        if(bFocusCaptain)
+            return true;
+
+        if (bFocusTarget)
+            return true;
+
+        return false;
     }
 
-    public bool IsHoveringOverTarget()
+    public void SelectCaptain()
     {
-        return bFocusTarget;
+        reticle.GetComponent<SpriteRenderer>().sprite = selectingReticle;
+
+        reticleSecondary.transform.position = targetCaptainTransform.position;
+        reticleSecondary.SetActive(true);
+        bSelectedCaptain = true;
+        bFocusCaptain = false;
     }
 
-    public void UpdateReticleLocation(Vector3 position)
+    public void FocusTarget(bool state, Transform target)
     {
-        Vector3 lerp = Vector3.Lerp(reticle.transform.position, position, 15 * Time.deltaTime);
-        reticle.transform.position = lerp;
-    }
+        reticle.GetComponent<SpriteRenderer>().sprite = (state) ? hoveringCardReticle : selectingReticle;
 
-    public void focusTarget(bool state, Transform target)
-    {
         bFocusTarget = state;
         targetTransform = target;
     }
 
     private IEnumerator ShowLineRender()
     {
-        yield return new WaitForSeconds(0.1f);
+        yield return new WaitForEndOfFrame();
         lr.sortingOrder = 0;
+    }
+
+    public void UpdateReticleLocation(Vector3 position)
+    {
+        reticle.transform.position = Vector3.Lerp(reticle.transform.position, position, 15 * Time.deltaTime);
     }
 
     private void Update()
@@ -83,19 +123,23 @@ public class LineScript : MonoBehaviour
         if (lr.enabled == false)
             return;
 
-        lr.SetPosition(0, startPoint);
-        lr.SetPosition(1, reticle.transform.position);
+        Vector3 spot1Pos = (bSelectedCaptain) ? targetCaptainTransform.position : startPoint;
+        Vector3 spot2Pos = reticle.transform.position;
 
+        lr.SetPosition(1, spot1Pos);
+        lr.SetPosition(2, spot2Pos);
 
-        Vector3 lerpScale = (bFocusTarget) ? Vector3.Lerp(reticle.transform.localScale, (targetTransform.localScale * 9), 6 * Time.deltaTime)
-                                          : Vector3.Lerp(reticle.transform.localScale, previousScale, 6 * Time.deltaTime);
-        reticle.transform.localScale = lerpScale;
+        Vector3 newSize = (bFocusTarget || bFocusCaptain) ? previousScale * 2.0f : previousScale;
+        reticle.transform.localScale = Vector3.Lerp(reticle.transform.localScale, newSize, 6 * Time.deltaTime);
+
+        if (bFocusCaptain == true)
+        {
+            UpdateReticleLocation(targetCaptainTransform.position);
+        }
 
         if (bFocusTarget == true)
         {
-            Vector3 lerpPos = Vector3.Lerp(reticle.transform.position, targetTransform.position, 6 * Time.deltaTime);
-            reticle.transform.position = lerpPos;
-            return;
+            UpdateReticleLocation(targetTransform.position);
         }
     }
 

@@ -21,6 +21,11 @@ MonoBehaviour:
   CardArtAdjustment: {x: 42, y: 0}
   CardArtSize: {x: 0.13, y: 0.15}
   CardPreviewArt: {fileID: 21300000, guid: d6108977a747a1243a5aff91deb86888, type: 3}
+  bTargetsSelf: 1
+  bTargetsAllies: 0
+  bTargetsAlliesExceptSelf: 0
+  bTargetsEnemies: 0
   bSwift: 1
+  DescriptionText: 
   bAttacking: 0
   Damage: 0
