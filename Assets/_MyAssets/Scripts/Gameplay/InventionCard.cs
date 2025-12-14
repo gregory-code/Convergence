@@ -7,7 +7,7 @@ public abstract class InventionCard : BaseCard
 
     }
 
-    public override void PlayCard(PlayingCard captainUsing, bool bTargetingEnemy, PlayingCard captainTargeting)
+    public override void PlayCard(PlayingCard thisPlayingCard, PlayingCard captainUsing, bool bTargetingEnemy, PlayingCard captainTargeting)
     {
 
     }

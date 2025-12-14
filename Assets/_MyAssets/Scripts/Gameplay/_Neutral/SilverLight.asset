@@ -26,6 +26,4 @@ MonoBehaviour:
   bTargetsAlliesExceptSelf: 0
   bTargetsEnemies: 1
   bSwift: 0
-  DescriptionText: 
-  bAttacking: 1
-  Damage: 3
+  DescriptionText: Attack for 3 magic

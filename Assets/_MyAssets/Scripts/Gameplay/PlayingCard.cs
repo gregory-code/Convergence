@@ -8,9 +8,10 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
     private int originalIndex;
     public BaseCard myCard { get; private set; }
-    [SerializeField] private UserPlayer ownerPlayer;
 
+    [SerializeField] private UserPlayer ownerPlayer;
     [SerializeField] private GameObject mulliganOverlay;
+
     private bool bMulliganThis;
 
     private bool bIsPlayer1;
@@ -24,6 +25,8 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
     private bool bHovering;
 
+    [SerializeField] Vector2[] EquipmentPos;
+
     public void Init(UserPlayer ownerplayer, BaseCard card, bool bIsPlayer1)
     {
         desiredPos = Vector3.zero;
@@ -33,7 +36,7 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         this.bIsPlayer1 = bIsPlayer1;
 
         this.ownerPlayer = ownerplayer;
-        myCard = card;
+        SetCard(card);
 
         if(ownerplayer != null)
         {
@@ -41,12 +44,16 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
             myCard.Init(ownerplayer);
         }
 
-        SetCard(myCard);
 
         if(myCard == null)
         {
             GetComponent<VisibleCard>().SetAsCardBack();
         }
+    }
+
+    public void SetHealthText(int newHealth, int maxHealth)
+    { 
+        GetComponent<VisibleCard>().SetHealthText(newHealth, maxHealth); 
     }
 
     public void PreventRegularMoving()
@@ -56,13 +63,14 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
     public void SetCard(BaseCard card)
     {
-        if (myCard != null)
-        {
-            GetComponent<VisibleCard>().SetCard(card);
-        }
+        if (card == null)
+            return;
+
+        myCard = card;
+        GetComponent<VisibleCard>().SetCard(card);
     }
 
-    private bool DoIOwnThis()
+    public bool DoIOwnThis()
     {
         if (ownerPlayer == null) // for enemy cards
             return false;
@@ -84,7 +92,7 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
                 return true;
             }
 
-            if (cardTryingToUse.myCard.bTargetsSelf && ownerPlayer.currentCaptain == this)
+            if (cardTryingToUse.myCard.bTargetsSelf && ownerPlayer.currentCaptain == this && ownerPlayer.currentCaptain.bEnergized == true)
             {
                 return true;
             }
@@ -122,6 +130,50 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         transform.localPosition = desiredPos;
     }
 
+    public void BeginCardAttachment(PlayingCard parentCharacter, int equipmentSlotIndex)
+    {
+        StartCoroutine(AttachCard(parentCharacter, parentCharacter.transform.parent.transform, equipmentSlotIndex));
+    }
+
+    public IEnumerator AttachCard(PlayingCard parentCharacter, Transform fieldTransform, int equipmentSlotIndex)
+    {
+
+        transform.SetParent(fieldTransform, false);
+        float y = parentCharacter.DoIOwnThis() ? -300 : 300 ;
+        transform.localPosition = new Vector3(0, y, 0);
+
+        StartCoroutine(MoveCard(parentCharacter.transform.localPosition.x, true, 0.2f));
+        StartCoroutine(MoveCard(parentCharacter.transform.localPosition.y, false, 0.2f));
+
+        yield return new WaitForSeconds(0.3f);
+
+        transform.SetParent(parentCharacter.transform);
+        transform.localEulerAngles = Vector3.zero;
+        transform.localScale = new Vector3(0.5f, 0.67f, 0.15f);
+        RectTransform transformRect = GetComponent<RectTransform>();
+        transformRect.sizeDelta = new Vector2(225, 64);
+        transform.localPosition = EquipmentPos[equipmentSlotIndex];
+    }
+
+    public void BeginPlayAndDiscard(PlayingCard usingCaptain)
+    {
+        StartCoroutine(PlayAndDiscard(usingCaptain, usingCaptain.transform.parent.transform));
+    }
+
+    public IEnumerator PlayAndDiscard(PlayingCard usingCaptain, Transform fieldTransform)
+    {
+        transform.SetParent(fieldTransform, false);
+        float y = usingCaptain.DoIOwnThis() ? -300 : 300;
+        transform.localPosition = new Vector3(0, y, 0);
+
+        StartCoroutine(MoveCard(usingCaptain.transform.localPosition.x, true, 0.2f));
+        StartCoroutine(MoveCard(usingCaptain.transform.localPosition.y, false, 0.2f));
+
+        yield return new WaitForSeconds(0.6f);
+
+        CleanupDestroy();
+    }
+
     public IEnumerator EnergizeAndExhaust(bool bEnergized)
     {
         this.bEnergized = bEnergized;
@@ -142,7 +194,7 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     {
         if(bHovering)
         {
-            ownerPlayer.InspectCard(myCard, DoIOwnThis());
+            ownerPlayer.InspectCard(this, DoIOwnThis());
         }
     }
 
@@ -150,10 +202,10 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     {
         bHovering = true;
 
-        if (ownerPlayer == null || bEnergized == false) // for enemy cards
+        if (ownerPlayer == null) // for enemy cards
             return;
 
-        if (myCard.Type.type == CardType.Captain && ownerPlayer.bChoosingCaptain && DoIOwnThis())
+        if (myCard.Type.type == CardType.Captain && ownerPlayer.bChoosingCaptain && DoIOwnThis() && bEnergized == true)
         {
             ownerPlayer.HoveringCard(true, this);
 
@@ -264,6 +316,7 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         {
             bool bTargetingEnemy = (ownerPlayer.currentCaptain.DoIOwnThis() && ownerPlayer.currentTarget.DoIOwnThis()) ? false : true;
             ownerPlayer.RequestPlayCard(ownerPlayer.currentCard, ownerPlayer.currentCaptain, bTargetingEnemy, ownerPlayer.currentTarget);
+            CancelUsingCard();
         }
 
         if (ownerPlayer.bInMulligan)

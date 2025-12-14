@@ -25,6 +25,6 @@ public abstract class BaseCard : ScriptableObject
     public string DescriptionText;
 
     public abstract void Init(UserPlayer ownerPlayer);
-    public abstract void PlayCard(PlayingCard captainUsing, bool bTargetingEnemy, PlayingCard captainTargeting);
+    public abstract void PlayCard(PlayingCard thisPlayingCard, PlayingCard captainUsing, bool bTargetingEnemy, PlayingCard captainTargeting);
     public abstract void Cleanup();
 }

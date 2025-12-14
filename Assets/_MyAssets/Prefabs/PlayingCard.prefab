@@ -1207,3 +1207,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ownerPlayer: {fileID: 0}
   mulliganOverlay: {fileID: 8658477933471779940}
+  EquipmentPos:
+  - {x: -32, y: 40}
+  - {x: -32, y: 0}
+  - {x: -32, y: -40}
+  - {x: -135, y: 40}
+  - {x: -135, y: 0}
+  - {x: -135, y: -40}

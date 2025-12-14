@@ -21,6 +21,11 @@ MonoBehaviour:
   CardArtAdjustment: {x: -39.36, y: 10.3}
   CardArtSize: {x: 0.16, y: 0.34}
   CardPreviewArt: {fileID: 21300000, guid: da481280e608ec047b70169b41d89f4c, type: 3}
+  bTargetsSelf: 0
+  bTargetsAllies: 0
+  bTargetsAlliesExceptSelf: 0
+  bTargetsEnemies: 0
   bSwift: 0
+  DescriptionText: Exhaust to gain +1 Spark and draw 1 card
   maxHealth: 9
   maxEquipment: 2

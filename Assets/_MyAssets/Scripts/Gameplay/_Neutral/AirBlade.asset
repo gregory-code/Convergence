@@ -26,6 +26,7 @@ MonoBehaviour:
   bTargetsAlliesExceptSelf: 0
   bTargetsEnemies: 1
   bSwift: 1
-  DescriptionText: Attack for 1 physical
-  bAttacking: 1
-  Damage: 1
+  DescriptionText: 'Swift
+
+
+    Attack for 1 physical'

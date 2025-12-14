@@ -110,10 +110,10 @@ public class EnemyPlayer : MonoBehaviour
         int count = PlayingCardsInHand.Count;
 
         const float minCount = 2f;
-        const float maxCount = 10f;
+        const float maxCount = 22f;
 
         const float maxValue = 250f;
-        const float minValue = 150f;
+        const float minValue = 50f;
 
         float c = Mathf.Clamp(count, minCount, maxCount);
         float t = (c - minCount) / (maxCount - minCount);
@@ -135,20 +135,20 @@ public class EnemyPlayer : MonoBehaviour
     public void PlayEnemyCard(BaseCard cardToPlay, PlayingCard captainUsing, bool bTargetingEnemy, PlayingCard captainTargeting)
     {
         PlayingCardsInHand[0].SetCard(cardToPlay);
-        cardToPlay.PlayCard(captainUsing, bTargetingEnemy, captainTargeting);
-        StartCoroutine(captainUsing.EnergizeAndExhaust(false));
+
+        if (cardToPlay.bSwift == false)
+            StartCoroutine(captainUsing.EnergizeAndExhaust(false));
+
+        cardToPlay.PlayCard(PlayingCardsInHand[0], captainUsing, bTargetingEnemy, captainTargeting);
         StartCoroutine(RemoveCardFromHand());
     }
 
     private IEnumerator RemoveCardFromHand()
     {
-        PlayingCard card = PlayingCardsInHand[0];
-        PlayingCardsInHand[0].StartMoveCard(-300, false, 0.5f);
+        PlayingCardsInHand[0].PreventRegularMoving();
         PlayingCardsInHand.RemoveAt(0);
         yield return new WaitForSeconds(0.1f);
         ReOrganizeHand();
-
-        yield return new WaitForSeconds(1.3f);
     }
 
     private IEnumerator LoadingOpponentDeck()

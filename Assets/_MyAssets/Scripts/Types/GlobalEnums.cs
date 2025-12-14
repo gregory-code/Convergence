@@ -62,7 +62,5 @@ public enum EquipmentType
 public enum ReactionType
 {
     EnemyAttacks,
-    EnemyWins,
-    EnemyPlaysSwift,
     AllyDies
 }

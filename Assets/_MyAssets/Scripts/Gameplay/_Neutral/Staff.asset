@@ -26,6 +26,9 @@ MonoBehaviour:
   bTargetsAlliesExceptSelf: 0
   bTargetsEnemies: 0
   bSwift: 0
-  DescriptionText: 
+  DescriptionText: '+1 magic [Magic Item]'
   bPrestige: 0
   equipmentType: 1
+  physicalStatChange: 0
+  magicStatChange: 1
+  defenseStatChange: 0

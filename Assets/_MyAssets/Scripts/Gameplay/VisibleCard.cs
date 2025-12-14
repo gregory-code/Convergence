@@ -25,6 +25,15 @@ public class VisibleCard : MonoBehaviour
         CardBack.SetActive(true);
     }
 
+    public void SetHealthText(int newHealth, int maxHealth)
+    {
+        HealthText.text = "" + newHealth;
+        HealthText.color = (newHealth >= maxHealth) ? Color.green : Color.white ;
+
+        if(newHealth <= 2)
+            HealthText.color = Color.red;
+    }
+
     public void SetCard(BaseCard card) // <--- OwnerMenu will have to change
     {
         myCard = card;
@@ -44,7 +53,7 @@ public class VisibleCard : MonoBehaviour
             CaptainCard captain = card as CaptainCard;
             if(captain)
             {
-                HealthText.text = "" + captain.maxHealth;
+                SetHealthText(captain.maxHealth, captain.maxHealth);
                 EquipmentText.text = "" + captain.maxEquipment;
             }
 

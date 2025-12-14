@@ -26,6 +26,9 @@ MonoBehaviour:
   bTargetsAlliesExceptSelf: 0
   bTargetsEnemies: 0
   bSwift: 0
-  DescriptionText: 
+  DescriptionText: 'Gain +1 physical [Weapon]'
   bPrestige: 0
   equipmentType: 0
+  physicalStatChange: 1
+  magicStatChange: 0
+  defenseStatChange: 0

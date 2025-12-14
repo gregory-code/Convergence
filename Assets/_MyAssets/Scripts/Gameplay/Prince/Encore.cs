@@ -9,9 +9,9 @@ public class Encore : ActionCard
 
     }
 
-    public override void PlayCard(PlayingCard captainUsing, bool bTargetingEnemy, PlayingCard captainTargeting)
+    public override void PlayCard(PlayingCard thisPlayingCard, PlayingCard captainUsing, bool bTargetingEnemy, PlayingCard captainTargeting)
     {
-        base.PlayCard(captainUsing, bTargetingEnemy, captainTargeting);
+        base.PlayCard(thisPlayingCard, captainUsing, bTargetingEnemy, captainTargeting);
 
     }
 

@@ -14,32 +14,44 @@ public static class RichTextFormatter
 
         var map = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            // colors in hex, you can change hex or use named colors supported by TMP
             { "physical", "<color=#FF8C00>{0}</color>" },            // orange
             { "magic",    "<color=#1E90FF>{0}</color>" },            // blue
-            { "health",   "<color=#FF0000>{0}</color>" },            // red
-            { "heal",     "<color=#FF0000>{0}</color>" },            // red
-            { "healed",   "<color=#FF0000>{0}</color>" },            // red
-            { "Swift",    "<u><color=#FFFF00>{0}</color></u>" }      // yellow and underlined
+
+            { "health",     "<color=#FF0000>{0}</color>" },          // red
+            { "max health", "<color=#FF0000>{0}</color>" },          // red
+            { "heal",       "<color=#FF0000>{0}</color>" },          // red
+            { "healed",     "<color=#FF0000>{0}</color>" },          // red
+
+            { "defense", "<color=#D0D0D0>{0}</color>" },             // darker white / light gray
+
+            { "exhaust",   "<u><color=#E8D8B0>{0}</color></u>" },    // beige + underline
+            { "exhausted", "<u><color=#E8D8B0>{0}</color></u>" },    // beige + underline
+
+            { "energize",  "<u><color=#FFF3A0>{0}</color></u>" },    // light yellow + underline
+            { "energized", "<u><color=#FFF3A0>{0}</color></u>" },    // light yellow + underline
+
+            { "spark", "<u><color=#FFD200>{0}</color></u>" },       // darker yellow + underline
+
+            { "swift", "<u><color=#FFFF00>{0}</color></u>" }        // yellow + underline
         };
 
-        // Sort keys by descending length to avoid partial matches (e.g., "healed" before "heal")
-        var orderedKeys = map.Keys.OrderByDescending(k => k.Length).Select(Regex.Escape);
+        // Sort keys by descending length to avoid partial matches
+        var orderedKeys = map.Keys
+            .OrderByDescending(k => k.Length)
+            .Select(Regex.Escape);
 
-        // \b ensures whole word matching; allows punctuation immediately around words
+        // Word boundary matching
         var pattern = @"\b(" + string.Join("|", orderedKeys) + @")\b";
 
-        // Replacement evaluator that preserves the original matched text's casing
         string Evaluator(Match m)
         {
             var matchedText = m.Value;
-            // Find corresponding map key (case-insensitive): use First because map is case-insensitive
-            var key = map.Keys.First(k => string.Equals(k, matchedText, StringComparison.OrdinalIgnoreCase));
-            var template = map[key];
-            return string.Format(template, matchedText);
+            var key = map.Keys.First(k =>
+                string.Equals(k, matchedText, StringComparison.OrdinalIgnoreCase));
+
+            return string.Format(map[key], matchedText);
         }
 
-        string result = Regex.Replace(input, pattern, new MatchEvaluator(Evaluator), RegexOptions.IgnoreCase);
-        tmp.text = result;
+        tmp.text = Regex.Replace(input, pattern, Evaluator, RegexOptions.IgnoreCase);
     }
 }

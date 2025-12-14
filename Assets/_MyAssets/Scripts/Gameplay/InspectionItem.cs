@@ -7,8 +7,9 @@ public class InspectionItem : MonoBehaviour
     [SerializeField] private Image Icon;
     [SerializeField] private TextMeshProUGUI Description;
 
-    private void Init(BaseCard card)
+    public void Init(BaseCard card)
     {
-
+        Description.text = card.DescriptionText;
+        Icon.sprite = card.CardArt;
     }
 }

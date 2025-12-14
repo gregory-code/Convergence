@@ -26,6 +26,9 @@ MonoBehaviour:
   bTargetsAlliesExceptSelf: 0
   bTargetsEnemies: 0
   bSwift: 0
-  DescriptionText: 
+  DescriptionText: "Prestige \n\nGain +2 magic [Magic Item]"
   bPrestige: 1
   equipmentType: 1
+  physicalStatChange: 0
+  magicStatChange: 2
+  defenseStatChange: 0

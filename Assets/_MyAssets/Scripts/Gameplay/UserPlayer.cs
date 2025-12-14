@@ -82,7 +82,7 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
     {
         if(Input.GetKeyDown(KeyCode.Mouse0))
         {
-            if(bChoosingTarget)
+            if(bChoosingTarget && lineRenderer.IsHoveringOverCard() == false)
             {
                 BlockHand(false);
                 StartStopLineRenderer(false, null, Color.white);
@@ -121,8 +121,10 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
 
     public void PlayClientCard(bool bTargetingEnemy)
     {
-        currentCard.myCard.PlayCard(currentCaptain, bTargetingEnemy, currentTarget);
-        StartCoroutine(currentCaptain.EnergizeAndExhaust(false));
+        if(currentCard.myCard.bSwift == false)
+            StartCoroutine(currentCaptain.EnergizeAndExhaust(false));
+
+        currentCard.myCard.PlayCard(currentCard, currentCaptain, bTargetingEnemy, currentTarget);
         StartCoroutine(RemoveCardFromHand(currentCard));
     }
 
@@ -224,9 +226,7 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
     private IEnumerator RemoveCardFromHand(PlayingCard cardToRemove)
     {
         cardToRemove.PreventRegularMoving();
-        cardToRemove.StartMoveCard(300.0f, false, 0.5f);
         PlayingCardsInHand.Remove(cardToRemove);
-
         yield return new WaitForSeconds(0.1f);
         ReOrganizeHand();
     }
@@ -237,10 +237,10 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
         int count = PlayingCardsInHand.Count;
 
         const float minCount = 2f;
-        const float maxCount = 10f;
+        const float maxCount = 22f;
 
         const float maxValue = 250f;
-        const float minValue = 150f;
+        const float minValue = 50f;
 
         float c = Mathf.Clamp(count, minCount, maxCount);
         float t = (c - minCount) / (maxCount - minCount);
@@ -346,7 +346,7 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
         StartCoroutine(visualDeck.ShuffleAnimation());
     }
 
-    public void InspectCard(BaseCard cardToInspect, bool IOwnit)
+    public void InspectCard(PlayingCard cardToInspect, bool IOwnit)
     {
         for (int i = 0; i < InspectionItemList.Count; i++)
         {
@@ -356,11 +356,33 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
 
         bIsInspecting = true;
         InspectionPanel.SetActive(true);
-        InspectionCard.SetCard(cardToInspect);
+        InspectionCard.SetCard(cardToInspect.myCard);
 
         if (IOwnit)
         {
+            InspectionItem inspection = Instantiate(InspectionItemPrefab, InspectionTransform);
+            inspection.Init(cardToInspect.myCard);
+        }
 
+        if(cardToInspect.myCard is CaptainCard captain)
+        {
+            InspectionCard.SetHealthText(captain.currentHealth, captain.maxHealth);
+            foreach(PlayingCard equipment in captain.GetEquipments())
+            {
+                InspectionItem inspection = Instantiate(InspectionItemPrefab, InspectionTransform);
+                inspection.Init(equipment.myCard);
+            }
+
+            foreach (PlayingCard linger in captain.GetLingersInEffect())
+            {
+
+            }
+        }
+
+        if(cardToInspect.myCard is AllyCard ally)
+        {
+            InspectionCard.SetHealthText(ally.currentHealth, ally.maxHealth);
+            // Add lingers here
         }
     }
 
