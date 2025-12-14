@@ -8,7 +8,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 
 
-public class GameMaster : MonoBehaviourPunCallbacks, IDataPersistence
+public class GameMaster : MonoBehaviourPunCallbacks
 {
     [SerializeField] private UserPlayer player;
     [SerializeField] private EnemyPlayer enemy;
@@ -141,17 +141,6 @@ public class GameMaster : MonoBehaviourPunCallbacks, IDataPersistence
         }
     }
 
-
-    public IEnumerator LoadData(DataSnapshot data)
-    {
-        yield return new WaitForEndOfFrame();
-    }
-
-    public void LoadOtherPlayersData(string key, object data)
-    {
-
-    }
-
     private int GetCardIndexForLibrary(BaseCard card, List<BaseCard> library)
     {
         for (int i = 0; i < library.Count; i++)
@@ -209,6 +198,48 @@ public class GameMaster : MonoBehaviourPunCallbacks, IDataPersistence
         }
     }
 
+    public void RequestPlayCard(PlayingCard cardToPlay, PlayingCard captainUsing, bool bTargetingEnemy, PlayingCard captainTargeting)
+    {
+        int cardIndex = GetCardIndexForLibrary(cardToPlay.myCard, CardAndCaptainCardLibrary);
+        int captainUsingIndex = 0;
+        int captainTargetingIndex = 0;
+        if(bIsPlayer1)
+        {
+            captainUsingIndex = Player1Allies.IndexOf(captainUsing);
+            captainTargetingIndex = (bTargetingEnemy) ? Player2Allies.IndexOf(captainTargeting) : Player1Allies.IndexOf(captainTargeting);
+        }
+        else
+        {
+            captainUsingIndex = Player2Allies.IndexOf(captainUsing);
+            captainTargetingIndex = (bTargetingEnemy) ? Player1Allies.IndexOf(captainTargeting) : Player2Allies.IndexOf(captainTargeting);
+        }
+        this.photonView.RPC("PlayCard", RpcTarget.AllBuffered, bIsPlayer1, cardIndex, captainUsingIndex, bTargetingEnemy, captainTargetingIndex);
+    }
+
+    [PunRPC]
+    void PlayCard(bool isPlayer1, int cardToPlayIndex, int captainUsingIndex, bool bTargetingEnemy, int captainTargetingIndex)
+    {
+        if (isPlayer1 == bIsPlayer1) // Owner, this client
+        {
+            player.PlayClientCard(bTargetingEnemy);
+        }
+        else // other player
+        {
+            PlayingCard captainUsing = null;
+            PlayingCard captainTarget = null;
+            if(bIsPlayer1)
+            {
+                captainUsing = Player2Allies[captainUsingIndex];
+                captainTarget = (bTargetingEnemy) ? Player1Allies[captainTargetingIndex] : Player2Allies[captainTargetingIndex];
+            }
+            else
+            {
+                captainUsing = Player1Allies[captainUsingIndex];
+                captainTarget = (bTargetingEnemy) ? Player2Allies[captainTargetingIndex] : Player1Allies[captainTargetingIndex];
+            }
+            enemy.PlayEnemyCard(CardAndCaptainCardLibrary[cardToPlayIndex], captainUsing, bTargetingEnemy, captainTarget);
+        }
+    }
     public void RequestDrawCards(int cardsToDraw)
     {
         this.photonView.RPC("DrawCards", RpcTarget.AllBuffered, bIsPlayer1, cardsToDraw);
@@ -256,6 +287,22 @@ public class GameMaster : MonoBehaviourPunCallbacks, IDataPersistence
     void SwitchTurns()
     {
         bPlayer1sTurn = !bPlayer1sTurn;
+
+        if(bPlayer1sTurn)
+        {
+            foreach(PlayingCard allyCard in Player1Allies)
+            {
+                StartCoroutine(allyCard.EnergizeAndExhaust(true));
+            }
+        }
+        else
+        {
+            foreach (PlayingCard allyCard in Player2Allies)
+            {
+                StartCoroutine(allyCard.EnergizeAndExhaust(true));
+            }
+        }
+
         if (bIsPlayer1 == bPlayer1sTurn)
         {
             player.StartTurn(true);

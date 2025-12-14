@@ -48,13 +48,30 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
     public PlayingCard currentCard { get; private set; }
 
     [SerializeField] private PlayingCard playingCardPrefab;
-    private List<PlayingCard> PlayingCardsInHand = new List<PlayingCard>();
+    [SerializeField] private List<PlayingCard> PlayingCardsInHand = new List<PlayingCard>(); // FOR TESTING TO SEE THE VALUES
     private List<PlayingCard> CardsToMulligan = new List<PlayingCard>();
 
     private bool bIsInspecting;
 
     public delegate void OnInspect();
     public event OnInspect onInspect;
+
+    // ********** Hall of Delegates ********** //
+    public delegate void Killed(int killingDamage, PlayingCard allyDoingTheKilling, PlayingCard allyKilled);
+    public event Killed killed;
+
+    public delegate void DealtDamage(int damageDealt, bool bWasMagic, PlayingCard allyDealingDamage, PlayingCard allyRecivingDamage);
+    public event DealtDamage dealtDamage;
+
+    public delegate void Healed(int healthHealed, PlayingCard allyDoingTheHealing, PlayingCard allyBeingHealed);
+    public event Healed healed;
+
+    public delegate void EquipmentAttached(PlayingCard equipment, PlayingCard allyDoingTheEquipping, PlayingCard allyGettingTheEquipment);
+    public event EquipmentAttached equipmentAttached;
+
+    public delegate void EquipmentRemoved(PlayingCard equipment, PlayingCard allyRemovingTheEquipment, PlayingCard allyWhoHadTheEquipment);
+    public event EquipmentRemoved equipmentRemoved;
+    // ********** **************** ********** //
 
     private void Start()
     {
@@ -67,7 +84,6 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
         {
             if(bChoosingTarget)
             {
-                // check if it's actually an enemy captain
                 BlockHand(false);
                 StartStopLineRenderer(false, null, Color.white);
             }
@@ -94,6 +110,21 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
 
     public void SetIsPlayer1() { bIsPlayer1 = true; }
     public bool IsMyTurn() { return gameMaster.bPlayer1sTurn == bIsPlayer1; }
+
+    public void RequestPlayCard(PlayingCard cardToPlay, PlayingCard captainUsing, bool bTargetingEnemy, PlayingCard captainTargeting)
+    {
+        currentCard = cardToPlay;
+        currentCaptain = captainUsing;
+        currentTarget = captainTargeting;
+        gameMaster.RequestPlayCard(cardToPlay, captainUsing, bTargetingEnemy, captainTargeting);
+    }
+
+    public void PlayClientCard(bool bTargetingEnemy)
+    {
+        currentCard.myCard.PlayCard(currentCaptain, bTargetingEnemy, currentTarget);
+        StartCoroutine(currentCaptain.EnergizeAndExhaust(false));
+        StartCoroutine(RemoveCardFromHand(currentCard));
+    }
 
     public void StartPickNewCaptain()
     {
@@ -185,8 +216,18 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
         newPlayingCard.Init(this, newCardToadd, bIsPlayer1);
         newPlayingCard.transform.localPosition = new Vector3(0, -150, 0);
         PlayingCardsInHand.Add(newPlayingCard);
-        newPlayingCard.StartMoveCard(-5, false, 0.5f);
+        newPlayingCard.StartMoveCard(-5.0f, false, 0.5f);
 
+        ReOrganizeHand();
+    }
+
+    private IEnumerator RemoveCardFromHand(PlayingCard cardToRemove)
+    {
+        cardToRemove.PreventRegularMoving();
+        cardToRemove.StartMoveCard(300.0f, false, 0.5f);
+        PlayingCardsInHand.Remove(cardToRemove);
+
+        yield return new WaitForSeconds(0.1f);
         ReOrganizeHand();
     }
 
@@ -307,10 +348,20 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
 
     public void InspectCard(BaseCard cardToInspect, bool IOwnit)
     {
+        for (int i = 0; i < InspectionItemList.Count; i++)
+        {
+            Destroy(InspectionItemList[i].gameObject);
+        }
+        InspectionItemList.Clear();
+
         bIsInspecting = true;
         InspectionPanel.SetActive(true);
-
         InspectionCard.SetCard(cardToInspect);
+
+        if (IOwnit)
+        {
+
+        }
     }
 
     public void BlockHand(bool bState)

@@ -14,30 +14,51 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     private bool bMulliganThis;
 
     private bool bIsPlayer1;
+    
+    private bool bEnergized;
+
+    private bool bPreventRegularMoving;
 
     private Vector3 desiredPos;
-    private Vector3 originalPosBeforeInspection;
+    private Vector3 desiredRotation;
+
+    private bool bHovering;
 
     public void Init(UserPlayer ownerplayer, BaseCard card, bool bIsPlayer1)
     {
         desiredPos = Vector3.zero;
 
+        bEnergized = true;
+
         this.bIsPlayer1 = bIsPlayer1;
 
         this.ownerPlayer = ownerplayer;
+        myCard = card;
+
         if(ownerplayer != null)
         {
             ownerplayer.onInspect += InspectCard;
+            myCard.Init(ownerplayer);
         }
 
-        myCard = card;
-        if(myCard != null)
-        {
-            GetComponent<VisibleCard>().SetCard(card);
-        }
-        else
+        SetCard(myCard);
+
+        if(myCard == null)
         {
             GetComponent<VisibleCard>().SetAsCardBack();
+        }
+    }
+
+    public void PreventRegularMoving()
+    {
+        bPreventRegularMoving = true;
+    }
+
+    public void SetCard(BaseCard card)
+    {
+        if (myCard != null)
+        {
+            GetComponent<VisibleCard>().SetCard(card);
         }
     }
 
@@ -51,10 +72,6 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
     private bool EligableTarget(PlayingCard cardTryingToUse)
     {
-        if (ownerPlayer == null) // for enemy cards
-            return false;
-
-
         if (DoIOwnThis())
         {
             if (cardTryingToUse.myCard.bTargetsAllies)
@@ -75,7 +92,7 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         
         if(DoIOwnThis() == false)
         {
-            if (cardTryingToUse.myCard.bTargetsEnemies)
+            if (cardTryingToUse.myCard.bTargetsEnemies && bEnergized == false)
             {
                 return true;
             }
@@ -105,14 +122,35 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         transform.localPosition = desiredPos;
     }
 
+    public IEnumerator EnergizeAndExhaust(bool bEnergized)
+    {
+        this.bEnergized = bEnergized;
+
+        desiredRotation.z = (bEnergized) ? 90.0f : 180.0f ;
+
+        float duration = 0.5f;
+        while (duration > 0)
+        {
+            duration -= Time.deltaTime;
+            transform.localEulerAngles = Vector3.Lerp(transform.localEulerAngles, desiredRotation, Time.deltaTime * 10.0f);
+            yield return new WaitForEndOfFrame();
+        }
+        transform.localEulerAngles = desiredRotation;
+    }
+
     private void InspectCard()
     {
-        ownerPlayer.InspectCard(myCard, DoIOwnThis());
+        if(bHovering)
+        {
+            ownerPlayer.InspectCard(myCard, DoIOwnThis());
+        }
     }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        if (ownerPlayer == null) // for enemy cards
+        bHovering = true;
+
+        if (ownerPlayer == null || bEnergized == false) // for enemy cards
             return;
 
         if (myCard.Type.type == CardType.Captain && ownerPlayer.bChoosingCaptain && DoIOwnThis())
@@ -135,14 +173,18 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         originalIndex = transform.GetSiblingIndex();
         transform.SetAsLastSibling();
 
+        if (bPreventRegularMoving)
+            return;
+
         StartCoroutine(MoveCard(50, false, 0.5f));
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
+        bHovering = false;
+
         if (ownerPlayer == null) // for enemy cards
             return;
-
 
         if (myCard.Type.type == CardType.Captain && ownerPlayer.bChoosingCaptain && DoIOwnThis())
         {
@@ -159,12 +201,15 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
         transform.SetSiblingIndex(originalIndex);
 
+        if (bPreventRegularMoving)
+            return;
+
         StartCoroutine(MoveCard(-5, false, 0.5f));
     }
 
     public void OnBeginDrag(PointerEventData eventData)
     {
-        if (ownerPlayer == null) // for enemy cards
+        if (ownerPlayer == null || bPreventRegularMoving) // for enemy cards
             return;
 
 
@@ -185,6 +230,10 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         if (ownerPlayer == null) // for enemy cards
             return;
 
+        if(ownerPlayer.bChoosingTarget && ownerPlayer.bSkipCaptainChoice && ownerPlayer.currentTarget != null)
+        {
+            ownerPlayer.RequestPlayCard(ownerPlayer.currentCard, ownerPlayer.currentTarget, false, ownerPlayer.currentTarget);
+        }
 
         if (ownerPlayer.bChoosingCaptain && ownerPlayer.currentCaptain != null)
         {
@@ -197,9 +246,13 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
     public void CancelUsingCard()
     {
-        StartCoroutine(MoveCard(-5, false, 0.5f));
         ownerPlayer.StartStopLineRenderer(false, this, Color.white);
         ownerPlayer.BlockHand(false);
+
+        if (bPreventRegularMoving)
+            return;
+
+        StartCoroutine(MoveCard(-5, false, 0.5f));
     }
 
     public void OnPointerClick(PointerEventData eventData)
@@ -207,6 +260,11 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         if (ownerPlayer == null) // for enemy cards
             return;
 
+        if(ownerPlayer.bChoosingTarget && ownerPlayer.bSkipCaptainChoice == false)
+        {
+            bool bTargetingEnemy = (ownerPlayer.currentCaptain.DoIOwnThis() && ownerPlayer.currentTarget.DoIOwnThis()) ? false : true;
+            ownerPlayer.RequestPlayCard(ownerPlayer.currentCard, ownerPlayer.currentCaptain, bTargetingEnemy, ownerPlayer.currentTarget);
+        }
 
         if (ownerPlayer.bInMulligan)
         {
@@ -222,6 +280,11 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         if (ownerPlayer != null)
         {
             ownerPlayer.onInspect -= InspectCard;
+        }
+
+        if(myCard != null)
+        {
+            myCard.Cleanup();
         }
 
 

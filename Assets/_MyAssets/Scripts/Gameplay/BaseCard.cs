@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class BaseCard : ScriptableObject
+public abstract class BaseCard : ScriptableObject
 {
     public string CardName;
 
@@ -23,4 +23,8 @@ public class BaseCard : ScriptableObject
 
     [TextArea(3, 10)]
     public string DescriptionText;
+
+    public abstract void Init(UserPlayer ownerPlayer);
+    public abstract void PlayCard(PlayingCard captainUsing, bool bTargetingEnemy, PlayingCard captainTargeting);
+    public abstract void Cleanup();
 }

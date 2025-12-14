@@ -132,6 +132,25 @@ public class EnemyPlayer : MonoBehaviour
         }
     }
 
+    public void PlayEnemyCard(BaseCard cardToPlay, PlayingCard captainUsing, bool bTargetingEnemy, PlayingCard captainTargeting)
+    {
+        PlayingCardsInHand[0].SetCard(cardToPlay);
+        cardToPlay.PlayCard(captainUsing, bTargetingEnemy, captainTargeting);
+        StartCoroutine(captainUsing.EnergizeAndExhaust(false));
+        StartCoroutine(RemoveCardFromHand());
+    }
+
+    private IEnumerator RemoveCardFromHand()
+    {
+        PlayingCard card = PlayingCardsInHand[0];
+        PlayingCardsInHand[0].StartMoveCard(-300, false, 0.5f);
+        PlayingCardsInHand.RemoveAt(0);
+        yield return new WaitForSeconds(0.1f);
+        ReOrganizeHand();
+
+        yield return new WaitForSeconds(1.3f);
+    }
+
     private IEnumerator LoadingOpponentDeck()
     {
 

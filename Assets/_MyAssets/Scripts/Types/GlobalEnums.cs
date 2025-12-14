@@ -52,11 +52,11 @@ public enum CardRarity
 
 public enum EquipmentType
 {
-    Weapon,
-    MagicItem,
-    Shield,
-    Clothing,
-    Unique
+    Weapon, // physical
+    MagicItem, // magic and utility
+    Shield, // defense
+    Clothing, // all rounder
+    Unique // gimmicks
 }
 
 public enum ReactionType
