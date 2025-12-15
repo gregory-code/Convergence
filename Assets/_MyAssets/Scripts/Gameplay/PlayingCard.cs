@@ -16,7 +16,7 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
     private bool bIsPlayer1;
     
-    private bool bEnergized;
+    public bool bEnergized { get; private set; }
 
     private bool bPreventRegularMoving;
 

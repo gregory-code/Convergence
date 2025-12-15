@@ -4,12 +4,38 @@ using UnityEngine.UI;
 
 public class InspectionItem : MonoBehaviour
 {
+    [SerializeField] private Button ClickableButton;
     [SerializeField] private Image Icon;
     [SerializeField] private TextMeshProUGUI Description;
 
-    public void Init(BaseCard card)
+    private PlayingCard playingCard;
+    private UserPlayer ownerPlayer;
+
+    public void Init(UserPlayer ownerPlayer, PlayingCard card)
     {
-        Description.text = card.DescriptionText;
-        Icon.sprite = card.CardArt;
+        this.ownerPlayer = ownerPlayer;
+        playingCard = card;
+
+        Description.text = card.myCard.DescriptionText;
+        Icon.sprite = card.myCard.CardArt;
+
+        ClickableButton.interactable = false;
+
+        if (card.myCard is CaptainCard captain)
+        {
+            if(card.bEnergized == true && ownerPlayer.IsMyTurn() == true)
+            {
+                ClickableButton.interactable = captain.bActivateableAbility;
+            }
+        }
+    }
+
+    public void Activate()
+    {
+        if(playingCard != null && ownerPlayer != null)
+        {
+            ownerPlayer.StopInspecting();
+            ownerPlayer.RequestPlayCard(playingCard, playingCard, false, playingCard);
+        }
     }
 }

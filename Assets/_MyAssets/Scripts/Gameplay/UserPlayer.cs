@@ -57,6 +57,12 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
     public event OnInspect onInspect;
 
     // ********** Hall of Delegates ********** //
+    public delegate void TurnStarted();
+    public event TurnStarted turnStarted;
+
+    public delegate void TurnEnded();
+    public event TurnEnded turnEnded;
+
     public delegate void Killed(int killingDamage, PlayingCard allyDoingTheKilling, PlayingCard allyKilled);
     public event Killed killed;
 
@@ -93,8 +99,7 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
         {
             if(bIsInspecting)
             {
-                bIsInspecting = false;
-                InspectionPanel.SetActive(false);
+                StopInspecting();
             }
             else
             {
@@ -106,6 +111,12 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
             return;
 
         lineRenderer.UpdateReticleLocation(GetUIToWorldPoint(Input.mousePosition));
+    }
+
+    public void StopInspecting()
+    {
+        bIsInspecting = false;
+        InspectionPanel.SetActive(false);
     }
 
     public void SetIsPlayer1() { bIsPlayer1 = true; }
@@ -361,7 +372,8 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
         if (IOwnit)
         {
             InspectionItem inspection = Instantiate(InspectionItemPrefab, InspectionTransform);
-            inspection.Init(cardToInspect.myCard);
+            inspection.Init(this, cardToInspect);
+            InspectionItemList.Add(inspection);
         }
 
         if(cardToInspect.myCard is CaptainCard captain)
@@ -370,7 +382,8 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
             foreach(PlayingCard equipment in captain.GetEquipments())
             {
                 InspectionItem inspection = Instantiate(InspectionItemPrefab, InspectionTransform);
-                inspection.Init(equipment.myCard);
+                inspection.Init(this, equipment);
+                InspectionItemList.Add(inspection);
             }
 
             foreach (PlayingCard linger in captain.GetLingersInEffect())

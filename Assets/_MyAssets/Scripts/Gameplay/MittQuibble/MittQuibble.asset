@@ -29,3 +29,4 @@ MonoBehaviour:
   DescriptionText: Exhaust to gain +1 Spark and draw 1 card
   maxHealth: 9
   maxEquipment: 2
+  bActivateableAbility: 1

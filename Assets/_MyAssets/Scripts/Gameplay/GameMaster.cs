@@ -26,7 +26,10 @@ public class GameMaster : MonoBehaviourPunCallbacks
     private List<PlayingCard> Player2Allies = new List<PlayingCard>();
 
     [SerializeField] private GameObject opponentSpark;
+    private int opponentSparkValue;
+
     [SerializeField] private GameObject allySpark;
+    private int allySparkValue;
 
     [SerializeField] private TextMeshProUGUI opponentSparkText;
     [SerializeField] private TextMeshProUGUI allySparkText;
@@ -66,6 +69,8 @@ public class GameMaster : MonoBehaviourPunCallbacks
 
     private IEnumerator StartGame()
     {
+        opponentSparkValue = 0;
+        allySparkValue = 0;
         opponentSparkText.text = "0/20";
         allySparkText.text = "0/20";
 
@@ -255,6 +260,26 @@ public class GameMaster : MonoBehaviourPunCallbacks
         else // other player
         {
             enemy.RequestDrawCards(cardsToDraw);
+        }
+    }
+
+    public void RequestIncreaseSpark(int SparkToAdd)
+    {
+        this.photonView.RPC("IncreaseSpark", RpcTarget.AllBuffered, bIsPlayer1, SparkToAdd);
+    }
+
+    [PunRPC]
+    void IncreaseSpark(bool isPlayer1, int SparkToAdd)
+    {
+        if (isPlayer1 == bIsPlayer1) // Owner, this client
+        {
+            opponentSparkValue += SparkToAdd;
+            opponentSparkText.text = opponentSparkValue + "/20";
+        }
+        else // other player
+        {
+            allySparkValue += SparkToAdd;
+            allySparkText.text = allySparkValue + "/20";
         }
     }
 

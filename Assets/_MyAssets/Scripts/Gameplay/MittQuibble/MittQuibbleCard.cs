@@ -13,6 +13,11 @@ public class MittQuibbleCard : CaptainCard
     {
         base.PlayCard(thisPlayingCard, captainUsing, bTargetingEnemy, captainTargeting);
 
+        if (thisPlayingCard.DoIOwnThis())
+        {
+            FindAnyObjectByType<GameMaster>().RequestDrawCards(1);
+            FindAnyObjectByType<GameMaster>().RequestIncreaseSpark(1);
+        }
     }
 
     public override void Cleanup()

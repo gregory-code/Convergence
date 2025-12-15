@@ -10,6 +10,8 @@ public abstract class CaptainCard : BaseCard
     private List<PlayingCard> EquipmentsAttached = new List<PlayingCard>();
     private List<PlayingCard> LingersInEffect = new List<PlayingCard>();
 
+    public bool bActivateableAbility;
+
     public List<PlayingCard> GetEquipments() { return EquipmentsAttached; }
     public List<PlayingCard> GetLingersInEffect() { return LingersInEffect; }
 
