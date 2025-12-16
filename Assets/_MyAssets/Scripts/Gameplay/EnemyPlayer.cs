@@ -136,6 +136,9 @@ public class EnemyPlayer : MonoBehaviour
     {
         if(cardToPlay is CaptainCard captain)
         { // Passive Proc or activatable ability
+            if (cardToPlay.bSwift == false)
+                StartCoroutine(captainUsing.EnergizeAndExhaust(false));
+
             cardToPlay.PlayCard(captainUsing, captainUsing, bTargetingEnemy, captainUsing);
             return;
         }

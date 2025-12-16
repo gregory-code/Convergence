@@ -189,8 +189,8 @@ public class GameMaster : MonoBehaviourPunCallbacks
         const float minCount = 2f;
         const float maxCount = 9f;
 
-        const float maxValue = 220f;
-        const float minValue = 140f;
+        const float maxValue = 400f;
+        const float minValue = 240f;
 
         float c = Mathf.Clamp(count, minCount, maxCount);
         float t = (c - minCount) / (maxCount - minCount);
