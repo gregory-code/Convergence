@@ -50,6 +50,9 @@ public class GameMaster : MonoBehaviourPunCallbacks
     private string player1_ID; // SerializeField just for testing of course
     private string player2_ID;
 
+    private bool bHit3SparkThreshold;
+    private bool bHit10SparkThreshold;
+
     private bool player1IsReady; // SerializeField just for testing of course
     private bool player2IsReady;
 
@@ -95,7 +98,7 @@ public class GameMaster : MonoBehaviourPunCallbacks
         else
             player.SkipMulligan(8);
 
-        StartCoroutine(PlayersAddingNewCaptains());
+        StartCoroutine(PlayersAddingNewCaptains(false));
     }
 
 
@@ -124,7 +127,7 @@ public class GameMaster : MonoBehaviourPunCallbacks
         this.photonView.RPC("PlayerLocksIn", RpcTarget.AllBuffered, bIsPlayer1);
     }
 
-    private IEnumerator PlayersAddingNewCaptains()
+    private IEnumerator PlayersAddingNewCaptains(bool bRequestSwitchTurns)
     {
         while (player1IsReady == false || player2IsReady == false)
             yield return new WaitForEndOfFrame();
@@ -134,6 +137,9 @@ public class GameMaster : MonoBehaviourPunCallbacks
         AddAllyToBoard(captainHolder);
 
         yield return new WaitForSeconds(0.5f);
+
+        if (bRequestSwitchTurns && bIsPlayer1)
+            RequestSwitchTurns();
 
         opponentSpark.SetActive(true);
         allySpark.SetActive(true);
@@ -183,7 +189,7 @@ public class GameMaster : MonoBehaviourPunCallbacks
         const float minCount = 2f;
         const float maxCount = 9f;
 
-        const float maxValue = 45f;
+        const float maxValue = 220f;
         const float minValue = 140f;
 
         float c = Mathf.Clamp(count, minCount, maxCount);
@@ -205,7 +211,18 @@ public class GameMaster : MonoBehaviourPunCallbacks
 
     public void RequestPlayCard(PlayingCard cardToPlay, PlayingCard captainUsing, bool bTargetingEnemy, PlayingCard captainTargeting)
     {
-        int cardIndex = GetCardIndexForLibrary(cardToPlay.myCard, CardAndCaptainCardLibrary);
+        int cardIndex = 0;
+        bool bIsCaptain = false;
+        if(cardToPlay.myCard is CaptainCard captain)
+        {
+            bIsCaptain = true;
+            cardIndex = GetCardIndexForLibrary(cardToPlay.myCard, CaptainLibrary);
+        }
+        else
+        {
+            cardIndex = GetCardIndexForLibrary(cardToPlay.myCard, CardAndCaptainCardLibrary);
+        }
+
         int captainUsingIndex = 0;
         int captainTargetingIndex = 0;
         if(bIsPlayer1)
@@ -218,11 +235,11 @@ public class GameMaster : MonoBehaviourPunCallbacks
             captainUsingIndex = Player2Allies.IndexOf(captainUsing);
             captainTargetingIndex = (bTargetingEnemy) ? Player1Allies.IndexOf(captainTargeting) : Player2Allies.IndexOf(captainTargeting);
         }
-        this.photonView.RPC("PlayCard", RpcTarget.AllBuffered, bIsPlayer1, cardIndex, captainUsingIndex, bTargetingEnemy, captainTargetingIndex);
+        this.photonView.RPC("PlayCard", RpcTarget.AllBuffered, bIsPlayer1, cardIndex, captainUsingIndex, bTargetingEnemy, captainTargetingIndex, bIsCaptain);
     }
 
     [PunRPC]
-    void PlayCard(bool isPlayer1, int cardToPlayIndex, int captainUsingIndex, bool bTargetingEnemy, int captainTargetingIndex)
+    void PlayCard(bool isPlayer1, int cardToPlayIndex, int captainUsingIndex, bool bTargetingEnemy, int captainTargetingIndex, bool isCaptain)
     {
         if (isPlayer1 == bIsPlayer1) // Owner, this client
         {
@@ -242,7 +259,8 @@ public class GameMaster : MonoBehaviourPunCallbacks
                 captainUsing = Player1Allies[captainUsingIndex];
                 captainTarget = (bTargetingEnemy) ? Player2Allies[captainTargetingIndex] : Player1Allies[captainTargetingIndex];
             }
-            enemy.PlayEnemyCard(CardAndCaptainCardLibrary[cardToPlayIndex], captainUsing, bTargetingEnemy, captainTarget);
+            BaseCard cardToPlay = (isCaptain) ? CaptainLibrary[cardToPlayIndex] : CardAndCaptainCardLibrary[cardToPlayIndex];
+            enemy.PlayEnemyCard(cardToPlay, captainUsing, bTargetingEnemy, captainTarget);
         }
     }
     public void RequestDrawCards(int cardsToDraw)
@@ -280,6 +298,24 @@ public class GameMaster : MonoBehaviourPunCallbacks
         {
             opponentSparkValue += SparkToAdd;
             opponentSparkText.text = opponentSparkValue + "/20";
+        }
+
+        if((allySparkValue >= 3 || opponentSparkValue >= 3) && bHit3SparkThreshold == false)
+        {
+            Crossroads();
+            bHit3SparkThreshold = true;
+            player.StartPickNewCaptain();
+            StartCoroutine(PlayersAddingNewCaptains(true));
+            return;
+        }
+
+        if ((allySparkValue >= 10 || opponentSparkValue >= 10) && bHit10SparkThreshold == false)
+        {
+            Crossroads();
+            bHit10SparkThreshold = true;
+            player.StartPickNewCaptain();
+            StartCoroutine(PlayersAddingNewCaptains(true));
+            return;
         }
     }
 

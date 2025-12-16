@@ -26,6 +26,7 @@ public class InspectionItem : MonoBehaviour
             if(card.bEnergized == true && ownerPlayer.IsMyTurn() == true && card.myCard.bOncePerTurn == true && DoIOwnThis)
             {
                 ClickableButton.interactable = captain.bActivateableAbility;
+                ClickableButton.enabled = captain.bActivateableAbility;
             }
         }
     }

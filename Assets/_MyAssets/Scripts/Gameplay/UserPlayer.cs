@@ -141,6 +141,8 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
 
     public void StartPickNewCaptain()
     {
+        BlockHand(true);
+        StartCoroutine(GetPlayerOptions(false));
         StartCoroutine(PickNewCaptain());
     }
 
@@ -153,7 +155,11 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
 
     public void ConfirmNewCaptain(int captainIndex)
     {
+        BlockHand(false);
         CaptainPanel.SetActive(false);
+        SelectCaptainsVisible[captainIndex].GetComponent<CanvasGroup>().interactable = false;
+        SelectCaptainsVisible[captainIndex].GetComponent<CanvasGroup>().blocksRaycasts = false;
+        SelectCaptainsVisible[captainIndex].GetComponent<CanvasGroup>().alpha = 0.3f;
         gameMaster.PlayerConfirmedNewCaptain(SelectCaptainsVisible[captainIndex].myCard);
     }
 
@@ -282,16 +288,19 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
         bBlockHand = false;
     }
 
+    private Vector3 desiredPos;
     private IEnumerator MoveHand(Vector3 handPos)
     {
+        desiredPos = handPos;
+
         float duration = 0.8f;
         while (duration > 0)
         {
             duration -= Time.deltaTime;
-            transform.localPosition = Vector3.Lerp(transform.localPosition, handPos, Time.deltaTime * 15.0f);
+            transform.localPosition = Vector3.Lerp(transform.localPosition, desiredPos, Time.deltaTime * 15.0f);
             yield return new WaitForEndOfFrame();
         }
-        transform.localPosition = handPos;
+        transform.localPosition = desiredPos;
     }
 
     public void AddOrRemoveCardToMulligan(PlayingCard card, bool bMullgianThis)
@@ -401,7 +410,6 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
         bBlockHand = bState;
         if (bState)
         {
-            StopAllCoroutines();
             StartCoroutine(MoveHand(hiddenHand));
         }
     }
@@ -508,7 +516,6 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
         if (bBlockHand)
             return;
 
-        StopAllCoroutines();
         StartCoroutine(MoveHand(hoverHand));
     }
 
@@ -517,7 +524,6 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
         if (bBlockHand)
             return;
 
-        StopAllCoroutines();
         StartCoroutine(MoveHand(hiddenHand));
     }
 }
