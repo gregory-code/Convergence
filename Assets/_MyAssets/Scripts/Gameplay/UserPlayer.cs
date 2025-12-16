@@ -369,20 +369,17 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
         InspectionPanel.SetActive(true);
         InspectionCard.SetCard(cardToInspect.myCard);
 
-        if (IOwnit)
-        {
-            InspectionItem inspection = Instantiate(InspectionItemPrefab, InspectionTransform);
-            inspection.Init(this, cardToInspect);
-            InspectionItemList.Add(inspection);
-        }
+        InspectionItem inspectionSelf = Instantiate(InspectionItemPrefab, InspectionTransform);
+        inspectionSelf.Init(this, cardToInspect, IOwnit);
+        InspectionItemList.Add(inspectionSelf);
 
-        if(cardToInspect.myCard is CaptainCard captain)
+        if (cardToInspect.myCard is CaptainCard captain)
         {
             InspectionCard.SetHealthText(captain.currentHealth, captain.maxHealth);
             foreach(PlayingCard equipment in captain.GetEquipments())
             {
                 InspectionItem inspection = Instantiate(InspectionItemPrefab, InspectionTransform);
-                inspection.Init(this, equipment);
+                inspection.Init(this, equipment, IOwnit);
                 InspectionItemList.Add(inspection);
             }
 

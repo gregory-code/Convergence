@@ -11,7 +11,7 @@ public class InspectionItem : MonoBehaviour
     private PlayingCard playingCard;
     private UserPlayer ownerPlayer;
 
-    public void Init(UserPlayer ownerPlayer, PlayingCard card)
+    public void Init(UserPlayer ownerPlayer, PlayingCard card, bool DoIOwnThis)
     {
         this.ownerPlayer = ownerPlayer;
         playingCard = card;
@@ -23,7 +23,7 @@ public class InspectionItem : MonoBehaviour
 
         if (card.myCard is CaptainCard captain)
         {
-            if(card.bEnergized == true && ownerPlayer.IsMyTurn() == true)
+            if(card.bEnergized == true && ownerPlayer.IsMyTurn() == true && card.myCard.bOncePerTurn == true && DoIOwnThis)
             {
                 ClickableButton.interactable = captain.bActivateableAbility;
             }

@@ -273,13 +273,13 @@ public class GameMaster : MonoBehaviourPunCallbacks
     {
         if (isPlayer1 == bIsPlayer1) // Owner, this client
         {
-            opponentSparkValue += SparkToAdd;
-            opponentSparkText.text = opponentSparkValue + "/20";
+            allySparkValue += SparkToAdd;
+            allySparkText.text = allySparkValue + "/20";
         }
         else // other player
         {
-            allySparkValue += SparkToAdd;
-            allySparkText.text = allySparkValue + "/20";
+            opponentSparkValue += SparkToAdd;
+            opponentSparkText.text = opponentSparkValue + "/20";
         }
     }
 
@@ -315,16 +315,18 @@ public class GameMaster : MonoBehaviourPunCallbacks
 
         if(bPlayer1sTurn)
         {
-            foreach(PlayingCard allyCard in Player1Allies)
+            foreach(PlayingCard teammate in Player1Allies)
             {
-                StartCoroutine(allyCard.EnergizeAndExhaust(true));
+                teammate.myCard.bOncePerTurn = true;
+                StartCoroutine(teammate.EnergizeAndExhaust(true));
             }
         }
         else
         {
-            foreach (PlayingCard allyCard in Player2Allies)
+            foreach (PlayingCard teammate in Player2Allies)
             {
-                StartCoroutine(allyCard.EnergizeAndExhaust(true));
+                teammate.myCard.bOncePerTurn = true;
+                StartCoroutine(teammate.EnergizeAndExhaust(true));
             }
         }
 

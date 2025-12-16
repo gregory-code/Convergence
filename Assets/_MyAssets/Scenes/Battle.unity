@@ -5557,8 +5557,8 @@ MonoBehaviour:
   WaitingForOpponent: {fileID: 584005826}
   opponentSpark: {fileID: 466140353}
   allySpark: {fileID: 2047266298}
-  opponentSparkText: {fileID: 752224177}
-  allySparkText: {fileID: 438673800}
+  opponentSparkText: {fileID: 438673800}
+  allySparkText: {fileID: 752224177}
   allySide: {fileID: 604270409}
   enemySide: {fileID: 192090818}
   FirebasePlayer: {fileID: 1584138423}

@@ -24,6 +24,8 @@ public abstract class BaseCard : ScriptableObject
     [TextArea(3, 10)]
     public string DescriptionText;
 
+    public bool bOncePerTurn = true;
+
     public abstract void Init(UserPlayer ownerPlayer);
     public abstract void PlayCard(PlayingCard thisPlayingCard, PlayingCard captainUsing, bool bTargetingEnemy, PlayingCard captainTargeting);
     public abstract void Cleanup();
