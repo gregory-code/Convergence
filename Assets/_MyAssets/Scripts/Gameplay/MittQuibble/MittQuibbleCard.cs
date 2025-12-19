@@ -16,7 +16,7 @@ public class MittQuibbleCard : CaptainCard
         if (thisPlayingCard.DoIOwnThis())
         {
             FindAnyObjectByType<GameMaster>().RequestDrawCards(1);
-            FindAnyObjectByType<GameMaster>().RequestIncreaseSpark(1);
+            FindAnyObjectByType<GameMaster>().RequestIncreaseSpark(thisPlayingCard, 1);
         }
     }
 

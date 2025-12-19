@@ -1,8 +1,8 @@
 using Firebase.Database;
 using Photon.Pun;
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Threading;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -36,6 +36,12 @@ public class GameMaster : MonoBehaviourPunCallbacks
 
     [SerializeField] private Transform allySide;
     [SerializeField] private Transform enemySide;
+
+    [SerializeField] private Sprite[] numberSpriteOutline;
+    [SerializeField] private Sprite[] numberSpriteWhole;
+    private float vfxYSpawn = -3.0f;
+    [SerializeField] private GameObject allySparkGainParticleSystem;
+    [SerializeField] private GameObject enemySparkGainParticleSystem;
 
     public List<BaseCard> GetCaptainLibrary() { return CaptainLibrary; }
     public List<BaseCard> GetEveryCardLibrary() { return CardAndCaptainCardLibrary; }
@@ -84,7 +90,7 @@ public class GameMaster : MonoBehaviourPunCallbacks
 
         if (bIsPlayer1) // Only executes on player 1, so as we don't get two random numbers
         {
-            bool whoGoesFirst = Random.Range(0, 2) == 0;
+            bool whoGoesFirst = UnityEngine.Random.Range(0, 2) == 0;
             this.photonView.RPC("WhoGoesFirst", RpcTarget.AllBuffered, whoGoesFirst);
         }
 
@@ -225,7 +231,7 @@ public class GameMaster : MonoBehaviourPunCallbacks
 
         int captainUsingIndex = 0;
         int captainTargetingIndex = 0;
-        if(bIsPlayer1)
+        if (bIsPlayer1)
         {
             captainUsingIndex = Player1Allies.IndexOf(captainUsing);
             captainTargetingIndex = (bTargetingEnemy) ? Player2Allies.IndexOf(captainTargeting) : Player1Allies.IndexOf(captainTargeting);
@@ -235,6 +241,7 @@ public class GameMaster : MonoBehaviourPunCallbacks
             captainUsingIndex = Player2Allies.IndexOf(captainUsing);
             captainTargetingIndex = (bTargetingEnemy) ? Player1Allies.IndexOf(captainTargeting) : Player2Allies.IndexOf(captainTargeting);
         }
+
         this.photonView.RPC("PlayCard", RpcTarget.AllBuffered, bIsPlayer1, cardIndex, captainUsingIndex, bTargetingEnemy, captainTargetingIndex, bIsCaptain);
     }
 
@@ -249,7 +256,7 @@ public class GameMaster : MonoBehaviourPunCallbacks
         {
             PlayingCard captainUsing = null;
             PlayingCard captainTarget = null;
-            if(bIsPlayer1)
+            if (bIsPlayer1)
             {
                 captainUsing = Player2Allies[captainUsingIndex];
                 captainTarget = (bTargetingEnemy) ? Player1Allies[captainTargetingIndex] : Player2Allies[captainTargetingIndex];
@@ -259,6 +266,7 @@ public class GameMaster : MonoBehaviourPunCallbacks
                 captainUsing = Player1Allies[captainUsingIndex];
                 captainTarget = (bTargetingEnemy) ? Player2Allies[captainTargetingIndex] : Player1Allies[captainTargetingIndex];
             }
+
             BaseCard cardToPlay = (isCaptain) ? CaptainLibrary[cardToPlayIndex] : CardAndCaptainCardLibrary[cardToPlayIndex];
             enemy.PlayEnemyCard(cardToPlay, captainUsing, bTargetingEnemy, captainTarget);
         }
@@ -281,26 +289,67 @@ public class GameMaster : MonoBehaviourPunCallbacks
         }
     }
 
-    public void RequestIncreaseSpark(int SparkToAdd)
+    public void RequestIncreaseSpark(PlayingCard captainGainingSpark, int SparkToAdd)
     {
-        this.photonView.RPC("IncreaseSpark", RpcTarget.AllBuffered, bIsPlayer1, SparkToAdd);
+        int captainUsingIndex = (bIsPlayer1) ? Player1Allies.IndexOf(captainGainingSpark) : Player2Allies.IndexOf(captainGainingSpark);
+
+        this.photonView.RPC("IncreaseSpark", RpcTarget.AllBuffered, bIsPlayer1, captainUsingIndex, SparkToAdd);
     }
 
     [PunRPC]
-    void IncreaseSpark(bool isPlayer1, int SparkToAdd)
+    void IncreaseSpark(bool isPlayer1, int captainGainingSparkIndex, int SparkToAdd)
     {
+        Vector3 vfxSpawnPos = new Vector3();
         if (isPlayer1 == bIsPlayer1) // Owner, this client
         {
+            vfxSpawnPos = (bIsPlayer1) ? Player1Allies[captainGainingSparkIndex].transform.position : Player2Allies[captainGainingSparkIndex].transform.position;
             allySparkValue += SparkToAdd;
             allySparkText.text = allySparkValue + "/20";
         }
         else // other player
         {
+            vfxSpawnPos = (bIsPlayer1) ? Player2Allies[captainGainingSparkIndex].transform.position : Player1Allies[captainGainingSparkIndex].transform.position;
             opponentSparkValue += SparkToAdd;
             opponentSparkText.text = opponentSparkValue + "/20";
         }
 
-        if((allySparkValue >= 3 || opponentSparkValue >= 3) && bHit3SparkThreshold == false)
+        #region Extremely Sad Spark Spawn Logic
+
+        vfxSpawnPos.y = vfxYSpawn;
+
+        GameObject sparkPrefab = (bIsPlayer1 == isPlayer1) ? allySparkGainParticleSystem : enemySparkGainParticleSystem;
+        GameObject sparkGain = Instantiate(sparkPrefab, vfxSpawnPos, sparkPrefab.transform.rotation);
+
+        var wholeRenderer = sparkGain.transform.Find("Whole").GetComponent<ParticleSystemRenderer>();
+
+        Material wholeMat = new Material(wholeRenderer.sharedMaterial);
+        wholeRenderer.material = wholeMat;
+        wholeMat.SetTexture("_BaseMap", numberSpriteWhole[SparkToAdd - 1].texture);
+
+        var outlineRenderer = sparkGain.transform.Find("Outline").GetComponent<ParticleSystemRenderer>();
+        
+
+        Material outlineMat = new Material(outlineRenderer.sharedMaterial);
+        outlineRenderer.material = outlineMat;
+        outlineMat.SetTexture("_BaseMap", numberSpriteOutline[SparkToAdd - 1].texture);
+
+        ParticleSystem sparkParticle = sparkGain.GetComponent<ParticleSystem>();
+        ParticleSystem.EmissionModule emission = sparkParticle.emission;
+        ParticleSystem.Burst[] bursts = new ParticleSystem.Burst[emission.burstCount];
+        emission.GetBursts(bursts);
+
+        ParticleSystem.Burst burst = bursts[0];
+        burst.count = new ParticleSystem.MinMaxCurve(SparkToAdd);
+        bursts[0] = burst;
+
+        emission.SetBursts(bursts);
+
+        Destroy(sparkGain, sparkParticle.main.duration + sparkParticle.main.startLifetime.constantMax);
+
+        #endregion
+
+
+        if ((allySparkValue >= 3 || opponentSparkValue >= 3) && bHit3SparkThreshold == false)
         {
             Crossroads();
             bHit3SparkThreshold = true;

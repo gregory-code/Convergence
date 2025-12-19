@@ -1732,9 +1732,9 @@ MonoBehaviour:
   m_Transition: 1
   m_Colors:
     m_NormalColor: {r: 0.28235295, g: 0.28235295, b: 0.28235295, a: 1}
-    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_HighlightedColor: {r: 0.28235295, g: 0.28235295, b: 0.28235295, a: 1}
     m_PressedColor: {r: 1, g: 0.99202365, b: 0.3160377, a: 1}
-    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_SelectedColor: {r: 0.28235295, g: 0.28235295, b: 0.28235295, a: 1}
     m_DisabledColor: {r: 0.12156863, g: 0.12156863, b: 0.12156863, a: 0.2627451}
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
@@ -1958,63 +1958,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 604270408}
   m_CullTransparentMesh: 1
---- !u!1001 &610042992
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 184778, guid: 63664b0224560df48a888f59fa257abf, type: 3}
-      propertyPath: m_Name
-      value: SparkGain
-      objectReference: {fileID: 0}
-    - target: {fileID: 454118, guid: 63664b0224560df48a888f59fa257abf, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 454118, guid: 63664b0224560df48a888f59fa257abf, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: -2.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 454118, guid: 63664b0224560df48a888f59fa257abf, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: -7.482
-      objectReference: {fileID: 0}
-    - target: {fileID: 454118, guid: 63664b0224560df48a888f59fa257abf, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 0.7071068
-      objectReference: {fileID: 0}
-    - target: {fileID: 454118, guid: 63664b0224560df48a888f59fa257abf, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: -0.7071068
-      objectReference: {fileID: 0}
-    - target: {fileID: 454118, guid: 63664b0224560df48a888f59fa257abf, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 454118, guid: 63664b0224560df48a888f59fa257abf, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 454118, guid: 63664b0224560df48a888f59fa257abf, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: -90
-      objectReference: {fileID: 0}
-    - target: {fileID: 454118, guid: 63664b0224560df48a888f59fa257abf, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 454118, guid: 63664b0224560df48a888f59fa257abf, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 63664b0224560df48a888f59fa257abf, type: 3}
 --- !u!1 &611734273
 GameObject:
   m_ObjectHideFlags: 0
@@ -3156,9 +3099,9 @@ MonoBehaviour:
   m_Transition: 1
   m_Colors:
     m_NormalColor: {r: 0.28235295, g: 0.28235295, b: 0.28235295, a: 1}
-    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_HighlightedColor: {r: 0.28235295, g: 0.28235295, b: 0.28235295, a: 1}
     m_PressedColor: {r: 1, g: 0.99202365, b: 0.3160377, a: 1}
-    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_SelectedColor: {r: 0.28235295, g: 0.28235295, b: 0.28235295, a: 1}
     m_DisabledColor: {r: 0.12156863, g: 0.12156863, b: 0.12156863, a: 0.2627451}
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
@@ -5701,6 +5644,28 @@ MonoBehaviour:
   allySparkText: {fileID: 752224177}
   allySide: {fileID: 604270409}
   enemySide: {fileID: 192090818}
+  numberSpriteOutline:
+  - {fileID: 21300000, guid: 6ca2ae5a923c8f04ca0dc8913a0f2b84, type: 3}
+  - {fileID: 21300000, guid: 95ce2a3f18c0ec643ac183892622d458, type: 3}
+  - {fileID: 21300000, guid: 082870238868ecf4f86d89874ace3281, type: 3}
+  - {fileID: 21300000, guid: 408d47a7b1c402344b99c71da64ccf5f, type: 3}
+  - {fileID: 21300000, guid: 00ac3cfbaccaea34884769c22a55c323, type: 3}
+  - {fileID: 21300000, guid: 32150ea70942b1c4d8832d9b14de3f3a, type: 3}
+  - {fileID: 21300000, guid: ca2b58fc31492a540b48f9fa74c0c751, type: 3}
+  - {fileID: 21300000, guid: 88fd3e520189a6b49946bb432bb0c328, type: 3}
+  - {fileID: 21300000, guid: ad783aac25415814a979ce0ceb18bfd1, type: 3}
+  numberSpriteWhole:
+  - {fileID: 21300000, guid: 9aa79c9fe270e3845bdd02d43861bdab, type: 3}
+  - {fileID: 21300000, guid: 47f79b47c26c9a942b1785da75519a73, type: 3}
+  - {fileID: 21300000, guid: f42c94ba31cd36b439489ab6b1e392d9, type: 3}
+  - {fileID: 21300000, guid: 086042d6da7074647b567d4606ad1332, type: 3}
+  - {fileID: 21300000, guid: 2b55a73cd6ed3c545807175a6fd55934, type: 3}
+  - {fileID: 21300000, guid: 571c6a751e51b4d4ebfcc01bae31cbb6, type: 3}
+  - {fileID: 21300000, guid: 40d5b907a851a3342ab02467488a3158, type: 3}
+  - {fileID: 21300000, guid: 4504b4efe357b664f9bdb6c78c139946, type: 3}
+  - {fileID: 21300000, guid: de649a62d8e54c145a2f55c84a1d5a20, type: 3}
+  allySparkGainParticleSystem: {fileID: 184778, guid: 0daf4eb96a7a88442802c5fcdc318889, type: 3}
+  enemySparkGainParticleSystem: {fileID: 184778, guid: 63664b0224560df48a888f59fa257abf, type: 3}
   FirebasePlayer: {fileID: 1584138423}
   bDevTest: 0
   bSkipMulligan: 1
@@ -8899,9 +8864,9 @@ MonoBehaviour:
   m_Transition: 1
   m_Colors:
     m_NormalColor: {r: 0.2830189, g: 0.2830189, b: 0.2830189, a: 1}
-    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_HighlightedColor: {r: 0.28235295, g: 0.28235295, b: 0.28235295, a: 1}
     m_PressedColor: {r: 1, g: 0.99202365, b: 0.3160377, a: 1}
-    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_SelectedColor: {r: 0.28235295, g: 0.28235295, b: 0.28235295, a: 1}
     m_DisabledColor: {r: 0.122641504, g: 0.122641504, b: 0.122641504, a: 0.2627451}
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
@@ -8976,4 +8941,3 @@ SceneRoots:
   - {fileID: 441509275}
   - {fileID: 1085446868}
   - {fileID: 1584138420}
-  - {fileID: 610042992}
