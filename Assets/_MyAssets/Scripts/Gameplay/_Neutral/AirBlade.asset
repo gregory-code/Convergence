@@ -30,3 +30,5 @@ MonoBehaviour:
 
 
     Attack for 1 physical'
+  bOncePerTurn: 1
+  bAttackingCard: 1

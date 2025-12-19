@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public abstract class BaseCard : ScriptableObject
@@ -27,6 +29,6 @@ public abstract class BaseCard : ScriptableObject
     public bool bOncePerTurn = true;
 
     public abstract void Init(UserPlayer ownerPlayer);
-    public abstract void PlayCard(PlayingCard thisPlayingCard, PlayingCard captainUsing, bool bTargetingEnemy, PlayingCard captainTargeting);
+    public abstract IEnumerator PlayCard(PlayingCard thisPlayingCard, PlayingCard captainUsing, bool bTargetingEnemy, List<PlayingCard> captainTargeting);
     public abstract void Cleanup();
 }

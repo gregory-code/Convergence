@@ -2,8 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "TCG/Neutral/Guard")]
-public class Guard : ReactionCard
+[CreateAssetMenu(menuName = "TCG/Ivy/OddHat")]
+public class OddHat : EquipmentCard
 {
     public override void Init(UserPlayer ownerPlayer)
     {

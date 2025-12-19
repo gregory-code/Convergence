@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "TCG/MittQuibble/GreedIsGood")]
@@ -9,9 +11,9 @@ public class GreedIsGood : ActionCard
 
     }
 
-    public override void PlayCard(PlayingCard thisPlayingCard, PlayingCard captainUsing, bool bTargetingEnemy, PlayingCard captainTargeting)
+    public override IEnumerator PlayCard(PlayingCard thisPlayingCard, PlayingCard captainUsing, bool bTargetingEnemy, List<PlayingCard> captainTargeting)
     {
-        base.PlayCard(thisPlayingCard, captainUsing, bTargetingEnemy, captainTargeting);
+        yield return base.PlayCard(thisPlayingCard, captainUsing, bTargetingEnemy, captainTargeting);
 
         thisPlayingCard.BeginPlayAndDiscard(captainUsing);
 
@@ -19,6 +21,8 @@ public class GreedIsGood : ActionCard
         {
             FindAnyObjectByType<GameMaster>().RequestDrawCards(3);
         }
+
+        yield return new WaitForEndOfFrame();
     }
 
     public override void Cleanup()

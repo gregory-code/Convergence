@@ -30,5 +30,5 @@ MonoBehaviour:
 
 
     Draw 1 card'
-  bAttacking: 1
-  Damage: 2
+  bOncePerTurn: 1
+  bAttackingCard: 1

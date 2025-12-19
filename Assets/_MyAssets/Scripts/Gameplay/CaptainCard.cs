@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections;
 using UnityEngine;
 
 public abstract class CaptainCard : BaseCard
@@ -7,6 +8,7 @@ public abstract class CaptainCard : BaseCard
     public int currentHealth { get; private set; }
 
     public int maxEquipment;
+    public bool bIsAllyCard;
     private List<PlayingCard> EquipmentsAttached = new List<PlayingCard>();
     private List<PlayingCard> LingersInEffect = new List<PlayingCard>();
 
@@ -78,13 +80,19 @@ public abstract class CaptainCard : BaseCard
         EquipmentsAttached.Add(equipment);
     }
 
-    public void PredictOrDealDamage(bool bPrediction, int damageDealt, bool bWasMagic, PlayingCard allyDealingDamage, PlayingCard allyRecivingDamage)
+    public void RemoveEquipment(PlayingCard equipment, PlayingCard allyDoingTheUnEquipping)
+    {
+        EquipmentsAttached.Remove(equipment);
+    }
+
+    public void PredictOrDealDamage(bool bPrediction, int damageDealt, bool bWasMagic, PlayingCard thisPlayingCard, PlayingCard allyDealingDamage, bool bTargetingEnemy, PlayingCard allyRecivingDamage)
     {
         currentHealth -= damageDealt;
         allyRecivingDamage.SetHealthText(currentHealth, maxHealth);
+        StaticGameplayDelegates.DealtDamage(damageDealt, bWasMagic, thisPlayingCard, allyDealingDamage, allyRecivingDamage);
     }
 
-    public void PredictOrHealHealth(bool bPrediction, int healthHealed, PlayingCard allyDoingTheHealing, PlayingCard allyBeingHealed)
+    public void PredictOrHealHealth(bool bPrediction, int healthHealed, PlayingCard thisPlayingCard, PlayingCard allyDoingTheHealing, PlayingCard allyBeingHealed)
     {
 
     }
@@ -94,9 +102,9 @@ public abstract class CaptainCard : BaseCard
         currentHealth = maxHealth;
     }
 
-    public override void PlayCard(PlayingCard thisPlayingCard, PlayingCard captainUsing, bool bTargetingEnemy, PlayingCard captainTargeting)
+    public override IEnumerator PlayCard(PlayingCard thisPlayingCard, PlayingCard captainUsing, bool bTargetingEnemy, List<PlayingCard> captainTargeting)
     {
-        
+        yield return new WaitForEndOfFrame();
     }
 
     public override void Cleanup()

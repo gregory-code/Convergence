@@ -1,4 +1,7 @@
 using System.Collections;
+using System.Collections.Generic;
+using TMPro;
+using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -22,14 +25,28 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
     private Vector3 desiredPos;
     private Vector3 desiredRotation;
+    private Vector3 desiredSize;
+
+    private Vector3 originalSize;
 
     private bool bHovering;
 
     [SerializeField] Vector2[] EquipmentPos;
 
+    [SerializeField] GameObject AttackPredictionPanel;
+    [SerializeField] GameObject PhysicalGameObject;
+    [SerializeField] GameObject MagicGameObject;
+    [SerializeField] GameObject DefenseGameObject;
+    [SerializeField] TextMeshProUGUI healthPredictionLeft;
+    [SerializeField] TextMeshProUGUI healthPredictionRight;
+    [SerializeField] TextMeshProUGUI physicalText;
+    [SerializeField] TextMeshProUGUI magicText;
+    [SerializeField] TextMeshProUGUI defenseText;
+
     public void Init(UserPlayer ownerplayer, BaseCard card, bool bIsPlayer1)
     {
         desiredPos = Vector3.zero;
+        originalSize = this.transform.localScale;
 
         bEnergized = true;
 
@@ -40,7 +57,7 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
         if(ownerplayer != null)
         {
-            ownerplayer.onInspect += InspectCard;
+            StaticGameplayDelegates.onInspect += InspectCard;
             myCard.Init(ownerplayer);
         }
 
@@ -82,6 +99,9 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     {
         if (DoIOwnThis())
         {
+            if (ownerPlayer.currentCaptain == this && ownerPlayer.currentCaptain.bEnergized == false)
+                return false;
+
             if (cardTryingToUse.myCard.bTargetsAllies)
             {
                 return true;
@@ -92,7 +112,7 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
                 return true;
             }
 
-            if (cardTryingToUse.myCard.bTargetsSelf && ownerPlayer.currentCaptain == this && ownerPlayer.currentCaptain.bEnergized == true)
+            if (cardTryingToUse.myCard.bTargetsSelf && ownerPlayer.currentCaptain == this)
             {
                 return true;
             }
@@ -105,6 +125,37 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
                 return true;
             }
         }
+
+        return false;
+    }
+
+    private bool EligableEquipment(EquipmentCard equipment, PlayingCard captainEquipping)
+    {
+        bool bEligableBasicEquipment = true;
+
+        if (captainEquipping.myCard is CaptainCard captain)
+        {
+            foreach (PlayingCard equipmentPlayingCard in captain.GetEquipments())
+            {
+                if (equipmentPlayingCard.myCard is EquipmentCard equipmentAttached)
+                {
+                    if (equipment.bPrestige)
+                    {
+                        if (equipment.equipmentType == equipmentAttached.equipmentType)
+                            return true;
+                    }
+                    else
+                    {
+
+                        if (captain.GetEquipments().Count >= captain.maxEquipment || equipment.equipmentType == equipmentAttached.equipmentType)
+                            bEligableBasicEquipment = false;
+                    }
+                }
+            }
+        }
+
+        if (equipment.bPrestige == false && bEligableBasicEquipment)
+            return true;
 
         return false;
     }
@@ -130,14 +181,58 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         transform.localPosition = desiredPos;
     }
 
+    public IEnumerator EnergizeAndExhaust(bool bEnergized)
+    {
+        this.bEnergized = bEnergized;
+
+        desiredRotation.z = (bEnergized) ? 90.0f : 180.0f;
+
+        if(bEnergized)
+        {
+            StartCoroutine(ShrinkOrGrow(1.0f));
+        }
+        else
+        {
+            StartCoroutine(ShrinkOrGrow(0.9f));
+        }
+
+            float duration = 0.5f;
+        while (duration > 0)
+        {
+            duration -= Time.deltaTime;
+            transform.localEulerAngles = Vector3.Lerp(transform.localEulerAngles, desiredRotation, Time.deltaTime * 10.0f);
+            yield return new WaitForEndOfFrame();
+        }
+        transform.localEulerAngles = desiredRotation;
+    }
+
+    public IEnumerator ShrinkOrGrow(float shrinkMagnitude)
+    {
+        desiredSize = originalSize * shrinkMagnitude;
+
+        float duration = 0.5f;
+        while (duration > 0)
+        {
+            duration -= Time.deltaTime;
+            transform.localScale = Vector3.Lerp(transform.localScale, desiredSize, Time.deltaTime * 10.0f);
+            yield return new WaitForEndOfFrame();
+        }
+        transform.localScale = desiredSize;
+    }
+
     public void BeginCardAttachment(PlayingCard parentCharacter, int equipmentSlotIndex)
     {
         StartCoroutine(AttachCard(parentCharacter, parentCharacter.transform.parent.transform, equipmentSlotIndex));
     }
 
+    public void RemoveCardAttachment(PlayingCard parentCharacter)
+    {
+        StartCoroutine(UnAttachCard(parentCharacter, parentCharacter.transform.parent.transform));
+    }
+
+
     public IEnumerator AttachCard(PlayingCard parentCharacter, Transform fieldTransform, int equipmentSlotIndex)
     {
-
         transform.SetParent(fieldTransform, false);
         float y = parentCharacter.DoIOwnThis() ? -300 : 300 ;
         transform.localPosition = new Vector3(0, y, 0);
@@ -153,6 +248,29 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         RectTransform transformRect = GetComponent<RectTransform>();
         transformRect.sizeDelta = new Vector2(225, 64);
         transform.localPosition = EquipmentPos[equipmentSlotIndex];
+    }
+
+    public IEnumerator UnAttachCard(PlayingCard parentCharacter, Transform fieldTransform)
+    {
+        transform.SetParent(fieldTransform, false);
+        transform.localEulerAngles = new Vector3(0,0,90);
+        transform.localScale = originalSize;
+        RectTransform transformRect = GetComponent<RectTransform>();
+        transformRect.sizeDelta = new Vector2(384, 128);
+
+        StartCoroutine(MoveCard(parentCharacter.transform.localPosition.x, true, 0.2f));
+        StartCoroutine(MoveCard(parentCharacter.transform.localPosition.y, false, 0.2f));
+
+        yield return new WaitForSeconds(0.1f);
+
+        Transform discardPile = StaticGameplayDelegates.GetDiscardPileTransform(parentCharacter.bIsPlayer1);
+        StaticGameplayDelegates.AddCardToDiscard(this);
+
+        transform.SetParent(discardPile, true);
+
+        StartCoroutine(MoveCard(0, true, 0.4f));
+        StartCoroutine(MoveCard(0, false, 0.4f));
+        StartCoroutine(ShrinkOrGrow(1.0f));
     }
 
     public void BeginPlayAndDiscard(PlayingCard usingCaptain)
@@ -171,23 +289,16 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
         yield return new WaitForSeconds(0.6f);
 
-        CleanupDestroy();
-    }
+        Transform discardPile = StaticGameplayDelegates.GetDiscardPileTransform(usingCaptain.bIsPlayer1);
+        StaticGameplayDelegates.AddCardToDiscard(this);
 
-    public IEnumerator EnergizeAndExhaust(bool bEnergized)
-    {
-        this.bEnergized = bEnergized;
+        transform.SetParent(discardPile, true);
 
-        desiredRotation.z = (bEnergized) ? 90.0f : 180.0f ;
+        StartCoroutine(MoveCard(0, true, 0.4f));
+        StartCoroutine(MoveCard(0, false, 0.4f));
+        StartCoroutine(ShrinkOrGrow(1.0f));
 
-        float duration = 0.5f;
-        while (duration > 0)
-        {
-            duration -= Time.deltaTime;
-            transform.localEulerAngles = Vector3.Lerp(transform.localEulerAngles, desiredRotation, Time.deltaTime * 10.0f);
-            yield return new WaitForEndOfFrame();
-        }
-        transform.localEulerAngles = desiredRotation;
+        //CleanupDestroy();
     }
 
     private void InspectCard()
@@ -195,6 +306,70 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         if(bHovering)
         {
             ownerPlayer.InspectCard(this, DoIOwnThis());
+        }
+    }
+
+    public void DisplayAttackStats(bool bStopDisplaying, bool bRecivingEnd, bool bPhysical)
+    {
+        if(bStopDisplaying)
+        {
+            AttackPredictionPanel.SetActive(false);
+            PhysicalGameObject.SetActive(false);
+            MagicGameObject.SetActive(false);
+            DefenseGameObject.SetActive(false);
+            return;
+        }
+
+        if (bRecivingEnd)
+        {
+            DefenseGameObject.SetActive(true);
+            if (myCard is CaptainCard captain)
+                defenseText.text = captain.GetDefense() + "";
+        }
+        else
+        {
+            if (myCard is CaptainCard myCaptain)
+            {
+                foreach (PlayingCard equipmentCard in myCaptain.GetEquipments())
+                {
+                    if (equipmentCard.myCard is OddHat)
+                        bPhysical = false;
+                }
+            }
+
+            if (bPhysical)
+            {
+                PhysicalGameObject.SetActive(true);
+                if (myCard is CaptainCard captain)
+                    defenseText.text = captain.GetPhysical() + "";
+            }
+            else
+            {
+                MagicGameObject.SetActive(true);
+                if (myCard is CaptainCard captain)
+                    defenseText.text = captain.GetMagic() + "";
+            }
+        }
+    }
+
+    public void DisplayHealthChange(int newHealth)
+    {
+        if(myCard is CaptainCard captain)
+        {
+            AttackPredictionPanel.SetActive(true);
+
+            int maxHealth = captain.maxHealth;
+            int currentHealth = captain.currentHealth;
+
+            healthPredictionLeft.text = currentHealth + "";
+            healthPredictionLeft.color = (currentHealth >= maxHealth) ? Color.green : Color.white;
+            if (currentHealth <= 2)
+                healthPredictionLeft.color = Color.red;
+
+            healthPredictionRight.text = newHealth + "";
+            healthPredictionRight.color = (newHealth >= maxHealth) ? Color.green : Color.white;
+            if (newHealth <= 2)
+                healthPredictionRight.color = Color.red;
         }
     }
 
@@ -213,9 +388,21 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
         if (myCard.Type.type == CardType.Captain && ownerPlayer.bChoosingTarget)
         {
-            if(EligableTarget(ownerPlayer.currentCard) || (ownerPlayer.bSkipCaptainChoice && ownerPlayer.currentCard.myCard.bTargetsSelf && DoIOwnThis()))
+            if(EligableTarget(ownerPlayer.currentCard) || (ownerPlayer.bSkipCaptainChoice && ownerPlayer.currentCard.myCard.bTargetsSelf && DoIOwnThis() && bEnergized == true))
             {
-                ownerPlayer.HoveringTarget(true, this); 
+                if(ownerPlayer.currentCard.myCard is EquipmentCard equipment)
+                {
+                    if(EligableEquipment(equipment, this))
+                        ownerPlayer.HoveringTarget(true, this);
+                }
+                else
+                {
+                    ownerPlayer.HoveringTarget(true, this);
+
+                    if (ownerPlayer.currentCard.myCard is ActionCard action)
+                        if(action.bAttackingCard)
+                            DisplayHealthChange(2);
+                }
             }
         }
 
@@ -282,14 +469,29 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         if (ownerPlayer == null) // for enemy cards
             return;
 
-        if(ownerPlayer.bChoosingTarget && ownerPlayer.bSkipCaptainChoice && ownerPlayer.currentTarget != null)
+        if(ownerPlayer.bChoosingTarget && ownerPlayer.bSkipCaptainChoice && ownerPlayer.currentTargets.Count > 0)
         {
-            ownerPlayer.RequestPlayCard(ownerPlayer.currentCard, ownerPlayer.currentTarget, false, ownerPlayer.currentTarget);
+            ownerPlayer.RequestPlayCard(ownerPlayer.currentCard, ownerPlayer.currentTargets[0], false, ownerPlayer.currentTargets);
         }
 
         if (ownerPlayer.bChoosingCaptain && ownerPlayer.currentCaptain != null)
         {
             ownerPlayer.ChooseCaptainWhileLineIsRendering();
+
+            if(ownerPlayer.currentCard.myCard is ActionCard action)
+            { 
+                if(action.bAttackingCard)
+                {
+                    ownerPlayer.currentCaptain.DisplayAttackStats(false, false, !action.bMagicAttack);
+
+                    List<PlayingCard> enemies = StaticGameplayDelegates.GetAllAllies(false);
+                    foreach(PlayingCard enemy in enemies)
+                    {
+                        enemy.DisplayAttackStats(false, true, true);
+                    }
+                }
+            }
+
             return;
         }
 
@@ -300,6 +502,18 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     {
         ownerPlayer.StartStopLineRenderer(false, this, Color.white);
         ownerPlayer.BlockHand(false);
+
+        List<PlayingCard> enemies = StaticGameplayDelegates.GetAllAllies(false);
+        foreach (PlayingCard enemy in enemies)
+        {
+            enemy.DisplayAttackStats(true, true, true);
+        }
+
+        List<PlayingCard> allies = StaticGameplayDelegates.GetAllAllies(true);
+        foreach (PlayingCard ally in allies)
+        {
+            ally.DisplayAttackStats(true, true, true);
+        }
 
         if (bPreventRegularMoving)
             return;
@@ -314,8 +528,8 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
         if(ownerPlayer.bChoosingTarget && ownerPlayer.bSkipCaptainChoice == false)
         {
-            bool bTargetingEnemy = (ownerPlayer.currentCaptain.DoIOwnThis() && ownerPlayer.currentTarget.DoIOwnThis()) ? false : true;
-            ownerPlayer.RequestPlayCard(ownerPlayer.currentCard, ownerPlayer.currentCaptain, bTargetingEnemy, ownerPlayer.currentTarget);
+            bool bTargetingEnemy = (ownerPlayer.currentCaptain.DoIOwnThis() && ownerPlayer.currentTargets[0].DoIOwnThis()) ? false : true;
+            ownerPlayer.RequestPlayCard(ownerPlayer.currentCard, ownerPlayer.currentCaptain, bTargetingEnemy, ownerPlayer.currentTargets);
             CancelUsingCard();
         }
 
@@ -332,7 +546,7 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     {
         if (ownerPlayer != null)
         {
-            ownerPlayer.onInspect -= InspectCard;
+            StaticGameplayDelegates.onInspect -= InspectCard;
         }
 
         if(myCard != null)

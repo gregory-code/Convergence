@@ -132,14 +132,14 @@ public class EnemyPlayer : MonoBehaviour
         }
     }
 
-    public void PlayEnemyCard(BaseCard cardToPlay, PlayingCard captainUsing, bool bTargetingEnemy, PlayingCard captainTargeting)
+    public void PlayEnemyCard(BaseCard cardToPlay, PlayingCard captainUsing, bool bTargetingEnemy, List<PlayingCard> captainTargeting)
     {
         if(cardToPlay is CaptainCard captain)
         { // Passive Proc or activatable ability
             if (cardToPlay.bSwift == false)
                 StartCoroutine(captainUsing.EnergizeAndExhaust(false));
 
-            cardToPlay.PlayCard(captainUsing, captainUsing, bTargetingEnemy, captainUsing);
+            StartCoroutine(cardToPlay.PlayCard(captainUsing, captainUsing, bTargetingEnemy, null));
             return;
         }
 
@@ -148,7 +148,7 @@ public class EnemyPlayer : MonoBehaviour
         if (cardToPlay.bSwift == false)
             StartCoroutine(captainUsing.EnergizeAndExhaust(false));
 
-        cardToPlay.PlayCard(PlayingCardsInHand[0], captainUsing, bTargetingEnemy, captainTargeting);
+        StartCoroutine(cardToPlay.PlayCard(PlayingCardsInHand[0], captainUsing, bTargetingEnemy, captainTargeting));
         StartCoroutine(RemoveCardFromHand());
     }
 

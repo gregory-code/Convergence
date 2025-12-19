@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "TCG/Neutral/Slash")]
@@ -9,10 +11,11 @@ public class Slash : ActionCard
 
     }
 
-    public override void PlayCard(PlayingCard thisPlayingCard, PlayingCard captainUsing, bool bTargetingEnemy, PlayingCard captainTargeting)
+    public override IEnumerator PlayCard(PlayingCard thisPlayingCard, PlayingCard captainUsing, bool bTargetingEnemy, List<PlayingCard> captainTargeting)
     {
-        base.PlayCard(thisPlayingCard, captainUsing, bTargetingEnemy, captainTargeting);
+        yield return base.PlayCard(thisPlayingCard, captainUsing, bTargetingEnemy, captainTargeting);
 
+        yield return new WaitForEndOfFrame();
     }
 
     public override void Cleanup()

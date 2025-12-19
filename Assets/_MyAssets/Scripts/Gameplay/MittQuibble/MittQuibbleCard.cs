@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "TCG/MittQuibble/MittQuibble")]
@@ -9,15 +11,17 @@ public class MittQuibbleCard : CaptainCard
 
     }
 
-    public override void PlayCard(PlayingCard thisPlayingCard, PlayingCard captainUsing, bool bTargetingEnemy, PlayingCard captainTargeting)
+    public override IEnumerator PlayCard(PlayingCard thisPlayingCard, PlayingCard captainUsing, bool bTargetingEnemy, List<PlayingCard> captainTargeting)
     {
-        base.PlayCard(thisPlayingCard, captainUsing, bTargetingEnemy, captainTargeting);
+        yield return base.PlayCard(thisPlayingCard, captainUsing, bTargetingEnemy, captainTargeting);
 
         if (thisPlayingCard.DoIOwnThis())
         {
             FindAnyObjectByType<GameMaster>().RequestDrawCards(1);
             FindAnyObjectByType<GameMaster>().RequestIncreaseSpark(thisPlayingCard, 1);
         }
+
+        yield return new WaitForEndOfFrame();
     }
 
     public override void Cleanup()

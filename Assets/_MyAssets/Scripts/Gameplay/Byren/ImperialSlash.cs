@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "TCG/Byren/ImperialSlash")]
@@ -9,29 +11,19 @@ public class ImperialSlash : ActionCard
 
     }
 
-    public override void PlayCard(PlayingCard thisPlayingCard, PlayingCard captainUsing, bool bTargetingEnemy, PlayingCard captainTargeting)
+    public override IEnumerator PlayCard(PlayingCard thisPlayingCard, PlayingCard captainUsing, bool bTargetingEnemy, List<PlayingCard> captainTargeting)
     {
-        base.PlayCard(thisPlayingCard, captainUsing, bTargetingEnemy, captainTargeting);
+        yield return base.PlayCard(thisPlayingCard, captainUsing, bTargetingEnemy, captainTargeting);
 
         thisPlayingCard.BeginPlayAndDiscard(captainUsing);
 
-        if (captainUsing.myCard is CaptainCard attackingCaptain)
+        if (captainTargeting[0].myCard is CaptainCard attackeeTarget)
         {
-            int damage = 3;
-            damage += attackingCaptain.GetPhysical();
-
-            if (captainTargeting.myCard is CaptainCard attackeeTarget)
-            {
-                damage = Mathf.Max(damage, 0);
-                attackeeTarget.PredictOrDealDamage(false, damage, false, captainUsing, captainTargeting);
-            }
-
-            if (captainTargeting.myCard is AllyCard allyTarget)
-            {
-                damage = Mathf.Max(damage, 0);
-                allyTarget.PredictOrDealDamage(false, damage, false, captainUsing, captainTargeting);
-            }
+            int damage = CalculateAttackDamage(3, false, true, thisPlayingCard, captainUsing, bTargetingEnemy, captainTargeting[0]);
+            attackeeTarget.PredictOrDealDamage(false, damage, false, thisPlayingCard, captainUsing, bTargetingEnemy, captainTargeting[0]);
         }
+
+        yield return new WaitForEndOfFrame();
     }
 
     public override void Cleanup()

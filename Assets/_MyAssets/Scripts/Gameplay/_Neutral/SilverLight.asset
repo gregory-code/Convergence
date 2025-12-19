@@ -27,3 +27,6 @@ MonoBehaviour:
   bTargetsEnemies: 1
   bSwift: 0
   DescriptionText: Attack for 3 magic
+  bOncePerTurn: 1
+  bAttackingCard: 1
+  bMagicAttack: 1

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -36,7 +37,11 @@ public class InspectionItem : MonoBehaviour
         if(playingCard != null && ownerPlayer != null)
         {
             ownerPlayer.StopInspecting();
-            ownerPlayer.RequestPlayCard(playingCard, playingCard, false, playingCard);
+
+            List<PlayingCard> playingCards = new List<PlayingCard>();
+            playingCards.Add(playingCard);
+
+            ownerPlayer.RequestPlayCard(playingCard, playingCard, false, playingCards);
         }
     }
 }

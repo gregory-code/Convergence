@@ -44,7 +44,7 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
     public bool bSkipCaptainChoice { get; private set; }
 
     public PlayingCard currentCaptain;
-    public PlayingCard currentTarget { get; private set; }
+    public List<PlayingCard> currentTargets = new List<PlayingCard>();
     public PlayingCard currentCard { get; private set; }
 
     [SerializeField] private PlayingCard playingCardPrefab;
@@ -52,32 +52,6 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
     private List<PlayingCard> CardsToMulligan = new List<PlayingCard>();
 
     private bool bIsInspecting;
-
-    public delegate void OnInspect();
-    public event OnInspect onInspect;
-
-    // ********** Hall of Delegates ********** //
-    public delegate void TurnStarted();
-    public event TurnStarted turnStarted;
-
-    public delegate void TurnEnded();
-    public event TurnEnded turnEnded;
-
-    public delegate void Killed(int killingDamage, PlayingCard allyDoingTheKilling, PlayingCard allyKilled);
-    public event Killed killed;
-
-    public delegate void DealtDamage(int damageDealt, bool bWasMagic, PlayingCard allyDealingDamage, PlayingCard allyRecivingDamage);
-    public event DealtDamage dealtDamage;
-
-    public delegate void Healed(int healthHealed, PlayingCard allyDoingTheHealing, PlayingCard allyBeingHealed);
-    public event Healed healed;
-
-    public delegate void EquipmentAttached(PlayingCard equipment, PlayingCard allyDoingTheEquipping, PlayingCard allyGettingTheEquipment);
-    public event EquipmentAttached equipmentAttached;
-
-    public delegate void EquipmentRemoved(PlayingCard equipment, PlayingCard allyRemovingTheEquipment, PlayingCard allyWhoHadTheEquipment);
-    public event EquipmentRemoved equipmentRemoved;
-    // ********** **************** ********** //
 
     private void Start()
     {
@@ -91,6 +65,10 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
             if(bChoosingTarget && lineRenderer.IsHoveringOverCard() == false)
             {
                 BlockHand(false);
+
+                if (currentCaptain != null)
+                    currentCaptain.CancelUsingCard();
+
                 StartStopLineRenderer(false, null, Color.white);
             }
         }
@@ -103,7 +81,7 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
             }
             else
             {
-                onInspect?.Invoke();
+                StaticGameplayDelegates.Inspect();
             }
         }
 
@@ -122,11 +100,11 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
     public void SetIsPlayer1() { bIsPlayer1 = true; }
     public bool IsMyTurn() { return gameMaster.bPlayer1sTurn == bIsPlayer1; }
 
-    public void RequestPlayCard(PlayingCard cardToPlay, PlayingCard captainUsing, bool bTargetingEnemy, PlayingCard captainTargeting)
+    public void RequestPlayCard(PlayingCard cardToPlay, PlayingCard captainUsing, bool bTargetingEnemy, List<PlayingCard> captainTargeting)
     {
         currentCard = cardToPlay;
         currentCaptain = captainUsing;
-        currentTarget = captainTargeting;
+        currentTargets = captainTargeting;
         gameMaster.RequestPlayCard(cardToPlay, captainUsing, bTargetingEnemy, captainTargeting);
     }
 
@@ -135,7 +113,7 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
         if(currentCard.myCard.bSwift == false)
             StartCoroutine(currentCaptain.EnergizeAndExhaust(false));
 
-        currentCard.myCard.PlayCard(currentCard, currentCaptain, bTargetingEnemy, currentTarget);
+        StartCoroutine(currentCard.myCard.PlayCard(currentCard, currentCaptain, bTargetingEnemy, currentTargets));
         StartCoroutine(RemoveCardFromHand(currentCard));
     }
 
@@ -397,12 +375,6 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
 
             }
         }
-
-        if(cardToInspect.myCard is AllyCard ally)
-        {
-            InspectionCard.SetHealthText(ally.currentHealth, ally.maxHealth);
-            // Add lingers here
-        }
     }
 
     public void BlockHand(bool bState)
@@ -457,7 +429,12 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
 
     public void HoveringTarget(bool bHovering, PlayingCard cardHovered)
     {
-        currentTarget = (bHovering) ? cardHovered : null;
+        currentTargets.Clear();
+        if(bHovering)
+        {
+            currentTargets.Add(cardHovered);
+        }
+
         lineRenderer.FocusTarget(bHovering, cardHovered.transform);
     }
 

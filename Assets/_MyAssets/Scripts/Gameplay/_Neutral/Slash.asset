@@ -27,5 +27,5 @@ MonoBehaviour:
   bTargetsEnemies: 1
   bSwift: 0
   DescriptionText: 
-  bAttacking: 1
-  Damage: 3
+  bOncePerTurn: 1
+  bAttackingCard: 1

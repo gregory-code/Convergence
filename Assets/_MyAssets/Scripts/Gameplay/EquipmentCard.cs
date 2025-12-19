@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public abstract class EquipmentCard : BaseCard
@@ -21,7 +23,11 @@ public abstract class EquipmentCard : BaseCard
 
     public void RemoveEquipment(PlayingCard equipment, PlayingCard allyRemovingTheEquipment, PlayingCard allyWhoHadTheEquipment)
     {
-
+        if (allyWhoHadTheEquipment.myCard is CaptainCard captain)
+        {
+            equipment.RemoveCardAttachment(allyWhoHadTheEquipment);
+            captain.RemoveEquipment(equipment, allyRemovingTheEquipment);
+        }
     }
 
     public override void Init(UserPlayer ownerPlayer)
@@ -29,9 +35,31 @@ public abstract class EquipmentCard : BaseCard
 
     }
 
-    public override void PlayCard(PlayingCard thisPlayingCard, PlayingCard captainUsing, bool bTargetingEnemy, PlayingCard captainTargeting)
+    public override IEnumerator PlayCard(PlayingCard thisPlayingCard, PlayingCard captainUsing, bool bTargetingEnemy, List<PlayingCard> captainTargeting)
     {
-        AttachEquipment(thisPlayingCard, captainUsing, captainTargeting);
+        if (bPrestige)
+        {
+            if (captainTargeting[0].myCard is CaptainCard capatain)
+            {
+                foreach (PlayingCard equipmentPlayingCard in capatain.GetEquipments())
+                {
+                    if (equipmentPlayingCard.myCard is EquipmentCard equipmentAttached)
+                    {
+                        if (equipmentType == equipmentAttached.equipmentType)
+                        {
+                            equipmentAttached.RemoveEquipment(equipmentPlayingCard, captainUsing, captainUsing);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        yield return new WaitForSeconds(0.2f);
+
+        AttachEquipment(thisPlayingCard, captainUsing, captainTargeting[0]);
+        
+        yield return new WaitForEndOfFrame();
     }
 
     public override void Cleanup()
