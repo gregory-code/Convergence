@@ -37,7 +37,7 @@ public class EnergyBlast : ActionCard
 
         if (captainUsing.myCard is CaptainCard captainUsingTheAttack)
         {
-            context.damage = CalculateAttackDamage(2, false, true, thisPlayingCard, captainUsing, bTargetingEnemy, captainTargeting);
+            context.damage = CalculateAttackDamage(2, false, false, thisPlayingCard, captainUsing, bTargetingEnemy, captainTargeting);
             context.bMagicDamage = ConvertToMagic(false, thisPlayingCard, captainUsingTheAttack);
         }
 

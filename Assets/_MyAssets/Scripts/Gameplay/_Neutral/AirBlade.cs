@@ -33,7 +33,7 @@ public class AirBlade : ActionCard
 
         if (captainUsing.myCard is CaptainCard captainUsingTheAttack)
         {
-            context.damage = CalculateAttackDamage(1, false, true, thisPlayingCard, captainUsing, bTargetingEnemy, captainTargeting);
+            context.damage = CalculateAttackDamage(1, false, false, thisPlayingCard, captainUsing, bTargetingEnemy, captainTargeting);
             context.bMagicDamage = ConvertToMagic(false, thisPlayingCard, captainUsingTheAttack);
         }
 

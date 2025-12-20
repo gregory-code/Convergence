@@ -136,6 +136,7 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     private bool EligableEquipment(EquipmentCard equipment, PlayingCard captainEquipping)
     {
         bool bEligableBasicEquipment = true;
+        bool bEligablePresitgeEquipment = true;
 
         if (captainEquipping.myCard is CaptainCard captain)
         {
@@ -145,18 +146,23 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
                 {
                     if (equipment.bPrestige)
                     {
-                        if (equipment.equipmentType == equipmentAttached.equipmentType || StaticGameplayDelegates.GetAllySparkCount() >= 10)
+                        if (equipment.equipmentType == equipmentAttached.equipmentType)
                             return true;
+
+                        if (captain.GetEquipments().Count >= captain.maxEquipment || StaticGameplayDelegates.GetAllySparkCount() < 10)
+                            bEligablePresitgeEquipment = false;
                     }
                     else
                     {
-
                         if (captain.GetEquipments().Count >= captain.maxEquipment || equipment.equipmentType == equipmentAttached.equipmentType)
                             bEligableBasicEquipment = false;
                     }
                 }
             }
         }
+
+        if (equipment.bPrestige == true && bEligablePresitgeEquipment && StaticGameplayDelegates.GetAllySparkCount() >= 10)
+            return true;
 
         if (equipment.bPrestige == false && bEligableBasicEquipment)
             return true;

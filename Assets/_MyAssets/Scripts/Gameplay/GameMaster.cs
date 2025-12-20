@@ -452,8 +452,6 @@ public class GameMaster : MonoBehaviourPunCallbacks
 
         bPlayer1sTurn = !bPlayer1sTurn;
 
-        StaticGameplayDelegates.TurnStarted(bPlayer1sTurn);
-
         if(bPlayer1sTurn)
         {
             foreach(PlayingCard teammate in Player1Allies)
@@ -481,6 +479,8 @@ public class GameMaster : MonoBehaviourPunCallbacks
         {
             player.StartTurn(true);
         }
+
+        StaticGameplayDelegates.TurnStarted(bPlayer1sTurn);
     }
 
     [PunRPC]

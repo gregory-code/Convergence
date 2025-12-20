@@ -28,8 +28,14 @@ public class PrinceCard : CaptainCard
         {
             if (card.myCard is PrinceCard captain)
             {
-                thisPrince = card;
+                if(card.myCard == this)
+                    thisPrince = card;
             }
+        }
+
+        if(thisPrince == null)
+        {
+            return;
         }
 
         if (thisPrince.bIsPlayer1 != bPlayers1Turn)
