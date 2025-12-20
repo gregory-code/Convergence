@@ -5,6 +5,7 @@ using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerClickHandler
 {
@@ -17,8 +18,8 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
     private bool bMulliganThis;
 
-    private bool bIsPlayer1;
-    
+    public bool bIsPlayer1 { get; private set; }
+
     public bool bEnergized { get; private set; }
 
     private bool bPreventRegularMoving;
@@ -33,7 +34,8 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
     [SerializeField] Vector2[] EquipmentPos;
 
-    [SerializeField] GameObject AttackPredictionPanel;
+    [SerializeField] GameObject DeathPanel;
+    [SerializeField] public GameObject AttackPredictionPanel;
     [SerializeField] GameObject PhysicalGameObject;
     [SerializeField] GameObject MagicGameObject;
     [SerializeField] GameObject DefenseGameObject;
@@ -58,6 +60,8 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         if(ownerplayer != null)
         {
             StaticGameplayDelegates.onInspect += InspectCard;
+            StaticGameplayDelegates.onTurnEnded += TurnEnds;
+            StaticGameplayDelegates.onKilled += SomeoneKilled;
             myCard.Init(ownerplayer);
         }
 
@@ -120,7 +124,7 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         
         if(DoIOwnThis() == false)
         {
-            if (cardTryingToUse.myCard.bTargetsEnemies && bEnergized == false)
+            if (cardTryingToUse.myCard.bTargetsEnemies && bEnergized == false && myCard.bDead == false)
             {
                 return true;
             }
@@ -141,7 +145,7 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
                 {
                     if (equipment.bPrestige)
                     {
-                        if (equipment.equipmentType == equipmentAttached.equipmentType)
+                        if (equipment.equipmentType == equipmentAttached.equipmentType || StaticGameplayDelegates.GetAllySparkCount() >= 10)
                             return true;
                     }
                     else
@@ -220,6 +224,33 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         transform.localScale = desiredSize;
     }
 
+    public void Die()
+    {
+        myCard.respawnTurns = 1;
+        myCard.bOncePerTurn = false;
+        myCard.bDead = true;
+
+        DeathPanel.SetActive(true);
+
+        StartCoroutine(EnergizeAndExhaust(false));
+    }
+
+    public void Respawn()
+    {
+        myCard.bOncePerTurn = true;
+        myCard.bDead = false;
+
+        DeathPanel.SetActive(false);
+
+        StartCoroutine(EnergizeAndExhaust(true));
+
+        if(myCard is CaptainCard capatin)
+        {
+            capatin.SetToFullHealth();
+            SetHealthText(capatin.currentHealth, capatin.maxHealth);
+        }
+    }
+
     public void BeginCardAttachment(PlayingCard parentCharacter, int equipmentSlotIndex)
     {
         StartCoroutine(AttachCard(parentCharacter, parentCharacter.transform.parent.transform, equipmentSlotIndex));
@@ -242,6 +273,12 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
         yield return new WaitForSeconds(0.3f);
 
+        Image[] images = this.transform.GetComponentsInChildren<Image>(true);
+        foreach (Image img in images)
+        {
+            img.raycastTarget = false;
+        }
+
         transform.SetParent(parentCharacter.transform);
         transform.localEulerAngles = Vector3.zero;
         transform.localScale = new Vector3(0.5f, 0.67f, 0.15f);
@@ -262,6 +299,12 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         StartCoroutine(MoveCard(parentCharacter.transform.localPosition.y, false, 0.2f));
 
         yield return new WaitForSeconds(0.1f);
+
+        Image[] images = this.transform.GetComponentsInChildren<Image>(true);
+        foreach (Image img in images)
+        {
+            img.raycastTarget = true;
+        }
 
         Transform discardPile = StaticGameplayDelegates.GetDiscardPileTransform(parentCharacter.bIsPlayer1);
         StaticGameplayDelegates.AddCardToDiscard(this);
@@ -309,7 +352,27 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         }
     }
 
-    public void DisplayAttackStats(bool bStopDisplaying, bool bRecivingEnd, bool bPhysical)
+    private void TurnEnds(bool bPlayers1Turn)
+    {
+        if (myCard.respawnTurns > 0 && myCard.bDead)
+        {
+            myCard.respawnTurns--;
+        }
+        else if (myCard.respawnTurns <= 0 && myCard.bDead)
+        {
+            Respawn();
+        }
+    }
+
+    private void SomeoneKilled(int killingDamage, PlayingCard cardThatWasUsed, PlayingCard allyDoingTheKilling, PlayingCard allyKilled)
+    {
+        if (allyDoingTheKilling == this && allyDoingTheKilling.DoIOwnThis())
+        {
+            FindAnyObjectByType<GameMaster>().RequestIncreaseSpark(allyDoingTheKilling, 2);
+        }
+    }
+
+    public void DisplayAttackStats(bool bStopDisplaying, bool bRecivingEnd)
     {
         if(bStopDisplaying)
         {
@@ -328,26 +391,17 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         }
         else
         {
-            if (myCard is CaptainCard myCaptain)
-            {
-                foreach (PlayingCard equipmentCard in myCaptain.GetEquipments())
-                {
-                    if (equipmentCard.myCard is OddHat)
-                        bPhysical = false;
-                }
-            }
+            CardPlayContext context = ownerPlayer.currentCard.myCard.PredictCard(ownerPlayer.currentCard, ownerPlayer.currentCaptain, true, ownerPlayer.currentCaptain);
 
-            if (bPhysical)
+            if (context.bMagicDamage)
             {
-                PhysicalGameObject.SetActive(true);
-                if (myCard is CaptainCard captain)
-                    defenseText.text = captain.GetPhysical() + "";
+                MagicGameObject.SetActive(true);
+                magicText.text = context.damage + "";
             }
             else
             {
-                MagicGameObject.SetActive(true);
-                if (myCard is CaptainCard captain)
-                    defenseText.text = captain.GetMagic() + "";
+                PhysicalGameObject.SetActive(true);
+                physicalText.text = context.damage + "";
             }
         }
     }
@@ -400,8 +454,20 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
                     ownerPlayer.HoveringTarget(true, this);
 
                     if (ownerPlayer.currentCard.myCard is ActionCard action)
+                    {
                         if(action.bAttackingCard)
-                            DisplayHealthChange(2);
+                        {
+                            for(int i = 0; i < ownerPlayer.currentTargets.Count; i++)
+                            {
+                                CardPlayContext context = ownerPlayer.currentCard.myCard.PredictCard(ownerPlayer.currentCard, ownerPlayer.currentCaptain, true, ownerPlayer.currentTargets[i]);
+                                
+                                if(ownerPlayer.currentTargets[i].myCard is CaptainCard captain)
+                                {
+                                    DisplayHealthChange(captain.currentHealth - context.damage);
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -421,6 +487,12 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     public void OnPointerExit(PointerEventData eventData)
     {
         bHovering = false;
+
+        List<PlayingCard> enemies = StaticGameplayDelegates.GetAllAllies(false);
+        foreach (PlayingCard enemy in enemies)
+        {
+            enemy.AttackPredictionPanel.SetActive(false);
+        }
 
         if (ownerPlayer == null) // for enemy cards
             return;
@@ -455,6 +527,8 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         if (ownerPlayer.bBlockHand || ownerPlayer.IsMyTurn() == false)
           return;
 
+        ownerPlayer.currentTargets.Clear();
+
         ownerPlayer.StartStopLineRenderer(true, this, myCard.Type.color);
         ownerPlayer.BlockHand(true);
     }
@@ -482,13 +556,14 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
             { 
                 if(action.bAttackingCard)
                 {
-                    ownerPlayer.currentCaptain.DisplayAttackStats(false, false, !action.bMagicAttack);
+                    ownerPlayer.currentCaptain.DisplayAttackStats(false, false);
 
                     List<PlayingCard> enemies = StaticGameplayDelegates.GetAllAllies(false);
                     foreach(PlayingCard enemy in enemies)
                     {
-                        enemy.DisplayAttackStats(false, true, true);
+                        enemy.DisplayAttackStats(false, true);
                     }
+                    return;
                 }
             }
 
@@ -506,13 +581,13 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         List<PlayingCard> enemies = StaticGameplayDelegates.GetAllAllies(false);
         foreach (PlayingCard enemy in enemies)
         {
-            enemy.DisplayAttackStats(true, true, true);
+            enemy.DisplayAttackStats(true, true);
         }
 
         List<PlayingCard> allies = StaticGameplayDelegates.GetAllAllies(true);
         foreach (PlayingCard ally in allies)
         {
-            ally.DisplayAttackStats(true, true, true);
+            ally.DisplayAttackStats(true, true);
         }
 
         if (bPreventRegularMoving)

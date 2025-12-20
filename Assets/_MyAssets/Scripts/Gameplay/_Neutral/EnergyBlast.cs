@@ -20,7 +20,7 @@ public class EnergyBlast : ActionCard
         if (captainTargeting[0].myCard is CaptainCard attackeeTarget)
         {
             int damage = CalculateAttackDamage(2, false, false, thisPlayingCard, captainUsing, bTargetingEnemy, captainTargeting[0]);
-            attackeeTarget.PredictOrDealDamage(false, damage, false, thisPlayingCard, captainUsing, bTargetingEnemy, captainTargeting[0]);
+            attackeeTarget.TakeDamage(damage, false, thisPlayingCard, captainUsing, bTargetingEnemy, captainTargeting[0]);
         }
 
         if (thisPlayingCard.DoIOwnThis())
@@ -29,6 +29,19 @@ public class EnergyBlast : ActionCard
         }
 
         yield return new WaitForEndOfFrame();
+    }
+
+    public override CardPlayContext PredictCard(PlayingCard thisPlayingCard, PlayingCard captainUsing, bool bTargetingEnemy, PlayingCard captainTargeting)
+    {
+        CardPlayContext context = base.PredictCard(thisPlayingCard, captainUsing, bTargetingEnemy, captainTargeting);
+
+        if (captainUsing.myCard is CaptainCard captainUsingTheAttack)
+        {
+            context.damage = CalculateAttackDamage(2, false, true, thisPlayingCard, captainUsing, bTargetingEnemy, captainTargeting);
+            context.bMagicDamage = ConvertToMagic(false, thisPlayingCard, captainUsingTheAttack);
+        }
+
+        return context;
     }
 
     public override void Cleanup()

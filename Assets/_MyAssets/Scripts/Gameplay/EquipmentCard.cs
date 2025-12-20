@@ -7,6 +7,7 @@ public abstract class EquipmentCard : BaseCard
     public bool bPrestige;
     public EquipmentType equipmentType;
 
+    public int bonusHealthStatChange;
     public int physicalStatChange;
     public int magicStatChange;
     public int defenseStatChange;
@@ -48,6 +49,7 @@ public abstract class EquipmentCard : BaseCard
                         if (equipmentType == equipmentAttached.equipmentType)
                         {
                             equipmentAttached.RemoveEquipment(equipmentPlayingCard, captainUsing, captainUsing);
+                            bSwift = true;
                             break;
                         }
                     }
@@ -60,6 +62,21 @@ public abstract class EquipmentCard : BaseCard
         AttachEquipment(thisPlayingCard, captainUsing, captainTargeting[0]);
         
         yield return new WaitForEndOfFrame();
+    }
+
+    public override CardPlayContext PredictCard(PlayingCard thisPlayingCard, PlayingCard captainUsing, bool bTargetingEnemy, PlayingCard captainTargeting)
+    {
+        CardPlayContext context = new CardPlayContext
+        {
+            thisPlayingCard = thisPlayingCard,
+            captainUsing = captainUsing,
+            bTargetingEnemy = bTargetingEnemy,
+            captainTargeting = captainTargeting,
+            damage = 0,
+            bMagicDamage = false
+        };
+
+        return context;
     }
 
     public override void Cleanup()

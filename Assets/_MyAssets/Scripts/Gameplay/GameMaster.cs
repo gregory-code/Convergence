@@ -31,7 +31,7 @@ public class GameMaster : MonoBehaviourPunCallbacks
     private int opponentSparkValue;
 
     [SerializeField] private GameObject allySpark;
-    private int allySparkValue;
+    public int allySparkValue { get; private set; }
 
     [SerializeField] private TextMeshProUGUI opponentSparkText;
     [SerializeField] private TextMeshProUGUI allySparkText;
@@ -334,6 +334,9 @@ public class GameMaster : MonoBehaviourPunCallbacks
     {
         int captainUsingIndex = (bIsPlayer1) ? Player1Allies.IndexOf(captainGainingSpark) : Player2Allies.IndexOf(captainGainingSpark);
 
+        if(captainUsingIndex == -1)
+            captainUsingIndex = (bIsPlayer1) ? Player2Allies.IndexOf(captainGainingSpark) : Player1Allies.IndexOf(captainGainingSpark);
+
         this.photonView.RPC("IncreaseSpark", RpcTarget.AllBuffered, bIsPlayer1, captainUsingIndex, SparkToAdd);
     }
 
@@ -343,13 +346,21 @@ public class GameMaster : MonoBehaviourPunCallbacks
         Vector3 vfxSpawnPos = new Vector3();
         if (isPlayer1 == bIsPlayer1) // Owner, this client
         {
-            vfxSpawnPos = (bIsPlayer1) ? Player1Allies[captainGainingSparkIndex].transform.position : Player2Allies[captainGainingSparkIndex].transform.position;
+            if(bIsPlayer1)
+                vfxSpawnPos = Player1Allies[captainGainingSparkIndex].transform.position;
+            else
+                vfxSpawnPos = Player2Allies[captainGainingSparkIndex].transform.position;
+            
             allySparkValue += SparkToAdd;
             allySparkText.text = allySparkValue + "/20";
         }
         else // other player
         {
-            vfxSpawnPos = (bIsPlayer1) ? Player2Allies[captainGainingSparkIndex].transform.position : Player1Allies[captainGainingSparkIndex].transform.position;
+            if(bIsPlayer1)
+                vfxSpawnPos = Player2Allies[captainGainingSparkIndex].transform.position;
+            else
+                vfxSpawnPos = Player1Allies[captainGainingSparkIndex].transform.position;
+
             opponentSparkValue += SparkToAdd;
             opponentSparkText.text = opponentSparkValue + "/20";
         }
@@ -437,12 +448,19 @@ public class GameMaster : MonoBehaviourPunCallbacks
     [PunRPC]
     void SwitchTurns()
     {
+        StaticGameplayDelegates.TurnEnded(bPlayer1sTurn);
+
         bPlayer1sTurn = !bPlayer1sTurn;
+
+        StaticGameplayDelegates.TurnStarted(bPlayer1sTurn);
 
         if(bPlayer1sTurn)
         {
             foreach(PlayingCard teammate in Player1Allies)
             {
+                if (teammate.myCard.bDead == true)
+                    continue;
+
                 teammate.myCard.bOncePerTurn = true;
                 StartCoroutine(teammate.EnergizeAndExhaust(true));
             }
@@ -451,6 +469,9 @@ public class GameMaster : MonoBehaviourPunCallbacks
         {
             foreach (PlayingCard teammate in Player2Allies)
             {
+                if (teammate.myCard.bDead == true)
+                    continue;
+
                 teammate.myCard.bOncePerTurn = true;
                 StartCoroutine(teammate.EnergizeAndExhaust(true));
             }

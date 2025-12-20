@@ -27,8 +27,12 @@ public abstract class BaseCard : ScriptableObject
     public string DescriptionText;
 
     public bool bOncePerTurn = true;
+    public bool bWaitForReaction = false;
+    public bool bDead = false;
+    public int respawnTurns = 0;
 
     public abstract void Init(UserPlayer ownerPlayer);
     public abstract IEnumerator PlayCard(PlayingCard thisPlayingCard, PlayingCard captainUsing, bool bTargetingEnemy, List<PlayingCard> captainTargeting);
+    public abstract CardPlayContext PredictCard(PlayingCard thisPlayingCard, PlayingCard captainUsing, bool bTargetingEnemy, PlayingCard captainTargeting);
     public abstract void Cleanup();
 }

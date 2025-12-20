@@ -5,7 +5,6 @@ using UnityEngine;
 public abstract class ActionCard : BaseCard
 {
     public bool bAttackingCard;
-    public bool bMagicAttack;
 
     public override void Init(UserPlayer ownerPlayer)
     {
@@ -15,6 +14,47 @@ public abstract class ActionCard : BaseCard
     public override IEnumerator PlayCard(PlayingCard thisPlayingCard, PlayingCard captainUsing, bool bTargetingEnemy, List<PlayingCard> captainTargeting)
     {
         yield return new WaitForEndOfFrame();
+    }
+
+    public override CardPlayContext PredictCard(PlayingCard thisPlayingCard, PlayingCard captainUsing, bool bTargetingEnemy, PlayingCard captainTargeting)
+    {
+        CardPlayContext context = new CardPlayContext
+        {
+            thisPlayingCard = thisPlayingCard,
+            captainUsing = captainUsing,
+            bTargetingEnemy = bTargetingEnemy,
+            captainTargeting = captainTargeting,
+            damage = 0,
+            bMagicDamage = false
+        };
+
+        return context;
+    }
+
+    public IEnumerator WaitForReaction()
+    {
+        List<PlayingCard> enemyTeam = StaticGameplayDelegates.GetAllAllies(false);
+        bool bEnemyIsEnergized = false;
+
+        foreach (PlayingCard enemy in enemyTeam)
+        {
+            if (enemy.bEnergized)
+                bEnemyIsEnergized = true;
+        }
+
+        if(bEnemyIsEnergized)
+        {
+            bWaitForReaction = true;
+            while (bWaitForReaction)
+            {
+                yield return new WaitForEndOfFrame();
+            }
+        }
+        else
+        {
+            yield return new WaitForEndOfFrame();
+        }
+
     }
 
     public int CalculateAttackDamage(int baseDamage, bool bIsMagic, bool bIgnoreDefense, PlayingCard thisPlayingCard, PlayingCard captainUsing, bool bTargetingEnemy, PlayingCard captainTargeting)

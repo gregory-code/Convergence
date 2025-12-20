@@ -20,10 +20,23 @@ public class SilverLight : ActionCard
         if (captainTargeting[0].myCard is CaptainCard attackeeTarget)
         {
             int damage = CalculateAttackDamage(3, true, false, thisPlayingCard, captainUsing, bTargetingEnemy, captainTargeting[0]);
-            attackeeTarget.PredictOrDealDamage(false, damage, true, thisPlayingCard, captainUsing, bTargetingEnemy, captainTargeting[0]);
+            attackeeTarget.TakeDamage(damage, true, thisPlayingCard, captainUsing, bTargetingEnemy, captainTargeting[0]);
         }
 
         yield return new WaitForEndOfFrame();
+    }
+
+    public override CardPlayContext PredictCard(PlayingCard thisPlayingCard, PlayingCard captainUsing, bool bTargetingEnemy, PlayingCard captainTargeting)
+    {
+        CardPlayContext context = base.PredictCard(thisPlayingCard, captainUsing, bTargetingEnemy, captainTargeting);
+
+        if (captainUsing.myCard is CaptainCard captainUsingTheAttack)
+        {
+            context.damage = CalculateAttackDamage(3, true, true, thisPlayingCard, captainUsing, bTargetingEnemy, captainTargeting);
+            context.bMagicDamage = true;
+        }
+
+        return context;
     }
 
     public override void Cleanup()

@@ -21,6 +21,9 @@ public class ByrenCard : CaptainCard
 
     private void DealtDamage(int damageDealt, bool bWasMagic, PlayingCard cardThatWasUsed, PlayingCard allyDealingDamage, PlayingCard allyRecivingDamage)
     {
+        if (bDead)
+            return;
+
         if(allyDealingDamage.myCard is ByrenCard byren)
         {
             if(byren == this && allyDealingDamage.DoIOwnThis())

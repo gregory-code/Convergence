@@ -8,17 +8,17 @@ public static class StaticGameplayDelegates
     public static void Inspect() { onInspect?.Invoke(); }
 
     // ********** Hall of Delegates ********** //
-    public delegate void OnTurnStarted();
+    public delegate void OnTurnStarted(bool bPlayers1Turn);
     public static event OnTurnStarted onTurnStarted;
-    public static void TurnStarted() { onTurnStarted?.Invoke(); }
+    public static void TurnStarted(bool bPlayers1Turn) { onTurnStarted?.Invoke(bPlayers1Turn); }
 
-    public delegate void OnTurnEnded();
+    public delegate void OnTurnEnded(bool bPlayers1Turn);
     public static event OnTurnEnded onTurnEnded;
-    public static void TurnEnded() { onTurnEnded?.Invoke(); }
+    public static void TurnEnded(bool bPlayers1Turn) { onTurnEnded?.Invoke(bPlayers1Turn); }
 
     public delegate void OnKilled(int killingDamage, PlayingCard allyDoingTheKilling, PlayingCard cardThatWasUsed, PlayingCard allyKilled);
     public static event OnKilled onKilled;
-    public static void Killed(int killingDamage, PlayingCard allyDoingTheKilling, PlayingCard cardThatWasUsed, PlayingCard allyKilled) { onKilled?.Invoke(killingDamage, allyDoingTheKilling, cardThatWasUsed, allyKilled); }
+    public static void Killed(int killingDamage, PlayingCard cardThatWasUsed, PlayingCard allyDoingTheKilling, PlayingCard allyKilled) { onKilled?.Invoke(killingDamage, cardThatWasUsed, allyDoingTheKilling, allyKilled); }
 
     public delegate void OnDealtDamage(int damageDealt, bool bWasMagic, PlayingCard cardThatWasUsed, PlayingCard allyDealingDamage, PlayingCard allyRecivingDamage);
     public static event OnDealtDamage onDealtDamage;
@@ -37,6 +37,7 @@ public static class StaticGameplayDelegates
     public static void EquipmentRemoved(PlayingCard equipment, PlayingCard allyRemovingTheEquipment, PlayingCard allyWhoHadTheEquipment) { onEquipmentRemoved?.Invoke(equipment, allyRemovingTheEquipment, allyWhoHadTheEquipment); }
     // ********** **************** ********** //
 
+    public static int GetAllySparkCount() { return GameObject.FindFirstObjectByType<GameMaster>().allySparkValue; }
     public static List<PlayingCard> GetAllAllies(bool bGetMyTeam) { return GameObject.FindFirstObjectByType<GameMaster>().GetAllAllies(bGetMyTeam); }
     public static Transform GetDiscardPileTransform(bool isPlayer1) { return GameObject.FindFirstObjectByType<GameMaster>().GetDiscardPilieTransform(isPlayer1); }
     public static void AddCardToDiscard(PlayingCard cardtoAdd) { GameObject.FindFirstObjectByType<GameMaster>().AddCardToDiscard(cardtoAdd); }

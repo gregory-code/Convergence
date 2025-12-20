@@ -14,6 +14,21 @@ public abstract class InventionCard : BaseCard
         yield return new WaitForEndOfFrame();
     }
 
+    public override CardPlayContext PredictCard(PlayingCard thisPlayingCard, PlayingCard captainUsing, bool bTargetingEnemy, PlayingCard captainTargeting)
+    {
+        CardPlayContext context = new CardPlayContext
+        {
+            thisPlayingCard = thisPlayingCard,
+            captainUsing = captainUsing,
+            bTargetingEnemy = bTargetingEnemy,
+            captainTargeting = captainTargeting,
+            damage = 0,
+            bMagicDamage = false
+        };
+
+        return context;
+    }
+
     public override void Cleanup()
     {
 

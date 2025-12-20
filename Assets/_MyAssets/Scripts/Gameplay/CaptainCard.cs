@@ -1,5 +1,6 @@
-using System.Collections.Generic;
 using System.Collections;
+using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public abstract class CaptainCard : BaseCard
@@ -23,6 +24,19 @@ public abstract class CaptainCard : BaseCard
         slots += EquipmentsAttached.Count;
         slots += LingersInEffect.Count;
         return slots;
+    }
+
+    public int GetBonusHealth()
+    {
+        int health = 0;
+        foreach (PlayingCard card in EquipmentsAttached)
+        {
+            if (card.myCard is EquipmentCard equipment)
+            {
+                health += equipment.bonusHealthStatChange;
+            }
+        }
+        return health;
     }
 
     public int GetPhysical()
@@ -85,16 +99,34 @@ public abstract class CaptainCard : BaseCard
         EquipmentsAttached.Remove(equipment);
     }
 
-    public void PredictOrDealDamage(bool bPrediction, int damageDealt, bool bWasMagic, PlayingCard thisPlayingCard, PlayingCard allyDealingDamage, bool bTargetingEnemy, PlayingCard allyRecivingDamage)
+    public void TakeDamage(int damageDealt, bool bWasMagic, PlayingCard thisPlayingCard, PlayingCard allyDealingDamage, bool bTargetingEnemy, PlayingCard allyRecivingDamage)
     {
         currentHealth -= damageDealt;
+
+        while(currentHealth < 0)
+        {
+            currentHealth++;
+            damageDealt--;
+        }
+
         allyRecivingDamage.SetHealthText(currentHealth, maxHealth);
         StaticGameplayDelegates.DealtDamage(damageDealt, bWasMagic, thisPlayingCard, allyDealingDamage, allyRecivingDamage);
+        
+        if(currentHealth <= 0)
+        {
+            allyRecivingDamage.Die();
+            StaticGameplayDelegates.Killed(damageDealt, thisPlayingCard, allyDealingDamage, allyRecivingDamage);
+        }
     }
 
-    public void PredictOrHealHealth(bool bPrediction, int healthHealed, PlayingCard thisPlayingCard, PlayingCard allyDoingTheHealing, PlayingCard allyBeingHealed)
+    public void HealHealth(bool bPrediction, int healthHealed, PlayingCard thisPlayingCard, PlayingCard allyDoingTheHealing, PlayingCard allyBeingHealed)
     {
 
+    }
+
+    public void SetToFullHealth()
+    {
+        currentHealth = maxHealth + GetBonusHealth();
     }
 
     public override void Init(UserPlayer ownerPlayer)
@@ -105,6 +137,21 @@ public abstract class CaptainCard : BaseCard
     public override IEnumerator PlayCard(PlayingCard thisPlayingCard, PlayingCard captainUsing, bool bTargetingEnemy, List<PlayingCard> captainTargeting)
     {
         yield return new WaitForEndOfFrame();
+    }
+
+    public override CardPlayContext PredictCard(PlayingCard thisPlayingCard, PlayingCard captainUsing, bool bTargetingEnemy, PlayingCard captainTargeting)
+    {
+        CardPlayContext context = new CardPlayContext
+        {
+            thisPlayingCard = thisPlayingCard,
+            captainUsing = captainUsing,
+            bTargetingEnemy = bTargetingEnemy,
+            captainTargeting = captainTargeting,
+            damage = 0,
+            bMagicDamage = false
+        };
+
+        return context;
     }
 
     public override void Cleanup()

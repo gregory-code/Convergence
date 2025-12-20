@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 public class GlobalEnums
 {
 
@@ -63,4 +65,16 @@ public enum ReactionType
 {
     EnemyAttacks,
     AllyDies
+}
+
+[System.Serializable]
+public struct CardPlayContext
+{
+    public PlayingCard thisPlayingCard;
+    public PlayingCard captainUsing;
+    public bool bTargetingEnemy;
+    public PlayingCard captainTargeting;
+
+    public int damage;
+    public bool bMagicDamage;
 }

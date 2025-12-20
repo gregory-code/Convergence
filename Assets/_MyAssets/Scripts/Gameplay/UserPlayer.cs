@@ -27,6 +27,11 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
     [SerializeField] private Transform InspectionTransform;
     [SerializeField] private InspectionItem InspectionItemPrefab;
     private List<InspectionItem> InspectionItemList = new List<InspectionItem>();
+    [SerializeField] private GameObject inspectionStats;
+    [SerializeField] private TextMeshProUGUI healthInspectionText;
+    [SerializeField] private TextMeshProUGUI physicalInspectionText;
+    [SerializeField] private TextMeshProUGUI magicInspectionText;
+    [SerializeField] private TextMeshProUGUI defenseInspectionText;
 
     [SerializeField] private CanvasGroup playerOptionsCanvasGroup;
 
@@ -110,10 +115,11 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
 
     public void PlayClientCard(bool bTargetingEnemy)
     {
+        StartCoroutine(currentCard.myCard.PlayCard(currentCard, currentCaptain, bTargetingEnemy, currentTargets));
+
         if(currentCard.myCard.bSwift == false)
             StartCoroutine(currentCaptain.EnergizeAndExhaust(false));
 
-        StartCoroutine(currentCard.myCard.PlayCard(currentCard, currentCaptain, bTargetingEnemy, currentTargets));
         StartCoroutine(RemoveCardFromHand(currentCard));
     }
 
@@ -356,12 +362,20 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
         InspectionPanel.SetActive(true);
         InspectionCard.SetCard(cardToInspect.myCard);
 
+        inspectionStats.SetActive(false);
+
         InspectionItem inspectionSelf = Instantiate(InspectionItemPrefab, InspectionTransform);
         inspectionSelf.Init(this, cardToInspect, IOwnit);
         InspectionItemList.Add(inspectionSelf);
 
         if (cardToInspect.myCard is CaptainCard captain)
         {
+            inspectionStats.SetActive(true);
+            healthInspectionText.text = $"{captain.maxHealth + captain.GetBonusHealth()}";
+            physicalInspectionText.text = captain.GetPhysical() + "";
+            magicInspectionText.text = captain.GetMagic() + "";
+            defenseInspectionText.text = captain.GetDefense() + "";
+
             InspectionCard.SetHealthText(captain.currentHealth, captain.maxHealth);
             foreach(PlayingCard equipment in captain.GetEquipments())
             {
