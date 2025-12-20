@@ -14,6 +14,9 @@ public abstract class ActionCard : BaseCard
     public override IEnumerator PlayCard(PlayingCard thisPlayingCard, PlayingCard captainUsing, bool bTargetingEnemy, List<PlayingCard> captainTargeting)
     {
         yield return new WaitForEndOfFrame();
+
+        if(bAttackingCard)
+            yield return WaitForReaction(thisPlayingCard, captainUsing, bTargetingEnemy, captainTargeting);
     }
 
     public override CardPlayContext PredictCard(PlayingCard thisPlayingCard, PlayingCard captainUsing, bool bTargetingEnemy, PlayingCard captainTargeting)
@@ -31,7 +34,7 @@ public abstract class ActionCard : BaseCard
         return context;
     }
 
-    public IEnumerator WaitForReaction()
+    public IEnumerator WaitForReaction(PlayingCard thisPlayingCard, PlayingCard captainUsing, bool bTargetingEnemy, List<PlayingCard> captainTargeting)
     {
         List<PlayingCard> enemyTeam = StaticGameplayDelegates.GetAllAllies(false);
         bool bEnemyIsEnergized = false;
@@ -45,6 +48,12 @@ public abstract class ActionCard : BaseCard
         if(bEnemyIsEnergized)
         {
             bWaitForReaction = true;
+
+            if (thisPlayingCard.DoIOwnThis())
+            {
+                StaticGameplayDelegates.RequestAttackPrediction(thisPlayingCard, captainUsing, bTargetingEnemy, captainTargeting);
+            }
+
             while (bWaitForReaction)
             {
                 yield return new WaitForEndOfFrame();

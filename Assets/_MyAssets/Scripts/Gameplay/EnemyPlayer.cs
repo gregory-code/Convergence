@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Rendering;
 using UnityEngine.UI;
 
 public class EnemyPlayer : MonoBehaviour
@@ -13,6 +14,9 @@ public class EnemyPlayer : MonoBehaviour
     [SerializeField] private VisualDeck enemyDeck;
     [SerializeField] private GameMaster gameMaster;
     [SerializeField] protected FirebasePlayerInfo firebasePlayerInfo;
+
+    [SerializeField] private LineAttackPredictionScript lineAttackPredictionPrefab;
+    private List<LineAttackPredictionScript> lineAttacks = new List<LineAttackPredictionScript>();
 
     [SerializeField] private PlayingCard playingCardPrefab;
     private List<PlayingCard> PlayingCardsInHand = new List<PlayingCard>(); // these are for testing you can remove them
@@ -132,9 +136,30 @@ public class EnemyPlayer : MonoBehaviour
         }
     }
 
+
     public void PlayEnemyCard(BaseCard cardToPlay, PlayingCard captainUsing, bool bTargetingEnemy, List<PlayingCard> captainTargeting)
     {
-        if(cardToPlay is CaptainCard captain)
+        if (cardToPlay is ActionCard action)
+        {
+            if(action.bAttackingCard)
+            {
+                List<PlayingCard> myTeam = StaticGameplayDelegates.GetAllAllies(true);
+                bool bAllyIsEnergized = false;
+
+                foreach (PlayingCard ally in myTeam)
+                {
+                    if (ally.bEnergized)
+                        bAllyIsEnergized = true;
+                }
+
+                if (bAllyIsEnergized)
+                {
+                    return;
+                }
+            }
+        }
+
+        if (cardToPlay is CaptainCard captain)
         { // Passive Proc or activatable ability
             StartCoroutine(cardToPlay.PlayCard(captainUsing, captainUsing, bTargetingEnemy, null));
 
@@ -150,6 +175,33 @@ public class EnemyPlayer : MonoBehaviour
             StartCoroutine(captainUsing.EnergizeAndExhaust(false));
 
         StartCoroutine(cardToPlay.PlayCard(PlayingCardsInHand[0], captainUsing, bTargetingEnemy, captainTargeting));
+        StartCoroutine(RemoveCardFromHand());
+    }
+
+    private Vector3 GetUIToWorldPoint(Vector3 referencePoint)
+    {
+        referencePoint.z = 2.9f;
+        Vector3 worldMousePos = Camera.main.ScreenToWorldPoint(referencePoint);
+        return worldMousePos;
+    }
+
+    public void EnemyIsAttackingPredicition(BaseCard cardToPlay, PlayingCard captainUsing, bool bTargetingEnemy, List<PlayingCard> captainTargeting)
+    {
+        PlayingCardsInHand[0].SetCard(cardToPlay);
+
+        if (cardToPlay.bSwift == false)
+            StartCoroutine(captainUsing.EnergizeAndExhaust(false));
+
+        for(int i = 0; i < captainTargeting.Count; i++)
+        {
+            LineAttackPredictionScript lineAttack = Instantiate(lineAttackPredictionPrefab);
+            lineAttack.ShowPrediction(captainUsing.transform.position, captainTargeting[i].transform.position, Color.red);
+            lineAttacks.Add(lineAttack);
+        }
+
+        StartCoroutine(PlayingCardsInHand[0].PlayReaction(captainUsing, captainUsing.transform.parent, cardToPlay));
+
+        //StartCoroutine(cardToPlay.PlayCard(PlayingCardsInHand[0], captainUsing, bTargetingEnemy, captainTargeting));
         StartCoroutine(RemoveCardFromHand());
     }
 

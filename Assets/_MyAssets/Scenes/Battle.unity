@@ -4877,6 +4877,7 @@ MonoBehaviour:
   hoverHand: {x: 0, y: -450, z: 0}
   currentCaptain: {fileID: 0}
   currentTargets: []
+  currentReactionCard: {fileID: 0}
   playingCardPrefab: {fileID: 1047151496080733996, guid: 0735616eb3573c94d9c7e0b8bdefaf5a, type: 3}
   PlayingCardsInHand: []
 --- !u!114 &1366958863
@@ -7595,6 +7596,7 @@ MonoBehaviour:
   enemyDeck: {fileID: 709423604}
   gameMaster: {fileID: 1584138419}
   firebasePlayerInfo: {fileID: 1584138423}
+  lineAttackPredictionPrefab: {fileID: 4745052496178363599, guid: c2b7c95b7945a2d469fb58a4ab297f08, type: 3}
   playingCardPrefab: {fileID: 1047151496080733996, guid: 0735616eb3573c94d9c7e0b8bdefaf5a, type: 3}
 --- !u!222 &1858297384
 CanvasRenderer:

@@ -248,7 +248,7 @@ public class GameMaster : MonoBehaviourPunCallbacks
         }
     }
 
-    public void RequestPlayCard(PlayingCard cardToPlay, PlayingCard captainUsing, bool bTargetingEnemy, List<PlayingCard> captainTargeting)
+    public void RequestPlayCard(PlayingCard cardToPlay, PlayingCard captainUsing, bool bTargetingEnemy, List<PlayingCard> captainTargeting, bool bAttackPrediction)
     {
         int cardIndex = 0;
         bool bIsCaptain = false;
@@ -279,7 +279,33 @@ public class GameMaster : MonoBehaviourPunCallbacks
                 captainTargetingIndex.Add((bTargetingEnemy) ? Player1Allies.IndexOf(targets) : Player2Allies.IndexOf(targets));
         }
 
-        this.photonView.RPC("PlayCard", RpcTarget.AllBuffered, bIsPlayer1, cardIndex, captainUsingIndex, bTargetingEnemy, captainTargetingIndex.ToArray(), bIsCaptain);
+        if(bIsPlayer1 && captainUsingIndex == -1)
+        {
+            captainUsingIndex = Player2Allies.IndexOf(captainUsing);
+
+            captainTargetingIndex.Clear();
+
+            foreach (PlayingCard targets in captainTargeting)
+                captainTargetingIndex.Add((bTargetingEnemy) ? Player1Allies.IndexOf(targets) : Player2Allies.IndexOf(targets));
+        }
+        else if(bIsPlayer1 == false && captainUsingIndex == -1)
+        {
+            captainUsingIndex = Player1Allies.IndexOf(captainUsing);
+
+            captainTargetingIndex.Clear();
+
+            foreach (PlayingCard targets in captainTargeting)
+                captainTargetingIndex.Add((bTargetingEnemy) ? Player2Allies.IndexOf(targets) : Player1Allies.IndexOf(targets));
+        }
+
+        if (bAttackPrediction)
+        {
+            this.photonView.RPC("AttackPrediction", RpcTarget.AllBuffered, bIsPlayer1, cardIndex, captainUsingIndex, bTargetingEnemy, captainTargetingIndex.ToArray(), bIsCaptain);
+        }
+        else
+        {
+            this.photonView.RPC("PlayCard", RpcTarget.AllBuffered, bIsPlayer1, cardIndex, captainUsingIndex, bTargetingEnemy, captainTargetingIndex.ToArray(), bIsCaptain);
+        }
     }
 
     [PunRPC]
@@ -310,6 +336,49 @@ public class GameMaster : MonoBehaviourPunCallbacks
 
             BaseCard cardToPlay = (isCaptain) ? CaptainLibrary[cardToPlayIndex] : CardAndCaptainCardLibrary[cardToPlayIndex];
             enemy.PlayEnemyCard(cardToPlay, captainUsing, bTargetingEnemy, captainTarget);
+        }
+    }
+
+    [PunRPC]
+    void AttackPrediction(bool isPlayer1, int cardToPlayIndex, int captainUsingIndex, bool bTargetingEnemy, int[] captainTargetingIndex, bool isCaptain)
+    {
+        if (isPlayer1 == bIsPlayer1) // Owner, this client
+        {
+            PlayingCard captainUsing = null;
+            if (isPlayer1)
+            {
+                captainUsing = Player1Allies[captainUsingIndex];
+            }
+            else
+            {
+                captainUsing = Player2Allies[captainUsingIndex];
+            }
+
+            WaitingForOpponent.SetActive(true);
+            player.WaitingForReaction(true, captainUsing);
+        }
+        else // other player
+        {
+            PlayingCard captainUsing = null;
+            List<PlayingCard> captainTarget = new List<PlayingCard>();
+            if (isPlayer1)
+            {
+                captainUsing = Player1Allies[captainUsingIndex];
+
+                for (int i = 0; i < captainTargetingIndex.Length; i++)
+                    captainTarget.Add((bTargetingEnemy) ? Player2Allies[captainTargetingIndex[i]] : Player1Allies[captainTargetingIndex[i]]);
+            }
+            else
+            {
+                captainUsing = Player2Allies[captainUsingIndex];
+
+                for (int i = 0; i < captainTargetingIndex.Length; i++)
+                    captainTarget.Add((bTargetingEnemy) ? Player1Allies[captainTargetingIndex[i]] : Player2Allies[captainTargetingIndex[i]]);
+            }
+
+            BaseCard cardToPlay = (isCaptain) ? CaptainLibrary[cardToPlayIndex] : CardAndCaptainCardLibrary[cardToPlayIndex];
+            cardToPlay.bWaitForReaction = true;
+            enemy.EnemyIsAttackingPredicition(cardToPlay, captainUsing, bTargetingEnemy, captainTarget);
         }
     }
     public void RequestDrawCards(int cardsToDraw)

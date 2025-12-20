@@ -350,6 +350,36 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         //CleanupDestroy();
     }
 
+    public IEnumerator PlayReaction(PlayingCard usingCaptain, Transform fieldTransform, BaseCard cardWeAreWaitingOn)
+    {
+        transform.SetParent(fieldTransform, false);
+        float y = usingCaptain.DoIOwnThis() ? -300 : 300;
+        float placementY = usingCaptain.DoIOwnThis() ? 100 : -100;
+        float placementX = usingCaptain.DoIOwnThis() ? -60 : 60;
+        transform.localPosition = new Vector3(0, y, 0);
+
+        StartCoroutine(MoveCard(usingCaptain.transform.localPosition.x + placementX, true, 0.3f));
+        StartCoroutine(MoveCard(usingCaptain.transform.localPosition.y + placementY, false, 0.3f));
+
+        StartCoroutine(ShrinkOrGrow(0.7f));
+
+        yield return new WaitForEndOfFrame();
+
+        while(cardWeAreWaitingOn.bWaitForReaction)
+        {
+            yield return new WaitForEndOfFrame();
+        }
+
+        Transform discardPile = StaticGameplayDelegates.GetDiscardPileTransform(usingCaptain.bIsPlayer1);
+        StaticGameplayDelegates.AddCardToDiscard(this);
+
+        transform.SetParent(discardPile, true);
+
+        StartCoroutine(MoveCard(0, true, 0.4f));
+        StartCoroutine(MoveCard(0, false, 0.4f));
+        StartCoroutine(ShrinkOrGrow(1.0f));
+    }
+
     private void InspectCard()
     {
         if(bHovering)
@@ -610,6 +640,7 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         if(ownerPlayer.bChoosingTarget && ownerPlayer.bSkipCaptainChoice == false)
         {
             bool bTargetingEnemy = (ownerPlayer.currentCaptain.DoIOwnThis() && ownerPlayer.currentTargets[0].DoIOwnThis()) ? false : true;
+            ownerPlayer.currentReactionCard = ownerPlayer.currentCard;
             ownerPlayer.RequestPlayCard(ownerPlayer.currentCard, ownerPlayer.currentCaptain, bTargetingEnemy, ownerPlayer.currentTargets);
             CancelUsingCard();
         }

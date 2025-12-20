@@ -50,6 +50,8 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
 
     public PlayingCard currentCaptain;
     public List<PlayingCard> currentTargets = new List<PlayingCard>();
+
+    public PlayingCard currentReactionCard;
     public PlayingCard currentCard { get; private set; }
 
     [SerializeField] private PlayingCard playingCardPrefab;
@@ -102,6 +104,17 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
         InspectionPanel.SetActive(false);
     }
 
+    public void WaitingForReaction(bool bWaiting, PlayingCard captainToPlay)
+    {
+        BlockHand(bWaiting);
+        StartCoroutine(GetPlayerOptions(!bWaiting));
+
+        if(currentReactionCard != null && bWaiting)
+        {
+            StartCoroutine(currentReactionCard.PlayReaction(captainToPlay, captainToPlay.transform.parent, currentReactionCard.myCard));
+        }
+    }
+
     public void SetIsPlayer1() { bIsPlayer1 = true; }
     public bool IsMyTurn() { return gameMaster.bPlayer1sTurn == bIsPlayer1; }
 
@@ -110,7 +123,7 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
         currentCard = cardToPlay;
         currentCaptain = captainUsing;
         currentTargets = captainTargeting;
-        gameMaster.RequestPlayCard(cardToPlay, captainUsing, bTargetingEnemy, captainTargeting);
+        gameMaster.RequestPlayCard(cardToPlay, captainUsing, bTargetingEnemy, captainTargeting, false);
     }
 
     public void PlayClientCard(bool bTargetingEnemy)
