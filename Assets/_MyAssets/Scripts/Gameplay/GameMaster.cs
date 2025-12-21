@@ -378,9 +378,31 @@ public class GameMaster : MonoBehaviourPunCallbacks
 
             BaseCard cardToPlay = (isCaptain) ? CaptainLibrary[cardToPlayIndex] : CardAndCaptainCardLibrary[cardToPlayIndex];
             cardToPlay.bWaitForReaction = true;
+            player.AllowReaction(true, cardToPlay, captainUsing, bTargetingEnemy, captainTarget);
             enemy.EnemyIsAttackingPredicition(cardToPlay, captainUsing, bTargetingEnemy, captainTarget);
         }
     }
+
+    public void RequestFinishReaction()
+    {
+        this.photonView.RPC("FinishReaction", RpcTarget.AllBuffered, bIsPlayer1);
+    }
+
+    [PunRPC]
+    void FinishReaction(bool isPlayer1)
+    {
+        if (isPlayer1 == bIsPlayer1) // Owner, this client
+        {
+            enemy.EnemyFinishReaction();
+        }
+        else // other player
+        {
+            WaitingForOpponent.SetActive(false);
+            enemy.ClearLineAttacks();
+            player.EnemyFinishReaction();
+        }
+    }
+
     public void RequestDrawCards(int cardsToDraw)
     {
         this.photonView.RPC("DrawCards", RpcTarget.AllBuffered, bIsPlayer1, cardsToDraw);

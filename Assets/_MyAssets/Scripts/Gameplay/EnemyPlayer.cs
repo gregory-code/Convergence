@@ -154,6 +154,7 @@ public class EnemyPlayer : MonoBehaviour
 
                 if (bAllyIsEnergized)
                 {
+                    StartCoroutine(cardToPlay.PlayCard(PlayingCardsInHand[0], captainUsing, bTargetingEnemy, captainTargeting));
                     return;
                 }
             }
@@ -185,6 +186,7 @@ public class EnemyPlayer : MonoBehaviour
         return worldMousePos;
     }
 
+    private PlayingCard reactionCardPrediction;
     public void EnemyIsAttackingPredicition(BaseCard cardToPlay, PlayingCard captainUsing, bool bTargetingEnemy, List<PlayingCard> captainTargeting)
     {
         PlayingCardsInHand[0].SetCard(cardToPlay);
@@ -192,17 +194,55 @@ public class EnemyPlayer : MonoBehaviour
         if (cardToPlay.bSwift == false)
             StartCoroutine(captainUsing.EnergizeAndExhaust(false));
 
-        for(int i = 0; i < captainTargeting.Count; i++)
+        captainUsing.DisplayAttackStats(false, false, PlayingCardsInHand[0], captainUsing);
+
+        for (int i = 0; i < captainTargeting.Count; i++)
         {
             LineAttackPredictionScript lineAttack = Instantiate(lineAttackPredictionPrefab);
             lineAttack.ShowPrediction(captainUsing.transform.position, captainTargeting[i].transform.position, Color.red);
             lineAttacks.Add(lineAttack);
+
+            CardPlayContext context = cardToPlay.PredictCard(PlayingCardsInHand[0], captainUsing, bTargetingEnemy, captainTargeting[i]);
+
+            if (captainTargeting[i].myCard is CaptainCard captain)
+            {
+                captainTargeting[i].DisplayHealthChange(captain.currentHealth - context.damage);
+                captainTargeting[i].DisplayAttackStats(false, true, PlayingCardsInHand[0], captainUsing);
+            }
         }
 
         StartCoroutine(PlayingCardsInHand[0].PlayReaction(captainUsing, captainUsing.transform.parent, cardToPlay));
 
         //StartCoroutine(cardToPlay.PlayCard(PlayingCardsInHand[0], captainUsing, bTargetingEnemy, captainTargeting));
+        reactionCardPrediction = PlayingCardsInHand[0];
         StartCoroutine(RemoveCardFromHand());
+    }
+
+    public void EnemyFinishReaction()
+    {
+        reactionCardPrediction.myCard.bWaitForReaction = false;
+        ClearLineAttacks();
+
+        List<PlayingCard> enemies = StaticGameplayDelegates.GetAllAllies(false);
+        foreach (PlayingCard enemy in enemies)
+        {
+            enemy.DisplayAttackStats(true, true, null, null);
+        }
+
+        List<PlayingCard> allies = StaticGameplayDelegates.GetAllAllies(true);
+        foreach (PlayingCard ally in allies)
+        {
+            ally.DisplayAttackStats(true, true, null, null);
+        }
+    }
+
+    public void ClearLineAttacks()
+    {
+        for (int i = 0; i < lineAttacks.Count; i++)
+        {
+            Destroy(lineAttacks[i].gameObject);
+        }
+        lineAttacks.Clear();
     }
 
     private IEnumerator RemoveCardFromHand()

@@ -26,9 +26,13 @@ public abstract class BaseCard : ScriptableObject
     [TextArea(3, 10)]
     public string DescriptionText;
 
+    [HideInInspector]
     public bool bOncePerTurn = true;
+    [HideInInspector]
     public bool bWaitForReaction = false;
+    [HideInInspector]
     public bool bDead = false;
+    [HideInInspector]
     public int respawnTurns = 0;
 
     public abstract void Init(UserPlayer ownerPlayer);

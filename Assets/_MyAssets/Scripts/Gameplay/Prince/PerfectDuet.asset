@@ -23,9 +23,17 @@ MonoBehaviour:
   CardPreviewArt: {fileID: 21300000, guid: 7e3ca2fc802e6b140892964c1537ab71, type: 3}
   bTargetsSelf: 1
   bTargetsAllies: 0
-  bTargetsAlliesExceptSelf: 1
+  bTargetsAlliesExceptSelf: 0
   bTargetsEnemies: 0
   bSwift: 0
   DescriptionText: 
+  bOncePerTurn: 1
+  bWaitForReaction: 0
+  bDead: 0
+  respawnTurns: 0
   bPrestige: 1
   equipmentType: 4
+  bonusHealthStatChange: 0
+  physicalStatChange: 0
+  magicStatChange: 0
+  defenseStatChange: 0

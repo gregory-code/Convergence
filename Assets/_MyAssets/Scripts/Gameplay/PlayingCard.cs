@@ -101,6 +101,7 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
     private bool EligableTarget(PlayingCard cardTryingToUse)
     {
+
         if (DoIOwnThis())
         {
             if (ownerPlayer.currentCaptain == this && ownerPlayer.currentCaptain.bEnergized == false)
@@ -408,7 +409,7 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         }
     }
 
-    public void DisplayAttackStats(bool bStopDisplaying, bool bRecivingEnd)
+    public void DisplayAttackStats(bool bStopDisplaying, bool bRecivingEnd, PlayingCard cardUsing, PlayingCard captainUsing)
     {
         if(bStopDisplaying)
         {
@@ -427,7 +428,7 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         }
         else
         {
-            CardPlayContext context = ownerPlayer.currentCard.myCard.PredictCard(ownerPlayer.currentCard, ownerPlayer.currentCaptain, true, ownerPlayer.currentCaptain);
+            CardPlayContext context = cardUsing.myCard.PredictCard(cardUsing, captainUsing, true, captainUsing);
 
             if (context.bMagicDamage)
             {
@@ -559,6 +560,20 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         if (ownerPlayer == null || bPreventRegularMoving) // for enemy cards
             return;
 
+        if(myCard is ReactionCard reaction)
+        {
+            if(ownerPlayer.bAllowingReactions)
+            {
+                ownerPlayer.currentTargets.Clear();
+
+                ownerPlayer.StartStopLineRenderer(true, this, myCard.Type.color);
+                ownerPlayer.BlockHand(true);
+            }
+            else
+            {
+                return;
+            }
+        }
 
         if (ownerPlayer.bBlockHand || ownerPlayer.IsMyTurn() == false)
           return;
@@ -592,12 +607,12 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
             { 
                 if(action.bAttackingCard)
                 {
-                    ownerPlayer.currentCaptain.DisplayAttackStats(false, false);
+                    ownerPlayer.currentCaptain.DisplayAttackStats(false, false, ownerPlayer.currentCard, ownerPlayer.currentCaptain);
 
                     List<PlayingCard> enemies = StaticGameplayDelegates.GetAllAllies(false);
                     foreach(PlayingCard enemy in enemies)
                     {
-                        enemy.DisplayAttackStats(false, true);
+                        enemy.DisplayAttackStats(false, true, ownerPlayer.currentCard, ownerPlayer.currentCaptain);
                     }
                     return;
                 }
@@ -617,13 +632,13 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         List<PlayingCard> enemies = StaticGameplayDelegates.GetAllAllies(false);
         foreach (PlayingCard enemy in enemies)
         {
-            enemy.DisplayAttackStats(true, true);
+            enemy.DisplayAttackStats(true, true, ownerPlayer.currentCard, ownerPlayer.currentCaptain);
         }
 
         List<PlayingCard> allies = StaticGameplayDelegates.GetAllAllies(true);
         foreach (PlayingCard ally in allies)
         {
-            ally.DisplayAttackStats(true, true);
+            ally.DisplayAttackStats(true, true, ownerPlayer.currentCard, ownerPlayer.currentCaptain);
         }
 
         if (bPreventRegularMoving)

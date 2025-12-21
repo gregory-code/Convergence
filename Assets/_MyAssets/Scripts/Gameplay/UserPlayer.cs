@@ -7,6 +7,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using static UnityEngine.Rendering.DebugUI;
 
 public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler, IPointerExitHandler
 {
@@ -34,6 +35,12 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
     [SerializeField] private TextMeshProUGUI defenseInspectionText;
 
     [SerializeField] private CanvasGroup playerOptionsCanvasGroup;
+    [SerializeField] private CanvasGroup playerReactionCanvasGroup;
+
+    [SerializeField] private GameObject playerReactionHoldUpGroup;
+    [SerializeField] private Image reactionTimerImage;
+    private float reactionTime;
+    private Coroutine reactionTimerCorotine;
 
     private int DeckIndex;
 
@@ -48,9 +55,12 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
     public bool bChoosingTarget { get; private set; }
     public bool bSkipCaptainChoice { get; private set; }
 
+    [HideInInspector]
     public PlayingCard currentCaptain;
+    [HideInInspector]
     public List<PlayingCard> currentTargets = new List<PlayingCard>();
 
+    [HideInInspector]
     public PlayingCard currentReactionCard;
     public PlayingCard currentCard { get; private set; }
 
@@ -114,6 +124,79 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
             StartCoroutine(currentReactionCard.PlayReaction(captainToPlay, captainToPlay.transform.parent, currentReactionCard.myCard));
         }
     }
+
+    // This is when it sees an enemy throwing out a reaction //
+    public bool bAllowingReactions { get; private set; }
+    public BaseCard reactionAnticipating { get; private set; }
+    public PlayingCard reactionCaptainUsingAnticipating { get; private set; }
+    public List<PlayingCard> reactionCaptainTargetingAnticipating { get; private set; }
+    public void AllowReaction(bool bAllow, BaseCard cardToPlay, PlayingCard captainUsing, bool bTargetingEnemy, List<PlayingCard> captainTargeting)
+    {
+        bAllowingReactions = bAllow;
+        BlockHand(!bAllow);
+        StartCoroutine(GetReactionOptions(bAllow));
+        playerReactionHoldUpGroup.SetActive(bAllow);
+
+        if (bAllow)
+        {
+            reactionTime = 5.0f;
+            reactionTimerCorotine = StartCoroutine(ReactionTime());
+
+            reactionAnticipating = cardToPlay;
+            reactionCaptainUsingAnticipating = captainUsing;
+            reactionCaptainTargetingAnticipating = captainTargeting;
+        }
+    }
+
+    private IEnumerator ReactionTime()
+    {
+        reactionTimerImage.fillAmount = 1.0f;
+        while(reactionTime > 0)
+        {
+            yield return new WaitForEndOfFrame();
+            reactionTime -= Time.deltaTime;
+            reactionTimerImage.fillAmount = Mathf.InverseLerp(0f, 5f, reactionTime);
+        }
+        FinishReaction();
+    }
+
+    public void FinishReaction()
+    {
+        if(reactionTimerCorotine != null)
+            StopCoroutine(reactionTimerCorotine);
+
+        AllowReaction(false, null, null, false, null);
+
+        gameMaster.RequestFinishReaction();
+    }
+
+    public void EnemyFinishReaction()
+    {
+        currentReactionCard.myCard.bWaitForReaction = false;
+        BlockHand(false);
+        StartCoroutine(GetPlayerOptions(true));
+
+        List<PlayingCard> enemies = StaticGameplayDelegates.GetAllAllies(false);
+        foreach (PlayingCard enemy in enemies)
+        {
+            enemy.DisplayAttackStats(true, true, null, null);
+        }
+
+        List<PlayingCard> allies = StaticGameplayDelegates.GetAllAllies(true);
+        foreach (PlayingCard ally in allies)
+        {
+            ally.DisplayAttackStats(true, true, null, null);
+        }
+    }
+
+    public void HoldUpReaction()
+    {
+        if (reactionTimerCorotine != null)
+            StopCoroutine(reactionTimerCorotine);
+
+        playerReactionHoldUpGroup.SetActive(false);
+    }
+    // This is when it sees an enemy throwing out a reaction //
 
     public void SetIsPlayer1() { bIsPlayer1 = true; }
     public bool IsMyTurn() { return gameMaster.bPlayer1sTurn == bIsPlayer1; }
@@ -186,7 +269,23 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
         playerOptionsCanvasGroup.interactable = bShow;
         playerOptionsCanvasGroup.blocksRaycasts = bShow;
         playerOptionsCanvasGroup.alpha = alpha;
+    }
 
+    private IEnumerator GetReactionOptions(bool bShow)
+    {
+        float time = 0.2f;
+        float alpha = (bShow) ? 1 : 0;
+        while (time > 0)
+        {
+            yield return new WaitForEndOfFrame();
+            time -= Time.deltaTime;
+
+            playerReactionCanvasGroup.alpha = Mathf.Lerp(playerReactionCanvasGroup.alpha, alpha, 20 * Time.deltaTime);
+        }
+
+        playerReactionCanvasGroup.interactable = bShow;
+        playerReactionCanvasGroup.blocksRaycasts = bShow;
+        playerReactionCanvasGroup.alpha = alpha;
     }
 
     public void EndTurn()
