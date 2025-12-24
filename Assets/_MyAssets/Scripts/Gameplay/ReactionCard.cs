@@ -13,6 +13,8 @@ public abstract class ReactionCard : BaseCard
 
     public override IEnumerator PlayCard(PlayingCard thisPlayingCard, PlayingCard captainUsing, bool bTargetingEnemy, List<PlayingCard> captainTargeting)
     {
+        thisCard = thisPlayingCard;
+
         yield return new WaitForEndOfFrame();
     }
 

@@ -5,8 +5,6 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "TCG/Prince/Prince")]
 public class PrinceCard : CaptainCard
 {
-    private PlayingCard thisPrince;
-
     public override void Init(UserPlayer ownerPlayer)
     {
         base.Init(ownerPlayer);
@@ -29,16 +27,16 @@ public class PrinceCard : CaptainCard
             if (card.myCard is PrinceCard captain)
             {
                 if(card.myCard == this)
-                    thisPrince = card;
+                    thisCard = card;
             }
         }
 
-        if(thisPrince == null)
+        if(thisCard == null)
         {
             return;
         }
 
-        if (thisPrince.bIsPlayer1 != bPlayers1Turn)
+        if (thisCard.bIsPlayer1 != bPlayers1Turn)
             return;
 
         int sparkGain = 0;
@@ -52,10 +50,10 @@ public class PrinceCard : CaptainCard
             }
         }
 
-        if (sparkGain <= 0 && thisPrince != null)
+        if (sparkGain <= 0 && thisCard != null)
             return;
 
-        FindAnyObjectByType<GameMaster>().RequestIncreaseSpark(thisPrince, sparkGain);
+        FindAnyObjectByType<GameMaster>().RequestIncreaseSpark(thisCard, sparkGain);
     }
 
     public override void Cleanup()

@@ -51,6 +51,7 @@ public abstract class CaptainCard : BaseCard
         }
         foreach (PlayingCard card in LingersInEffect)
         {
+            physical += card.myCard.physicalStatLinger;
         }
         return physical;
     }
@@ -67,7 +68,7 @@ public abstract class CaptainCard : BaseCard
         }
         foreach (PlayingCard card in LingersInEffect)
         {
-
+            magic += card.myCard.magicStatLinger;
         }
         return magic;
     }
@@ -84,7 +85,7 @@ public abstract class CaptainCard : BaseCard
         }
         foreach (PlayingCard card in LingersInEffect)
         {
-
+            defense += card.myCard.defenseStatLinger;
         }
         return defense;
     }
@@ -99,7 +100,17 @@ public abstract class CaptainCard : BaseCard
         EquipmentsAttached.Remove(equipment);
     }
 
-    public void TakeDamage(int damageDealt, bool bWasMagic, PlayingCard thisPlayingCard, PlayingCard allyDealingDamage, bool bTargetingEnemy, PlayingCard allyRecivingDamage)
+    public void AttachLinger(PlayingCard linger, PlayingCard allyDoingTheEquipping)
+    {
+        LingersInEffect.Add(linger);
+    }
+
+    public void RemoveLinger(PlayingCard linger, PlayingCard allyDoingTheUnEquipping)
+    {
+        LingersInEffect.Remove(linger);
+    }
+
+    public void TakeDamage(int damageDealt, bool bWasMagic, PlayingCard usedCard, PlayingCard allyDealingDamage, bool bTargetingEnemy, PlayingCard allyRecivingDamage)
     {
         currentHealth -= damageDealt;
 
@@ -110,12 +121,12 @@ public abstract class CaptainCard : BaseCard
         }
 
         allyRecivingDamage.SetHealthText(currentHealth, maxHealth);
-        StaticGameplayDelegates.DealtDamage(damageDealt, bWasMagic, thisPlayingCard, allyDealingDamage, allyRecivingDamage);
+        StaticGameplayDelegates.DealtDamage(damageDealt, bWasMagic, usedCard, allyDealingDamage, allyRecivingDamage);
         
         if(currentHealth <= 0)
         {
             allyRecivingDamage.Die();
-            StaticGameplayDelegates.Killed(damageDealt, thisPlayingCard, allyDealingDamage, allyRecivingDamage);
+            StaticGameplayDelegates.Killed(damageDealt, usedCard, allyDealingDamage, allyRecivingDamage);
         }
     }
 

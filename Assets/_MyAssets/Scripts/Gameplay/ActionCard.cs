@@ -6,6 +6,9 @@ public abstract class ActionCard : BaseCard
 {
     public bool bAttackingCard;
 
+    [HideInInspector]
+    public List<PlayingCard> CaptainTargeting = new List<PlayingCard>();
+
     public override void Init(UserPlayer ownerPlayer)
     {
 
@@ -13,6 +16,9 @@ public abstract class ActionCard : BaseCard
 
     public override IEnumerator PlayCard(PlayingCard thisPlayingCard, PlayingCard captainUsing, bool bTargetingEnemy, List<PlayingCard> captainTargeting)
     {
+        CaptainTargeting = captainTargeting;
+        thisCard = thisPlayingCard;
+                
         yield return new WaitForEndOfFrame();
 
         if(bAttackingCard)

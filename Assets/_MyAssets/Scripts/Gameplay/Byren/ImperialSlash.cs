@@ -17,10 +17,10 @@ public class ImperialSlash : ActionCard
 
         thisPlayingCard.BeginPlayAndDiscard(captainUsing);
 
-        if (captainTargeting[0].myCard is CaptainCard attackeeTarget)
+        if (CaptainTargeting[0].myCard is CaptainCard attackeeTarget)
         {
-            int damage = CalculateAttackDamage(3, false, true, thisPlayingCard, captainUsing, bTargetingEnemy, captainTargeting[0]);
-            attackeeTarget.TakeDamage(damage, false, thisPlayingCard, captainUsing, bTargetingEnemy, captainTargeting[0]);
+            int damage = CalculateAttackDamage(3, false, true, thisPlayingCard, captainUsing, bTargetingEnemy, CaptainTargeting[0]);
+            attackeeTarget.TakeDamage(damage, false, thisPlayingCard, captainUsing, bTargetingEnemy, CaptainTargeting[0]);
         }
 
         yield return new WaitForEndOfFrame();

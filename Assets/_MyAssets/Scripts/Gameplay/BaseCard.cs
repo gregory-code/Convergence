@@ -26,6 +26,13 @@ public abstract class BaseCard : ScriptableObject
     [TextArea(3, 10)]
     public string DescriptionText;
 
+    public bool bActiveInEffectLinger = false;
+    public int physicalStatLinger;
+    public int magicStatLinger;
+    public int defenseStatLinger;
+
+    [HideInInspector]
+    public PlayingCard thisCard;
     [HideInInspector]
     public bool bOncePerTurn = true;
     [HideInInspector]

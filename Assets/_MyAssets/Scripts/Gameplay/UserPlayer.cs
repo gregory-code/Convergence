@@ -498,7 +498,9 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
 
             foreach (PlayingCard linger in captain.GetLingersInEffect())
             {
-
+                InspectionItem inspection = Instantiate(InspectionItemPrefab, InspectionTransform);
+                inspection.Init(this, linger, IOwnit);
+                InspectionItemList.Add(inspection);
             }
         }
     }

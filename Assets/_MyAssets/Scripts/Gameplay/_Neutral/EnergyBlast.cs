@@ -17,10 +17,10 @@ public class EnergyBlast : ActionCard
 
         thisPlayingCard.BeginPlayAndDiscard(captainUsing);
 
-        if (captainTargeting[0].myCard is CaptainCard attackeeTarget)
+        if (CaptainTargeting[0].myCard is CaptainCard attackeeTarget)
         {
-            int damage = CalculateAttackDamage(2, false, false, thisPlayingCard, captainUsing, bTargetingEnemy, captainTargeting[0]);
-            attackeeTarget.TakeDamage(damage, false, thisPlayingCard, captainUsing, bTargetingEnemy, captainTargeting[0]);
+            int damage = CalculateAttackDamage(2, false, false, thisPlayingCard, captainUsing, bTargetingEnemy, CaptainTargeting[0]);
+            attackeeTarget.TakeDamage(damage, false, thisPlayingCard, captainUsing, bTargetingEnemy, CaptainTargeting[0]);
         }
 
         if (thisPlayingCard.DoIOwnThis())

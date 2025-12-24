@@ -63,8 +63,9 @@ public enum EquipmentType
 
 public enum ReactionType
 {
-    EnemyAttacks,
-    AllyDies
+    TargetAttackedAlly,
+    TargetAttackingEnemy,
+    TargetSelf,
 }
 
 [System.Serializable]

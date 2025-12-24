@@ -27,5 +27,12 @@ MonoBehaviour:
   bTargetsEnemies: 1
   bSwift: 0
   DescriptionText: 
+  bHasLingerEffect: 1
+  physicalStatLinger: 0
+  magicStatLinger: 0
+  defenseStatLinger: 1
   bOncePerTurn: 1
+  bWaitForReaction: 0
+  bDead: 0
+  respawnTurns: 0
   bAttackingCard: 1

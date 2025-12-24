@@ -105,11 +105,23 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         if (DoIOwnThis())
         {
             if (ownerPlayer.currentCaptain == this && ownerPlayer.currentCaptain.bEnergized == false)
+            {
                 return false;
+            }
 
             if (cardTryingToUse.myCard.bTargetsAllies)
             {
-                return true;
+                if (ownerPlayer.bAllowingReactions && ownerPlayer.currentCard.myCard is ReactionCard reaction)
+                {
+                    if(reaction.reactionType == ReactionType.TargetAttackedAlly && ownerPlayer.reactionCaptainTargetingAnticipating.Contains(this))
+                    {
+                        return true;
+                    }
+                }
+                else
+                {
+                    return true;
+                }
             }
 
             if (cardTryingToUse.myCard.bTargetsAlliesExceptSelf && ownerPlayer.currentCaptain != this)
@@ -119,7 +131,17 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
             if (cardTryingToUse.myCard.bTargetsSelf && ownerPlayer.currentCaptain == this)
             {
-                return true;
+                if (ownerPlayer.bAllowingReactions && ownerPlayer.currentCard.myCard is ReactionCard reaction)
+                {
+                    if (reaction.reactionType == ReactionType.TargetSelf)
+                    {
+                        return true;
+                    }
+                }
+                else
+                {
+                    return true;
+                }
             }
         }
         
@@ -127,7 +149,17 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         {
             if (cardTryingToUse.myCard.bTargetsEnemies && bEnergized == false && myCard.bDead == false)
             {
-                return true;
+                if (ownerPlayer.bAllowingReactions && ownerPlayer.currentCard.myCard is ReactionCard reaction)
+                {
+                    if (reaction.reactionType == ReactionType.TargetAttackingEnemy)
+                    {
+                        return true;
+                    }
+                }
+                else
+                {
+                    return true;
+                }
             }
         }
 

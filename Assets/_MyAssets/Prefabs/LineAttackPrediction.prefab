@@ -154,7 +154,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   reticle: {fileID: 1741911103677948954}
-  dottedMAT: {fileID: 2100000, guid: 70cfe5a9d60b5014d8a9507b0b87a421, type: 2}
+  dottedMAT: {fileID: 2100000, guid: d3ddb747b2b97d7498b87e49458df689, type: 2}
 --- !u!1 &1741911103677948954
 GameObject:
   m_ObjectHideFlags: 0
