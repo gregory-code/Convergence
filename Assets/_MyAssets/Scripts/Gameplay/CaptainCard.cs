@@ -121,6 +121,7 @@ public abstract class CaptainCard : BaseCard
         }
 
         allyRecivingDamage.SetHealthText(currentHealth, maxHealth);
+        allyRecivingDamage.DisplayHitDamageVFX(damageDealt, bWasMagic);
         StaticGameplayDelegates.DealtDamage(damageDealt, bWasMagic, usedCard, allyDealingDamage, allyRecivingDamage);
         
         if(currentHealth <= 0)

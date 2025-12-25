@@ -42,10 +42,16 @@ public abstract class ActionCard : BaseCard
 
     public IEnumerator WaitForReaction(PlayingCard thisPlayingCard, PlayingCard captainUsing, bool bTargetingEnemy, List<PlayingCard> captainTargeting)
     {
+        if(bTargetingEnemy == false || captainTargeting.Count <= 0)
+            yield break;
+
         List<PlayingCard> enemyTeam = StaticGameplayDelegates.GetAllAllies(false);
+        List<PlayingCard> allyTeam = StaticGameplayDelegates.GetAllAllies(true);
+        List<PlayingCard> teamConsidering = (enemyTeam.Contains(captainTargeting[0])) ? enemyTeam : allyTeam;
+
         bool bEnemyIsEnergized = false;
 
-        foreach (PlayingCard enemy in enemyTeam)
+        foreach (PlayingCard enemy in teamConsidering)
         {
             if (enemy.bEnergized)
                 bEnemyIsEnergized = true;

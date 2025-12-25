@@ -17,16 +17,21 @@ MonoBehaviour:
   Rarity: {fileID: 11400000, guid: b1e478010c8d91d4d9e3393c5ffeaf18, type: 2}
   Captain: 6
   SeriesOverlay: {fileID: 21300000, guid: 73a0f5082a4a2584594d9309801360f2, type: 3}
-  CardArt: {fileID: 21300000, guid: 9843599ff2681144e9246371f4d0da55, type: 3}
+  CardArt: {fileID: 21300000, guid: e1c773ea58d72a74c88dac86b8b6d671, type: 3}
   CardArtAdjustment: {x: -70.85, y: 0}
   CardArtSize: {x: 0.16, y: 0.34}
-  CardPreviewArt: {fileID: 21300000, guid: 7e3ca2fc802e6b140892964c1537ab71, type: 3}
+  CardPreviewArt: {fileID: 21300000, guid: af684facd09eaaa4c83ed6acfedf66c7, type: 3}
   bTargetsSelf: 1
   bTargetsAllies: 0
   bTargetsAlliesExceptSelf: 0
   bTargetsEnemies: 0
   bSwift: 0
   DescriptionText: 
+  bActiveInEffectLinger: 0
+  physicalStatLinger: 0
+  magicStatLinger: 0
+  defenseStatLinger: 0
+  thisCard: {fileID: 0}
   bOncePerTurn: 1
   bWaitForReaction: 0
   bDead: 0

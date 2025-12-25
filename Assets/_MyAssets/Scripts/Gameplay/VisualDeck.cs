@@ -20,6 +20,8 @@ public class VisualDeck : MonoBehaviour
         OriginalPos = transform.position;
     }
 
+    public int VisualDeckAmount() { return VisualCardList.Count; }
+
     public void AddCardToVisualDeck()
     {
         GameObject newCard = Instantiate(VisualCardBackPrefab, this.transform);

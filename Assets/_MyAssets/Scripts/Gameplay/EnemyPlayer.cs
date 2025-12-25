@@ -14,6 +14,8 @@ public class EnemyPlayer : MonoBehaviour
     [SerializeField] private VisualDeck enemyDeck;
     [SerializeField] private GameMaster gameMaster;
     [SerializeField] protected FirebasePlayerInfo firebasePlayerInfo;
+    [SerializeField] private CardAmountHover enemyHandCardAmount;
+    [SerializeField] private CardAmountHover enemyDeckCardAmount;
 
     [SerializeField] private LineAttackPredictionScript lineAttackPredictionPrefab;
     private List<LineAttackPredictionScript> lineAttacks = new List<LineAttackPredictionScript>();
@@ -31,6 +33,8 @@ public class EnemyPlayer : MonoBehaviour
 
     void Start()
     {
+        enemyHandCardAmount.onChangeCardText += HoveredEnemyHand;
+        enemyDeckCardAmount.onChangeCardText += HoveredEnemyDeck;
         StartCoroutine(LoadingOpponentDeck());
     }
 
@@ -251,6 +255,21 @@ public class EnemyPlayer : MonoBehaviour
         PlayingCardsInHand.RemoveAt(0);
         yield return new WaitForSeconds(0.1f);
         ReOrganizeHand();
+    }
+
+    private void HoveredEnemyHand(bool bStartedHover)
+    {
+        if (bStartedHover)
+            enemyHandCardAmount.cardAmountText.text = "" + PlayingCardsInHand.Count;
+    }    
+
+    private void HoveredEnemyDeck(bool bStartedHover)
+    {
+        if (bStartedHover)
+        {
+            int cardsInDeck = enemyDeck.VisualDeckAmount();
+            enemyDeckCardAmount.cardAmountText.text = "" + cardsInDeck;
+        }
     }
 
     private IEnumerator LoadingOpponentDeck()

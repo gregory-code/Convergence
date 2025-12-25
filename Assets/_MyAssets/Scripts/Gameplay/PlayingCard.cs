@@ -34,6 +34,9 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
     [SerializeField] Vector2[] EquipmentPos;
 
+    [SerializeField] private GameObject[] physicalDamageVFX;
+    [SerializeField] private GameObject[] magicDamageVFX;
+
     [SerializeField] GameObject DeathPanel;
     [SerializeField] public GameObject AttackPredictionPanel;
     [SerializeField] GameObject PhysicalGameObject;
@@ -346,7 +349,7 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         }
 
         Transform discardPile = StaticGameplayDelegates.GetDiscardPileTransform(parentCharacter.bIsPlayer1);
-        StaticGameplayDelegates.AddCardToDiscard(this);
+        StaticGameplayDelegates.AddCardToDiscard(this, parentCharacter.bIsPlayer1);
 
         transform.SetParent(discardPile, true);
 
@@ -372,7 +375,7 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         yield return new WaitForSeconds(0.6f);
 
         Transform discardPile = StaticGameplayDelegates.GetDiscardPileTransform(usingCaptain.bIsPlayer1);
-        StaticGameplayDelegates.AddCardToDiscard(this);
+        StaticGameplayDelegates.AddCardToDiscard(this, usingCaptain.bIsPlayer1);
 
         transform.SetParent(discardPile, true);
 
@@ -404,7 +407,7 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         }
 
         Transform discardPile = StaticGameplayDelegates.GetDiscardPileTransform(usingCaptain.bIsPlayer1);
-        StaticGameplayDelegates.AddCardToDiscard(this);
+        StaticGameplayDelegates.AddCardToDiscard(this, usingCaptain.bIsPlayer1);
 
         transform.SetParent(discardPile, true);
 
@@ -494,6 +497,33 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
             if (newHealth <= 2)
                 healthPredictionRight.color = Color.red;
         }
+    }
+
+    public void DisplayHitDamageVFX(int damage, bool bIsMagic)
+    {
+        Vector3 vfxSpawnPos = transform.position;
+        vfxSpawnPos.y = -3.0f;
+
+        GameObject damagePrefab = (bIsMagic) ? magicDamageVFX[0] : physicalDamageVFX[0];
+        switch(damage)
+        {
+            case 3:
+            case 4:
+                damagePrefab = (bIsMagic) ? magicDamageVFX[1] : physicalDamageVFX[1];
+                break;
+
+            case 1:
+            case 2:
+                damagePrefab = (bIsMagic) ? magicDamageVFX[2] : physicalDamageVFX[2];
+                break;
+
+            case 0:
+                damagePrefab = (bIsMagic) ? magicDamageVFX[3] : physicalDamageVFX[3];
+                break;
+        }
+        GameObject sparkGain = Instantiate(damagePrefab, vfxSpawnPos, damagePrefab.transform.rotation);
+        ParticleSystem sparkParticle = sparkGain.GetComponent<ParticleSystem>();
+        Destroy(sparkGain, sparkParticle.main.duration + sparkParticle.main.startLifetime.constantMax);
     }
 
     public void OnPointerEnter(PointerEventData eventData)

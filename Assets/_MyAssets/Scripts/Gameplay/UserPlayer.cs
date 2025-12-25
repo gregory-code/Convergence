@@ -21,6 +21,7 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
     [SerializeField] private GameObject SelectCaptain;
     [SerializeField] private VisibleCard[] SelectCaptainsVisible;
 
+    [SerializeField] private CardAmountHover allyDeckCardAmount;
     [SerializeField] private GameObject MullgianPanel;
     [SerializeField] private GameObject CaptainPanel;
     [SerializeField] private GameObject InspectionPanel;
@@ -72,7 +73,7 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
 
     private void Start()
     {
-
+        allyDeckCardAmount.onChangeCardText += HoveredAllyDeck;
     }
 
     private void Update()
@@ -566,6 +567,14 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
         lineRenderer.FocusTarget(bHovering, cardHovered.transform);
     }
 
+    private void HoveredAllyDeck(bool bStartedHover)
+    {
+        if (bStartedHover)
+        {
+            int cardsInDeck = UserDeck.Count;
+            allyDeckCardAmount.cardAmountText.text = "" + cardsInDeck;
+        }
+    }
     public IEnumerator LoadData(DataSnapshot data)
     {
         DeckIndex = (data.Child("DeckIndex").Exists) ? DeckIndex = int.Parse(data.Child("DeckIndex").Value.ToString()) : 0;

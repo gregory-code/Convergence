@@ -22,10 +22,14 @@ public class GameMaster : MonoBehaviourPunCallbacks
 
     [SerializeField] private GameObject WaitingForOpponent;
 
+    [SerializeField] private CardAmountHover clientSideDiscardAmount;
+    [SerializeField] private CardAmountHover enemyDiscardAmount;
+
     private List<PlayingCard> Player1Allies = new List<PlayingCard>();
     private List<PlayingCard> Player1Discard = new List<PlayingCard>();
     private List<PlayingCard> Player2Allies = new List<PlayingCard>();
     private List<PlayingCard> Player2Discard = new List<PlayingCard>();
+
 
     [SerializeField] private GameObject opponentSpark;
     private int opponentSparkValue;
@@ -73,6 +77,9 @@ public class GameMaster : MonoBehaviourPunCallbacks
 
     void Start()
     {
+        clientSideDiscardAmount.onChangeCardText += HoveredClientDiscard;
+        enemyDiscardAmount.onChangeCardText += HoveredEnemyDiscard;
+
         opponentSpark.SetActive(false);
         allySpark.SetActive(false);
 
@@ -85,9 +92,9 @@ public class GameMaster : MonoBehaviourPunCallbacks
         return (isPlayer1 == bIsPlayer1) ? allyDiscard : enemyDiscard;
     }
 
-    public void AddCardToDiscard(PlayingCard cardtoAdd)
+    public void AddCardToDiscard(PlayingCard cardtoAdd, bool IsPlayer1)
     {
-        if (bIsPlayer1)
+        if (IsPlayer1)
         {
             Player1Discard.Add(cardtoAdd);
         }
@@ -199,6 +206,18 @@ public class GameMaster : MonoBehaviourPunCallbacks
         {
             return (bIsPlayer1) ? Player2Allies : Player1Allies;
         }
+    }
+
+    private void HoveredClientDiscard(bool bStartedHover)
+    {
+        if (bStartedHover)
+            clientSideDiscardAmount.cardAmountText.text = (bIsPlayer1) ? "" + Player1Discard.Count : "" + Player2Discard.Count;
+    }
+
+    private void HoveredEnemyDiscard(bool bStartedHover)
+    {
+        if (bStartedHover)
+            enemyDiscardAmount.cardAmountText.text = (bIsPlayer1) ? "" + Player2Discard.Count : "" + Player1Discard.Count;
     }
 
     public void AddAllyToBoard(BaseCard cardToAdd)

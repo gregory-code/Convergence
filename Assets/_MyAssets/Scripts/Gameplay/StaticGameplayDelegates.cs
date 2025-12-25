@@ -41,5 +41,5 @@ public static class StaticGameplayDelegates
     public static void RequestAttackPrediction(PlayingCard cardToPlay, PlayingCard captainUsing, bool bTargetingEnemy, List<PlayingCard> captainTargeting) { GameObject.FindFirstObjectByType<GameMaster>().RequestPlayCard(cardToPlay, captainUsing, bTargetingEnemy, captainTargeting, true); }
     public static List<PlayingCard> GetAllAllies(bool bGetMyTeam) { return GameObject.FindFirstObjectByType<GameMaster>().GetAllAllies(bGetMyTeam); }
     public static Transform GetDiscardPileTransform(bool isPlayer1) { return GameObject.FindFirstObjectByType<GameMaster>().GetDiscardPilieTransform(isPlayer1); }
-    public static void AddCardToDiscard(PlayingCard cardtoAdd) { GameObject.FindFirstObjectByType<GameMaster>().AddCardToDiscard(cardtoAdd); }
+    public static void AddCardToDiscard(PlayingCard cardtoAdd, bool isPlayer1) { GameObject.FindFirstObjectByType<GameMaster>().AddCardToDiscard(cardtoAdd, isPlayer1); }
 }

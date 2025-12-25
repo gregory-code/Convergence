@@ -2431,6 +2431,16 @@ MonoBehaviour:
   - {x: -135, y: 40}
   - {x: -135, y: 0}
   - {x: -135, y: -40}
+  physicalDamageVFX:
+  - {fileID: 1351971699517528, guid: c89f1ae0973cb614c88531b0603134c8, type: 3}
+  - {fileID: 1791144729913606, guid: 64aadd51fbd5e6e46841f1e136beed8d, type: 3}
+  - {fileID: 1274793349893442, guid: b9b370410ea27d140b4cda56840f9a71, type: 3}
+  - {fileID: 1274793349893442, guid: fe84d5708e365684a8d1f18971e771be, type: 3}
+  magicDamageVFX:
+  - {fileID: 1274793349893442, guid: e3f5f0b516d6c8a43a6b81540f5334ef, type: 3}
+  - {fileID: 1274793349893442, guid: 65a95d902cb7ec94d966a8149b09eb7c, type: 3}
+  - {fileID: 1274793349893442, guid: 1f3b2872533a20a4b9c623024e97866f, type: 3}
+  - {fileID: 1274793349893442, guid: a68932a6031f0b44cbb45de4b48e63b7, type: 3}
   DeathPanel: {fileID: 4747611746783186612}
   AttackPredictionPanel: {fileID: 8157390849759283628}
   PhysicalGameObject: {fileID: 8984285437642471042}
