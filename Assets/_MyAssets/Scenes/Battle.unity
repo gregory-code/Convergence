@@ -6116,6 +6116,7 @@ MonoBehaviour:
   reactionTimerImage: {fileID: 694223540}
   hiddenHand: {x: 0, y: -600, z: 0}
   hoverHand: {x: 0, y: -450, z: 0}
+  lineAttackPredictionPrefab: {fileID: 4745052496178363599, guid: c2b7c95b7945a2d469fb58a4ab297f08, type: 3}
   currentCaptain: {fileID: 0}
   currentTargets: []
   currentReactionCard: {fileID: 0}
@@ -7647,6 +7648,7 @@ MonoBehaviour:
   enemySide: {fileID: 192090818}
   enemyDiscard: {fileID: 147383717}
   numberSpriteOutline:
+  - {fileID: 21300000, guid: 34ce608ce844d6e4f8da5e0aa6bf2295, type: 3}
   - {fileID: 21300000, guid: 6ca2ae5a923c8f04ca0dc8913a0f2b84, type: 3}
   - {fileID: 21300000, guid: 95ce2a3f18c0ec643ac183892622d458, type: 3}
   - {fileID: 21300000, guid: 082870238868ecf4f86d89874ace3281, type: 3}
@@ -7657,6 +7659,7 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 88fd3e520189a6b49946bb432bb0c328, type: 3}
   - {fileID: 21300000, guid: ad783aac25415814a979ce0ceb18bfd1, type: 3}
   numberSpriteWhole:
+  - {fileID: 21300000, guid: 48f85ab0cfa04614eb2794b316dbb375, type: 3}
   - {fileID: 21300000, guid: 9aa79c9fe270e3845bdd02d43861bdab, type: 3}
   - {fileID: 21300000, guid: 47f79b47c26c9a942b1785da75519a73, type: 3}
   - {fileID: 21300000, guid: f42c94ba31cd36b439489ab6b1e392d9, type: 3}

@@ -56,6 +56,9 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
     public bool bChoosingTarget { get; private set; }
     public bool bSkipCaptainChoice { get; private set; }
 
+    [SerializeField] private LineAttackPredictionScript lineAttackPredictionPrefab;
+    private List<LineAttackPredictionScript> lineAttacks = new List<LineAttackPredictionScript>();
+
     [HideInInspector]
     public PlayingCard currentCaptain;
     [HideInInspector]
@@ -541,6 +544,32 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
         bChoosingTarget = true;
 
         lineRenderer.SelectCaptain();
+    }
+
+    public void TargetAllWithLineRenders(PlayingCard captainUsing)
+    {
+        currentTargets.Clear();
+
+        foreach(PlayingCard card in StaticGameplayDelegates.GetAllAllies(true))
+            currentTargets.Add(card);
+
+        ClearLineAttacks();
+
+        for (int i = 0; i < currentTargets.Count; i++)
+        {
+            LineAttackPredictionScript lineAttack = Instantiate(lineAttackPredictionPrefab);
+            lineAttack.ShowPrediction(captainUsing.transform.position, currentTargets[i].transform.position, Color.orange);
+            lineAttacks.Add(lineAttack);
+        }
+    }
+
+    public void ClearLineAttacks()
+    {
+        for (int i = 0; i < lineAttacks.Count; i++)
+        {
+            Destroy(lineAttacks[i].gameObject);
+        }
+        lineAttacks.Clear();
     }
 
     private Vector3 GetUIToWorldPoint(Vector3 referencePoint)

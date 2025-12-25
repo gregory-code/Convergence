@@ -2016,16 +2016,16 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8157390849759283628}
-  m_LocalRotation: {x: 0, y: 0, z: -0.7071068, w: 0.7071068}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.46484706, y: 2.3242352, z: 2.3242352}
+  m_LocalScale: {x: 1.01, y: 0.8, z: 2.3}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7679500349328189593}
   - {fileID: 6167345711201692576}
   - {fileID: 6621155816638745027}
   m_Father: {fileID: 2426123570424620281}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -90}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
@@ -2431,16 +2431,20 @@ MonoBehaviour:
   - {x: -135, y: 40}
   - {x: -135, y: 0}
   - {x: -135, y: -40}
+  healthHealedVFX: {fileID: 4569046032541823318, guid: 33bb0ee4a6f8c0b4e833c7b43c9ddceb, type: 3}
+  healthHealedNumberVFX: {fileID: 147324, guid: 9f58ba59749bdc246a176a5fb96e7b37, type: 3}
   physicalDamageVFX:
   - {fileID: 1351971699517528, guid: c89f1ae0973cb614c88531b0603134c8, type: 3}
   - {fileID: 1791144729913606, guid: 64aadd51fbd5e6e46841f1e136beed8d, type: 3}
   - {fileID: 1274793349893442, guid: b9b370410ea27d140b4cda56840f9a71, type: 3}
   - {fileID: 1274793349893442, guid: fe84d5708e365684a8d1f18971e771be, type: 3}
+  physicalDamageNumberVFX: {fileID: 147324, guid: f62d2aad5b370e745a2df880ad8a4c45, type: 3}
   magicDamageVFX:
   - {fileID: 1274793349893442, guid: e3f5f0b516d6c8a43a6b81540f5334ef, type: 3}
   - {fileID: 1274793349893442, guid: 65a95d902cb7ec94d966a8149b09eb7c, type: 3}
   - {fileID: 1274793349893442, guid: 1f3b2872533a20a4b9c623024e97866f, type: 3}
   - {fileID: 1274793349893442, guid: a68932a6031f0b44cbb45de4b48e63b7, type: 3}
+  magicDamageNumberVFX: {fileID: 147324, guid: 357d83b9fa1a4004c8ce43861753c7e2, type: 3}
   DeathPanel: {fileID: 4747611746783186612}
   AttackPredictionPanel: {fileID: 8157390849759283628}
   PhysicalGameObject: {fileID: 8984285437642471042}

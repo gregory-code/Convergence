@@ -20,6 +20,7 @@ public abstract class BaseCard : ScriptableObject
     public bool bTargetsAllies;
     public bool bTargetsAlliesExceptSelf;
     public bool bTargetsEnemies;
+    public bool bTargetsAll;
 
     public bool bSwift;
 
@@ -30,6 +31,7 @@ public abstract class BaseCard : ScriptableObject
     public int physicalStatLinger;
     public int magicStatLinger;
     public int defenseStatLinger;
+
 
     [HideInInspector]
     public PlayingCard thisCard;

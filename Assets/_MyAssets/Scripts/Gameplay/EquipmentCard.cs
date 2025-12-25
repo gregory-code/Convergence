@@ -57,7 +57,7 @@ public abstract class EquipmentCard : BaseCard
             }
         }
 
-        yield return new WaitForSeconds(0.2f);
+        yield return new WaitForSeconds(0.4f);
 
         AttachEquipment(thisPlayingCard, captainUsing, captainTargeting[0]);
         

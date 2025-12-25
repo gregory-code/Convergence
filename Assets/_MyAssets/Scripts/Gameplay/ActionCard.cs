@@ -5,6 +5,7 @@ using UnityEngine;
 public abstract class ActionCard : BaseCard
 {
     public bool bAttackingCard;
+    public bool bHasPredcition;
 
     [HideInInspector]
     public List<PlayingCard> CaptainTargeting = new List<PlayingCard>();

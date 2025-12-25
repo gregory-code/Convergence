@@ -131,6 +131,21 @@ public abstract class CaptainCard : BaseCard
         }
     }
 
+    public void HealHealth(int healthHealed, bool bWasMagic, PlayingCard usedCard, PlayingCard allyDoingTheHealing, bool bTargetingEnemy, PlayingCard allyBeingHealed)
+    {
+        currentHealth += healthHealed;
+
+        while (currentHealth > maxHealth + GetBonusHealth())
+        {
+            currentHealth--;
+            healthHealed--;
+        }
+
+        allyBeingHealed.SetHealthText(currentHealth, maxHealth);
+        allyBeingHealed.DisplayHealVFX(healthHealed);
+        StaticGameplayDelegates.Healed(healthHealed, usedCard, allyDoingTheHealing, allyBeingHealed);
+    }
+
     public void HealHealth(bool bPrediction, int healthHealed, PlayingCard thisPlayingCard, PlayingCard allyDoingTheHealing, PlayingCard allyBeingHealed)
     {
 

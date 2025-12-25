@@ -21,14 +21,22 @@ MonoBehaviour:
   CardArtAdjustment: {x: 42, y: 0}
   CardArtSize: {x: 0.13, y: 0.15}
   CardPreviewArt: {fileID: 21300000, guid: 4a039e77848268c46853933f1854e697, type: 3}
-  bTargetsSelf: 1
-  bTargetsAllies: 0
+  bTargetsSelf: 0
+  bTargetsAllies: 1
   bTargetsAlliesExceptSelf: 0
   bTargetsEnemies: 0
+  bTargetsAll: 1
   bSwift: 0
   DescriptionText: 
+  bActiveInEffectLinger: 0
+  physicalStatLinger: 0
+  magicStatLinger: 0
+  defenseStatLinger: 0
+  thisCard: {fileID: 0}
   bOncePerTurn: 1
   bWaitForReaction: 0
   bDead: 0
   respawnTurns: 0
   bAttackingCard: 0
+  bHasPredcition: 1
+  CaptainTargeting: []

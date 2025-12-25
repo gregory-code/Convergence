@@ -34,8 +34,13 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
     [SerializeField] Vector2[] EquipmentPos;
 
+    [SerializeField] private GameObject healthHealedVFX;
+    [SerializeField] private GameObject healthHealedNumberVFX;
+
     [SerializeField] private GameObject[] physicalDamageVFX;
+    [SerializeField] private GameObject physicalDamageNumberVFX;
     [SerializeField] private GameObject[] magicDamageVFX;
+    [SerializeField] private GameObject magicDamageNumberVFX;
 
     [SerializeField] GameObject DeathPanel;
     [SerializeField] public GameObject AttackPredictionPanel;
@@ -483,6 +488,19 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         if(myCard is CaptainCard captain)
         {
             AttackPredictionPanel.SetActive(true);
+            if (bEnergized)
+            {
+                AttackPredictionPanel.transform.SetLocalPositionAndRotation(Vector3.one, Quaternion.Euler(0, 0, 0));
+                AttackPredictionPanel.transform.localScale = new Vector3(1.01f, 0.8f, 2.3f);
+            }
+            else
+            {
+                AttackPredictionPanel.transform.SetLocalPositionAndRotation(Vector3.one, Quaternion.Euler(0, 0, -90));
+                AttackPredictionPanel.transform.localScale = new Vector3(0.46f, 2.3f, 2.3f);
+            }
+
+
+            newHealth = Mathf.Min(newHealth, (captain.maxHealth + captain.GetBonusHealth()));
 
             int maxHealth = captain.maxHealth;
             int currentHealth = captain.currentHealth;
@@ -497,6 +515,30 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
             if (newHealth <= 2)
                 healthPredictionRight.color = Color.red;
         }
+    }
+
+    public void DisplayHealVFX(int healthHealed)
+    {
+        Vector3 vfxSpawnPos = transform.position;
+        vfxSpawnPos.y = -3.0f;
+
+        GameObject healthPrefab = healthHealedVFX;
+        GameObject healthVFX = Instantiate(healthPrefab, vfxSpawnPos, healthPrefab.transform.rotation);
+        ParticleSystem healParticle = healthVFX.GetComponent<ParticleSystem>();
+        Destroy(healthVFX, healParticle.main.duration + healParticle.main.startLifetime.constantMax);
+
+        GameObject numPrefab = healthHealedNumberVFX;
+        GameObject num = Instantiate(numPrefab, vfxSpawnPos, numPrefab.transform.rotation);
+
+        var wholeRenderer = num.transform.Find("Whole").GetComponent<ParticleSystemRenderer>();
+
+        Material wholeMat = new Material(wholeRenderer.sharedMaterial);
+        wholeRenderer.material = wholeMat;
+        wholeMat.SetTexture("_BaseMap", StaticGameplayDelegates.GetNumberSpriteWholes()[healthHealed].texture);
+
+        ParticleSystem sparkParticleNum = num.GetComponent<ParticleSystem>();
+
+        Destroy(num, sparkParticleNum.main.duration + sparkParticleNum.main.startLifetime.constantMax);
     }
 
     public void DisplayHitDamageVFX(int damage, bool bIsMagic)
@@ -524,6 +566,19 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         GameObject sparkGain = Instantiate(damagePrefab, vfxSpawnPos, damagePrefab.transform.rotation);
         ParticleSystem sparkParticle = sparkGain.GetComponent<ParticleSystem>();
         Destroy(sparkGain, sparkParticle.main.duration + sparkParticle.main.startLifetime.constantMax);
+
+        GameObject numPrefab = (bIsMagic) ? magicDamageNumberVFX : physicalDamageNumberVFX;
+        GameObject num = Instantiate(numPrefab, vfxSpawnPos, numPrefab.transform.rotation);
+
+        var wholeRenderer = num.transform.Find("Whole").GetComponent<ParticleSystemRenderer>();
+
+        Material wholeMat = new Material(wholeRenderer.sharedMaterial);
+        wholeRenderer.material = wholeMat;
+        wholeMat.SetTexture("_BaseMap", StaticGameplayDelegates.GetNumberSpriteWholes()[damage].texture);
+
+        ParticleSystem sparkParticleNum = num.GetComponent<ParticleSystem>();
+
+        Destroy(num, sparkParticleNum.main.duration + sparkParticleNum.main.startLifetime.constantMax);
     }
 
     public void OnPointerEnter(PointerEventData eventData)
@@ -550,19 +605,31 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
                 }
                 else
                 {
-                    ownerPlayer.HoveringTarget(true, this);
+                    ownerPlayer.HoveringTarget(bHovering, this);
 
                     if (ownerPlayer.currentCard.myCard is ActionCard action)
                     {
-                        if(action.bAttackingCard)
+                        if (ownerPlayer.currentCard.myCard.bTargetsAll)
+                        {
+                            ownerPlayer.TargetAllWithLineRenders(ownerPlayer.currentCaptain);
+                        }
+
+                        if (action.bHasPredcition || action.bAttackingCard)
                         {
                             for(int i = 0; i < ownerPlayer.currentTargets.Count; i++)
                             {
-                                CardPlayContext context = ownerPlayer.currentCard.myCard.PredictCard(ownerPlayer.currentCard, ownerPlayer.currentCaptain, true, ownerPlayer.currentTargets[i]);
+                                if (action.bAttackingCard && ownerPlayer.currentTargets[i].bEnergized == true)
+                                    continue;
+
+                                CardPlayContext context;
+                                if(ownerPlayer.bSkipCaptainChoice)
+                                    context = ownerPlayer.currentCard.myCard.PredictCard(ownerPlayer.currentCard, ownerPlayer.currentTargets[i], true, ownerPlayer.currentTargets[i]);
+                                else
+                                    context = ownerPlayer.currentCard.myCard.PredictCard(ownerPlayer.currentCard, ownerPlayer.currentCaptain, true, ownerPlayer.currentTargets[i]);
                                 
                                 if(ownerPlayer.currentTargets[i].myCard is CaptainCard captain)
                                 {
-                                    DisplayHealthChange(captain.currentHealth - context.damage);
+                                    ownerPlayer.currentTargets[i].DisplayHealthChange(captain.currentHealth - context.damage);
                                 }
                             }
                         }
@@ -592,6 +659,9 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         {
             enemy.AttackPredictionPanel.SetActive(false);
         }
+
+        if(ownerPlayer != null)
+            ownerPlayer.ClearLineAttacks();
 
         if (ownerPlayer == null) // for enemy cards
             return;
@@ -690,6 +760,8 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     {
         ownerPlayer.StartStopLineRenderer(false, this, Color.white);
         ownerPlayer.BlockHand(false);
+
+        ownerPlayer.ClearLineAttacks();
 
         List<PlayingCard> enemies = StaticGameplayDelegates.GetAllAllies(false);
         foreach (PlayingCard enemy in enemies)

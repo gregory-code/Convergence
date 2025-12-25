@@ -26,7 +26,7 @@ public static class StaticGameplayDelegates
 
     public delegate void OnHealed(int healthHealed, PlayingCard allyDoingTheHealing, PlayingCard cardThatWasUsed, PlayingCard allyBeingHealed);
     public static event OnHealed onHealed;
-    public static void Healed(int healthHealed, PlayingCard allyDoingTheHealing, PlayingCard cardThatWasUsed, PlayingCard allyBeingHealed) { onHealed?.Invoke(healthHealed, allyDoingTheHealing, cardThatWasUsed, allyBeingHealed); }
+    public static void Healed(int healthHealed, PlayingCard cardThatWasUsed, PlayingCard allyDoingTheHealing, PlayingCard allyBeingHealed) { onHealed?.Invoke(healthHealed, allyDoingTheHealing, cardThatWasUsed, allyBeingHealed); }
 
     public delegate void OnEquipmentAttached(PlayingCard equipment, PlayingCard allyDoingTheEquipping, PlayingCard allyGettingTheEquipment);
     public static event OnEquipmentAttached onEquipmentAttached;
@@ -42,4 +42,5 @@ public static class StaticGameplayDelegates
     public static List<PlayingCard> GetAllAllies(bool bGetMyTeam) { return GameObject.FindFirstObjectByType<GameMaster>().GetAllAllies(bGetMyTeam); }
     public static Transform GetDiscardPileTransform(bool isPlayer1) { return GameObject.FindFirstObjectByType<GameMaster>().GetDiscardPilieTransform(isPlayer1); }
     public static void AddCardToDiscard(PlayingCard cardtoAdd, bool isPlayer1) { GameObject.FindFirstObjectByType<GameMaster>().AddCardToDiscard(cardtoAdd, isPlayer1); }
+    public static Sprite[] GetNumberSpriteWholes() { return GameObject.FindFirstObjectByType<GameMaster>().GetNumberSpriteWholes(); }
 }

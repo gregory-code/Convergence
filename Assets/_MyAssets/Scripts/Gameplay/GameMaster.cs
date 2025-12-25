@@ -25,9 +25,9 @@ public class GameMaster : MonoBehaviourPunCallbacks
     [SerializeField] private CardAmountHover clientSideDiscardAmount;
     [SerializeField] private CardAmountHover enemyDiscardAmount;
 
-    private List<PlayingCard> Player1Allies = new List<PlayingCard>();
+    [SerializeField] private List<PlayingCard> Player1Allies = new List<PlayingCard>();
     private List<PlayingCard> Player1Discard = new List<PlayingCard>();
-    private List<PlayingCard> Player2Allies = new List<PlayingCard>();
+    [SerializeField] private List<PlayingCard> Player2Allies = new List<PlayingCard>();
     private List<PlayingCard> Player2Discard = new List<PlayingCard>();
 
 
@@ -47,6 +47,9 @@ public class GameMaster : MonoBehaviourPunCallbacks
 
     [SerializeField] private Sprite[] numberSpriteOutline;
     [SerializeField] private Sprite[] numberSpriteWhole;
+
+    public Sprite[] GetNumberSpriteWholes() {  return numberSpriteWhole; }
+
     private float vfxYSpawn = -3.0f;
     [SerializeField] private GameObject allySparkGainParticleSystem;
     [SerializeField] private GameObject enemySparkGainParticleSystem;
@@ -323,6 +326,13 @@ public class GameMaster : MonoBehaviourPunCallbacks
         }
         else
         {
+           /* Debug.Log("CaptainUsing: " + captainUsing.myCard.CardName);
+            Debug.Log("TargetingEnemy: " + bTargetingEnemy);
+            foreach(PlayingCard targets in captainTargeting)
+            {
+                Debug.Log("CaptainTargetting: " + targets.myCard.CardName);
+            }*/
+
             this.photonView.RPC("PlayCard", RpcTarget.AllBuffered, bIsPlayer1, cardIndex, captainUsingIndex, bTargetingEnemy, captainTargetingIndex.ToArray(), bIsCaptain);
         }
     }
@@ -486,14 +496,14 @@ public class GameMaster : MonoBehaviourPunCallbacks
 
         Material wholeMat = new Material(wholeRenderer.sharedMaterial);
         wholeRenderer.material = wholeMat;
-        wholeMat.SetTexture("_BaseMap", numberSpriteWhole[SparkToAdd - 1].texture);
+        wholeMat.SetTexture("_BaseMap", numberSpriteWhole[SparkToAdd].texture);
 
         var outlineRenderer = sparkGain.transform.Find("Outline").GetComponent<ParticleSystemRenderer>();
         
 
         Material outlineMat = new Material(outlineRenderer.sharedMaterial);
         outlineRenderer.material = outlineMat;
-        outlineMat.SetTexture("_BaseMap", numberSpriteOutline[SparkToAdd - 1].texture);
+        outlineMat.SetTexture("_BaseMap", numberSpriteOutline[SparkToAdd].texture);
 
         ParticleSystem sparkParticle = sparkGain.GetComponent<ParticleSystem>();
         ParticleSystem.EmissionModule emission = sparkParticle.emission;

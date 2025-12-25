@@ -15,7 +15,28 @@ public class LifePotion : ActionCard
     {
         yield return base.PlayCard(thisPlayingCard, captainUsing, bTargetingEnemy, captainTargeting);
 
+        thisPlayingCard.BeginPlayAndDiscard(captainUsing);
+
+        if (CaptainTargeting[0].myCard is CaptainCard attackeeTarget)
+        {
+            int health = 3;
+            attackeeTarget.HealHealth(health, false, thisPlayingCard, captainUsing, bTargetingEnemy, CaptainTargeting[0]);
+        }
+
         yield return new WaitForEndOfFrame();
+    }
+
+    public override CardPlayContext PredictCard(PlayingCard thisPlayingCard, PlayingCard captainUsing, bool bTargetingEnemy, PlayingCard captainTargeting)
+    {
+        CardPlayContext context = base.PredictCard(thisPlayingCard, captainUsing, bTargetingEnemy, captainTargeting);
+
+        if (captainUsing.myCard is CaptainCard captainUsingTheHeal)
+        {
+            context.damage = -3;
+            context.bMagicDamage = false;
+        }
+
+        return context;
     }
 
     public override void Cleanup()
