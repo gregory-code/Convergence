@@ -87,8 +87,6 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
     [SerializeField] private CanvasGroup ChoicePanel;
     [SerializeField] private TextMeshProUGUI ChoicePanelInstructions;
 
-    public PlayingCard captainPlayingAlly { get; private set; }
-
     public void AddToDaybreak(PlayingCard thisCard) { DaybreakCards.Add(thisCard); }
 
     private bool bIsInspecting;
@@ -248,7 +246,6 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
         currentCard = cardToPlay;
         currentCaptain = captainUsing;
         currentTargets = captainTargeting;
-        captainPlayingAlly = captainUsing;
         gameMaster.RequestPlayCard(cardToPlay, captainUsing, bTargetingEnemy, captainTargeting, false, false);
     }
 
@@ -296,22 +293,17 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
 
         List<PlayingCard> discardPile = gameMaster.GetDiscardPile(bMyDiscardPile);
 
-        foreach (ChoiceCard choice in ChoiceCards)
-        {
-            Destroy(choice.gameObject);
-        }
-        ChoiceCards.Clear();
+        ClearChoiceMenu();
 
         foreach (PlayingCard card in discardPile)
         {
-            ChoiceCard newDiscardCard = Instantiate(ChoiceCardPrefab, ChoiceCardPanelTransform.transform);
-            newDiscardCard.Init(this, card);
-            ChoiceCards.Add(newDiscardCard);
+            AddItemToChoice(card, null);
         }
     }
 
     private bool bInChoiceMenu;
     private bool bInDiscardPile;
+    private bool bInUniqueMenu;
     private bool bShowingTable;
 
     private void SetPanelButtonTableState(bool ShowTable)
@@ -332,8 +324,63 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
         }
     }
 
+    public void DoUniqueChoice(PlayingCard playingCardEffect)
+    {
+        BlockHand(true);
+        SetChoicePanel(true, false);
+        StartCoroutine(GetPlayerOptions(false));
+
+        ClearChoiceMenu();
+
+        bInUniqueMenu = true;
+
+        if(playingCardEffect.myCard is CrownOfNature)
+        {
+            foreach(BaseCard card in UserDeck)
+            {
+                if(card.Type.type == CardType.Ally)
+                {
+                    AddItemToChoice(null, card);
+                }
+            }
+            return;
+        }
+
+        if (ChoiceCards.Count <= 0)
+        {
+            FinishUniqueChoice();
+        }
+    }
+
+    public IEnumerator DrawCardFromDeck(BaseCard cardToDraw)
+    {
+        for (int i = 0; i < UserDeck.Count; i++)
+        {
+            if (UserDeck[i].CardName == cardToDraw.CardName)
+            {
+                gameMaster.RequestShowOpponentIveDrawn(cardToDraw);
+                visualDeck.DrawTopCard();
+                yield return new WaitForSeconds(0.34f);
+                UserDeck.RemoveAt(i);
+                AddCardToHand(cardToDraw);
+                yield break;
+            }
+        }
+    }
+
+    public void FinishUniqueChoice()
+    {
+        BlockHand(false);
+        SetChoicePanel(false, true);
+        StartCoroutine(GetPlayerOptions(true));
+        bInUniqueMenu = false;
+    }
+
+    private bool bPickingCaptain;
     public void StartPickNewCaptain()
     {
+        bPickingCaptain = true;
+
         BlockHand(true);
         SetChoicePanel(false, true);
         StartCoroutine(GetPlayerOptions(false));
@@ -349,6 +396,8 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
 
     public void ConfirmNewCaptain(int captainIndex)
     {
+        bPickingCaptain = false;
+
         BlockHand(false);
         CaptainPanel.SetActive(false);
         SelectCaptainsVisible[captainIndex].GetComponent<CanvasGroup>().interactable = false;
@@ -356,6 +405,7 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
         SelectCaptainsVisible[captainIndex].GetComponent<CanvasGroup>().alpha = 0.3f;
         gameMaster.PlayerConfirmedNewCaptain(SelectCaptainsVisible[captainIndex].myCard);
     }
+
 
     public void StartTurn(bool shouldDraw)
     {
@@ -367,15 +417,27 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
         }
 
         DaybreakCards.Clear();
-        foreach(ChoiceCard choice in ChoiceCards)
-        {
-            Destroy(choice.gameObject);
-        }
-        ChoiceCards.Clear();
+        ClearChoiceMenu();
 
         StartCoroutine(DaybreakCheck());
 
         StaticGameplayDelegates.TurnStarted(this, bIsPlayer1);
+    }
+
+    private void ClearChoiceMenu()
+    {
+        foreach (ChoiceCard choice in ChoiceCards)
+        {
+            Destroy(choice.gameObject);
+        }
+        ChoiceCards.Clear();
+    }
+
+    private void AddItemToChoice(PlayingCard card, BaseCard cardEffect)
+    {
+        ChoiceCard newChoice = Instantiate(ChoiceCardPrefab, ChoiceCardPanelTransform.transform);
+        newChoice.Init(this, card, cardEffect);
+        ChoiceCards.Add(newChoice);
     }
 
     public IEnumerator DaybreakCheck()
@@ -388,6 +450,7 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
 
             bInChoiceMenu = true;
             bInDiscardPile = false;
+            bInUniqueMenu = false;
             bShowingTable = true;
             ChoicePanelButton.SetActive(true);
 
@@ -396,9 +459,7 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
 
             foreach (PlayingCard card in DaybreakCards)
             {
-                ChoiceCard newDaybreak = Instantiate(ChoiceCardPrefab, ChoiceCardPanelTransform.transform);
-                newDaybreak.Init(this, card);
-                ChoiceCards.Add(newDaybreak);
+                AddItemToChoice(card, null);
             }
 
             while(DaybreakCards.Count > 0)
@@ -412,9 +473,13 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
         bInChoiceMenu = false;
         ChoicePanelButton.SetActive(false);
 
-        StartCoroutine(GetPlayerOptions(true));
+        if(bPickingCaptain == false)
+        {
+            StartCoroutine(GetPlayerOptions(true));
+            bBlockHand = false;
+        }
+
         SetChoicePanel(false, true);
-        bBlockHand = false;
     }
 
     public void StopAndWaitChoosingSomething()
@@ -510,7 +575,7 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
     public void AddCardToHand(BaseCard newCardToadd)
     {
         PlayingCard newPlayingCard = Instantiate(playingCardPrefab, this.transform);
-        newPlayingCard.Init(this, newCardToadd, bIsPlayer1, -1);
+        newPlayingCard.Init(this, newCardToadd, bIsPlayer1, -1, null);
         newPlayingCard.transform.localPosition = new Vector3(0, -150, 0);
         PlayingCardsInHand.Add(newPlayingCard);
         newPlayingCard.StartMoveCard(-5.0f, false, 0.5f);

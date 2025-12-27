@@ -49,6 +49,23 @@ public class EnemyPlayer : MonoBehaviour
         StartCoroutine(DrawCardsToHand(cardsToDraw));
     }
 
+    public IEnumerator RevealCardAndDraw(BaseCard cardToDraw)
+    {
+        PlayingCard newPlayingCard = Instantiate(playingCardPrefab, this.transform);
+        newPlayingCard.Init(null, cardToDraw, bIsPlayer1, -1, null);
+        newPlayingCard.transform.localPosition = new Vector3(0, 250, 0);
+        newPlayingCard.StartMoveCard(-550, false, 0.5f);
+
+        yield return new WaitForSeconds(0.8f);
+
+        newPlayingCard.StartMoveCard(250, false, 0.3f);
+
+        yield return new WaitForSeconds(0.3f);
+
+        AddCardToHand(null);
+    }
+
+
     private IEnumerator DrawCardsToHand(int cardsToDraw)
     {
         for (int i = 0; i < cardsToDraw; i++)
@@ -79,7 +96,7 @@ public class EnemyPlayer : MonoBehaviour
     public void AddCardToHand(BaseCard newCardToadd)
     {
         PlayingCard newPlayingCard = Instantiate(playingCardPrefab, this.transform);
-        newPlayingCard.Init(null, newCardToadd, bIsPlayer1, -1);
+        newPlayingCard.Init(null, newCardToadd, bIsPlayer1, -1, null);
         newPlayingCard.transform.localPosition = new Vector3(0, 150, 0);
         PlayingCardsInHand.Add(newPlayingCard);
         newPlayingCard.StartMoveCard(-5, false, 0.5f);

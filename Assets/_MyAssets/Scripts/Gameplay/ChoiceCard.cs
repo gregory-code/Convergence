@@ -8,31 +8,46 @@ public class ChoiceCard : MonoBehaviour
 
     private UserPlayer player;
     private PlayingCard myPlayingCard;
+    private BaseCard myBaseCard;
 
-    public void Init(UserPlayer player, PlayingCard myPlayingCard)
+    public void Init(UserPlayer player, PlayingCard myPlayingCard, BaseCard cardEffect)
     {
         this.player = player;
-        this.myPlayingCard = myPlayingCard;
-        visibleCard.SetCard(myPlayingCard.myCard);
-
-        if (myPlayingCard.bInDiscard)
-            return;
-
-        if(myPlayingCard.myCard is PrinceCard prince)
+        if(myPlayingCard == null) // A deck ability
         {
-            sparkAmount.gameObject.SetActive(true);
-            sparkAmount.sprite = StaticGameplayDelegates.GetNumberSpriteWholes()[prince.sparkAmount];
+            myBaseCard = cardEffect;
+            visibleCard.SetCard(cardEffect);
         }
-
-        if (myPlayingCard.myCard is WindWizard windy)
+        else // the card exsists
         {
-            sparkAmount.gameObject.SetActive(true);
-            sparkAmount.sprite = StaticGameplayDelegates.GetNumberSpriteWholes()[windy.sparkAmount];
+            this.myPlayingCard = myPlayingCard;
+            visibleCard.SetCard(myPlayingCard.myCard);
+
+            if (myPlayingCard.bInDiscard)
+                return;
+
+            if (myPlayingCard.myCard is PrinceCard prince)
+            {
+                sparkAmount.gameObject.SetActive(true);
+                sparkAmount.sprite = StaticGameplayDelegates.GetNumberSpriteWholes()[prince.sparkAmount];
+            }
+
+            if (myPlayingCard.myCard is WindWizard windy)
+            {
+                sparkAmount.gameObject.SetActive(true);
+                sparkAmount.sprite = StaticGameplayDelegates.GetNumberSpriteWholes()[windy.sparkAmount];
+            }
         }
     }
 
     public void SelectedThisEffect()
     {
+        if (myPlayingCard == null)
+        {
+            DeckEffect();
+            return;
+        }
+
         if (myPlayingCard.bInDiscard)
             return;
 
@@ -42,5 +57,14 @@ public class ChoiceCard : MonoBehaviour
 
         transform.SetParent(null); // this is awful, absolutely diabolical choice -GR
         transform.position = Vector3.zero;
+    }
+
+    private void DeckEffect()
+    {
+        if(myBaseCard.Type.type == CardType.Ally)
+        {
+            StartCoroutine(player.DrawCardFromDeck(myBaseCard));
+            player.FinishUniqueChoice();
+        }
     }
 }

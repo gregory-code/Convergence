@@ -56,7 +56,7 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     [SerializeField] TextMeshProUGUI magicText;
     [SerializeField] TextMeshProUGUI defenseText;
 
-    public void Init(UserPlayer ownerplayer, BaseCard card, bool bIsPlayer1, int uniqueID)
+    public void Init(UserPlayer ownerplayer, BaseCard card, bool bIsPlayer1, int uniqueID, PlayingCard captainPlayingAlly)
     {
         desiredPos = Vector3.zero;
         originalSize = this.transform.localScale;
@@ -67,10 +67,16 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
         this.ownerPlayer = ownerplayer;
         SetCard(card);
+        
 
         if(myCard != null)
         {
             myCard.uniqueID = uniqueID;
+
+            if (myCard.Type.type == CardType.Ally)
+                if (myCard is CaptainCard newAlly)
+                    if (captainPlayingAlly != null)
+                        newAlly.CaptainWhoPlayedMe = captainPlayingAlly;
         }
 
         StaticGameplayDelegates.onInspect += InspectCard;
@@ -371,6 +377,7 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         Transform discardPile = StaticGameplayDelegates.GetDiscardPileTransform(parentCharacter.bIsPlayer1);
         StaticGameplayDelegates.AddCardToDiscard(this, parentCharacter.bIsPlayer1);
         bInDiscard = true;
+        myCard.Cleanup();
 
         transform.SetParent(discardPile, true);
 
@@ -399,6 +406,7 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         Transform discardPile = StaticGameplayDelegates.GetDiscardPileTransform(usingCaptain.bIsPlayer1);
         StaticGameplayDelegates.AddCardToDiscard(this, usingCaptain.bIsPlayer1);
         bInDiscard = true;
+        myCard.Cleanup();
 
         transform.SetParent(discardPile, true);
 
@@ -430,8 +438,9 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         }
 
         Transform discardPile = StaticGameplayDelegates.GetDiscardPileTransform(usingCaptain.bIsPlayer1);
-        StaticGameplayDelegates.AddCardToDiscard(this, usingCaptain.bIsPlayer1);
+        //StaticGameplayDelegates.AddCardToDiscard(this, usingCaptain.bIsPlayer1);
         bInDiscard = true;
+        myCard.Cleanup();
 
         transform.SetParent(discardPile, true);
 

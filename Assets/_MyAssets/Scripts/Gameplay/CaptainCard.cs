@@ -6,7 +6,9 @@ using UnityEngine;
 public abstract class CaptainCard : BaseCard
 {
     public int maxHealth;
-    public int currentHealth { get; private set; }
+
+    [HideInInspector]
+    public int currentHealth;
 
     public int maxEquipment;
     public bool bIsAllyCard;
@@ -47,6 +49,7 @@ public abstract class CaptainCard : BaseCard
                 health += equipment.bonusHealthStatChange;
             }
         }
+        health += GetTeammateBonusHealthBuffs();
         return health;
     }
 
@@ -64,6 +67,7 @@ public abstract class CaptainCard : BaseCard
         {
             physical += card.myCard.physicalStatLinger;
         }
+        physical = GetTeammatePhysicalBuffs();
         return physical;
     }
 
@@ -155,16 +159,7 @@ public abstract class CaptainCard : BaseCard
         {
             if(bIsAllyCard)
             {
-                thisCard.BeginEnergize();
-                thisCard.BeginPlayAndDiscard(thisCard);
-
-                if(thisCard.DoIOwnThis())
-                {
-                    FindFirstObjectByType<GameMaster>().RequestRemoveAllyFromBoard(thisCard);
-                }
-
-                bDead = true;
-                Cleanup();
+                AllyDeath();
             }
             else
             {
@@ -172,6 +167,20 @@ public abstract class CaptainCard : BaseCard
                 StaticGameplayDelegates.Killed(damageDealt, usedCard, allyDealingDamage, allyRecivingDamage);
             }
         }
+    }
+
+    public void AllyDeath()
+    {
+        thisCard.BeginEnergize();
+        thisCard.BeginPlayAndDiscard(thisCard);
+
+        if (thisCard.DoIOwnThis())
+        {
+            FindFirstObjectByType<GameMaster>().RequestRemoveAllyFromBoard(thisCard);
+        }
+
+        bDead = true;
+        Cleanup();
     }
 
     public void HealHealth(int healthHealed, bool bWasMagic, PlayingCard usedCard, PlayingCard allyDoingTheHealing, bool bTargetingEnemy, PlayingCard allyBeingHealed)
@@ -201,7 +210,7 @@ public abstract class CaptainCard : BaseCard
 
     public override void Init(UserPlayer ownerPlayer)
     {
-        currentHealth = maxHealth;
+        SetToFullHealth();
     }
 
     public override IEnumerator PlayCard(PlayingCard thisPlayingCard, PlayingCard captainUsing, bool bTargetingEnemy, List<PlayingCard> captainTargeting)

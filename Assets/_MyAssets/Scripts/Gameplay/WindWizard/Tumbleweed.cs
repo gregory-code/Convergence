@@ -21,7 +21,7 @@ public class Tumbleweed : CaptainCard
         if (thisPlayingCard.DoIOwnThis())
         {
             thisPlayingCard.StartMoveCard(-350, false, 0.3f);
-            FindAnyObjectByType<GameMaster>().AddAllyToBoard(thisPlayingCard.myCard);
+            FindAnyObjectByType<GameMaster>().AddAllyToBoard(thisPlayingCard.myCard, captainUsing);
         }
 
         yield return new WaitForSeconds(0.2f);

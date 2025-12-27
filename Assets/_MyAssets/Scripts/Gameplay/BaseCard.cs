@@ -122,6 +122,37 @@ public abstract class BaseCard : ScriptableObject
         return 0;
     }
 
+    public int GetTeammateBonusHealthBuffs()
+    {
+        int bonusHealth = 0;
+
+        List<PlayingCard> allies = StaticGameplayDelegates.GetAllAllies(true);
+        if(this is CaptainCard thisCapatain)
+        {
+            if(thisCapatain.Type.type == CardType.Ally)
+            {
+                foreach (PlayingCard ally in allies)
+                {
+                    if (ally.myCard is CaptainCard allyCaptain)
+                    {
+                        foreach (PlayingCard equipment in allyCaptain.GetEquipments())
+                        {
+                            if (equipment.myCard is CrownOfNature crown)
+                            {
+                                if (thisCapatain.CaptainWhoPlayedMe == crown.crownsOwner)
+                                {
+                                    bonusHealth++;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return bonusHealth;
+    }
+
     public int GetEnemyDefenseBuffs()
     {
         return 0;
