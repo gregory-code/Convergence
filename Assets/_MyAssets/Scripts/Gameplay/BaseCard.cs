@@ -51,13 +51,12 @@ public abstract class BaseCard : ScriptableObject
         if (bTargetingEnemy == false || captainTargeting.Count <= 0)
             yield break;
 
-        List<PlayingCard> enemyTeam = StaticGameplayDelegates.GetAllAllies(false);
-        List<PlayingCard> allyTeam = StaticGameplayDelegates.GetAllAllies(true);
-        List<PlayingCard> teamConsidering = (enemyTeam.Contains(captainTargeting[0])) ? enemyTeam : allyTeam;
+        List<PlayingCard> allyTeam = StaticGameplayDelegates.GetAllAllies(true, captainUsing);
+        List<PlayingCard> enemyTeam = StaticGameplayDelegates.GetAllAllies(false, captainUsing);
 
         bool bEnemyIsEnergized = false;
 
-        foreach (PlayingCard enemy in teamConsidering)
+        foreach (PlayingCard enemy in enemyTeam)
         {
             if (enemy.bEnergized)
                 bEnemyIsEnergized = true;
@@ -86,8 +85,8 @@ public abstract class BaseCard : ScriptableObject
 
     public int CalculateAttackDamage(int baseDamage, bool bIsMagic, bool bIgnoreDefense, PlayingCard thisPlayingCard, PlayingCard captainUsing, bool bTargetingEnemy, PlayingCard captainTargeting)
     {
-        List<PlayingCard> allyTeam = StaticGameplayDelegates.GetAllAllies(true);
-        List<PlayingCard> enemyTeam = StaticGameplayDelegates.GetAllAllies(false);
+        List<PlayingCard> allyTeam = StaticGameplayDelegates.GetAllAllies(true, captainUsing);
+        List<PlayingCard> enemyTeam = StaticGameplayDelegates.GetAllAllies(false, captainUsing);
 
         int damage = baseDamage;
 
@@ -126,11 +125,14 @@ public abstract class BaseCard : ScriptableObject
     {
         int bonusHealth = 0;
 
-        List<PlayingCard> allies = StaticGameplayDelegates.GetAllAllies(true);
         if(this is CaptainCard thisCapatain)
         {
+            List<PlayingCard> allies = StaticGameplayDelegates.GetAllAllies(true, thisCapatain.thisCard);
             if(thisCapatain.Type.type == CardType.Ally)
             {
+                if (allies == null)
+                    return 0;
+
                 foreach (PlayingCard ally in allies)
                 {
                     if (ally.myCard is CaptainCard allyCaptain)

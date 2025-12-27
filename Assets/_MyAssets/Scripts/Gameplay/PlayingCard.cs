@@ -406,6 +406,8 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         Transform discardPile = StaticGameplayDelegates.GetDiscardPileTransform(usingCaptain.bIsPlayer1);
         StaticGameplayDelegates.AddCardToDiscard(this, usingCaptain.bIsPlayer1);
         bInDiscard = true;
+
+        if(myCard != null)
         myCard.Cleanup();
 
         transform.SetParent(discardPile, true);
@@ -696,10 +698,17 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     {
         bHovering = false;
 
-        List<PlayingCard> enemies = StaticGameplayDelegates.GetAllAllies(false);
-        foreach (PlayingCard enemy in enemies)
+        if(myCard != null)
         {
-            enemy.AttackPredictionPanel.SetActive(false);
+            if(myCard.uniqueID != -1)
+            {
+                List<PlayingCard> enemies = StaticGameplayDelegates.GetAllAllies(false, this);
+                foreach (PlayingCard enemy in enemies)
+                {
+                    enemy.AttackPredictionPanel.SetActive(false);
+                }
+            }
+
         }
 
         if(ownerPlayer != null)
@@ -783,7 +792,7 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
                 {
                     ownerPlayer.currentCaptain.DisplayAttackStats(false, false, ownerPlayer.currentCard, ownerPlayer.currentCaptain);
 
-                    List<PlayingCard> enemies = StaticGameplayDelegates.GetAllAllies(false);
+                    List<PlayingCard> enemies = StaticGameplayDelegates.GetAllAllies(false, ownerPlayer.currentCaptain);
                     foreach(PlayingCard enemy in enemies)
                     {
                         enemy.DisplayAttackStats(false, true, ownerPlayer.currentCard, ownerPlayer.currentCaptain);
@@ -805,17 +814,7 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
         ownerPlayer.ClearLineAttacks();
 
-        List<PlayingCard> enemies = StaticGameplayDelegates.GetAllAllies(false);
-        foreach (PlayingCard enemy in enemies)
-        {
-            enemy.DisplayAttackStats(true, true, ownerPlayer.currentCard, ownerPlayer.currentCaptain);
-        }
-
-        List<PlayingCard> allies = StaticGameplayDelegates.GetAllAllies(true);
-        foreach (PlayingCard ally in allies)
-        {
-            ally.DisplayAttackStats(true, true, ownerPlayer.currentCard, ownerPlayer.currentCaptain);
-        }
+        FindFirstObjectByType<GameMaster>().ResetAllDisplayAttackStats();
 
         if (bPreventRegularMoving)
             return;

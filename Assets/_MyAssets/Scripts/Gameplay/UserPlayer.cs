@@ -216,17 +216,7 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
         BlockHand(DaybreakCards.Count > 0);
         StartCoroutine(GetPlayerOptions(DaybreakCards.Count <= 0));
 
-        List<PlayingCard> enemies = StaticGameplayDelegates.GetAllAllies(false);
-        foreach (PlayingCard enemy in enemies)
-        {
-            enemy.DisplayAttackStats(true, true, null, null);
-        }
-
-        List<PlayingCard> allies = StaticGameplayDelegates.GetAllAllies(true);
-        foreach (PlayingCard ally in allies)
-        {
-            ally.DisplayAttackStats(true, true, null, null);
-        }
+        gameMaster.ResetAllDisplayAttackStats();
     }
 
     public void HoldUpReaction()
@@ -798,7 +788,7 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
     {
         currentTargets.Clear();
 
-        foreach(PlayingCard card in StaticGameplayDelegates.GetAllAllies(true))
+        foreach(PlayingCard card in StaticGameplayDelegates.GetAllAllies(true, captainUsing))
             currentTargets.Add(card);
 
         ClearLineAttacks();

@@ -164,7 +164,7 @@ public class EnemyPlayer : MonoBehaviour
         {
             if(action.bAttackingCard)
             {
-                List<PlayingCard> myTeam = StaticGameplayDelegates.GetAllAllies(true);
+                List<PlayingCard> myTeam = StaticGameplayDelegates.GetAllAllies(false, captainUsing);
                 bool bAllyIsEnergized = false;
 
                 foreach (PlayingCard ally in myTeam)
@@ -272,17 +272,7 @@ public class EnemyPlayer : MonoBehaviour
         reactionCardPrediction.myCard.bWaitForReaction = false;
         ClearLineAttacks();
 
-        List<PlayingCard> enemies = StaticGameplayDelegates.GetAllAllies(false);
-        foreach (PlayingCard enemy in enemies)
-        {
-            enemy.DisplayAttackStats(true, true, null, null);
-        }
-
-        List<PlayingCard> allies = StaticGameplayDelegates.GetAllAllies(true);
-        foreach (PlayingCard ally in allies)
-        {
-            ally.DisplayAttackStats(true, true, null, null);
-        }
+        gameMaster.ResetAllDisplayAttackStats();
     }
 
     public void ClearLineAttacks()

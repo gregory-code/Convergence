@@ -204,16 +204,63 @@ public class GameMaster : MonoBehaviourPunCallbacks
         return 0;
     }
 
-    public List<PlayingCard> GetAllAllies(bool bGetMyTeam) 
-    { 
-        if(bGetMyTeam)
+    public void ResetAllDisplayAttackStats()
+    {
+        foreach (PlayingCard enemy in Player1Allies)
         {
-            return (bIsPlayer1) ? Player1Allies : Player2Allies;
+            enemy.DisplayAttackStats(true, true, null, null);
         }
-        else
+        foreach (PlayingCard ally in Player2Allies)
         {
-            return (bIsPlayer1) ? Player2Allies : Player1Allies;
+            ally.DisplayAttackStats(true, true, null, null);
         }
+    }
+
+    public List<PlayingCard> GetAllAllies(bool bGetMyTeam, PlayingCard captainForReference) 
+    {
+        if (bIsPlayer1)
+        {
+            for (int i = 0; i < Player1Allies.Count; i++)
+            {
+                if (Player1Allies[i].myCard.uniqueID == captainForReference.myCard.uniqueID)
+                {
+                    return (bGetMyTeam) ? Player1Allies : Player2Allies;
+                }
+            }
+        }
+        else if (bIsPlayer1 == false)
+        {
+            for (int i = 0; i < Player2Allies.Count; i++)
+            {
+                if (Player2Allies[i].myCard.uniqueID == captainForReference.myCard.uniqueID)
+                {
+                    return (bGetMyTeam) ? Player2Allies : Player1Allies;
+                }
+            }
+        }
+
+        if (bIsPlayer1) // an enemy call
+        {
+            for (int i = 0; i < Player2Allies.Count; i++)
+            {
+                if (Player2Allies[i].myCard.uniqueID == captainForReference.myCard.uniqueID)
+                {
+                    return (bGetMyTeam) ? Player2Allies : Player1Allies;
+                }
+            }
+        }
+        else if (bIsPlayer1 == false)
+        {
+            for (int i = 0; i < Player1Allies.Count; i++)
+            {
+                if (Player1Allies[i].myCard.uniqueID == captainForReference.myCard.uniqueID)
+                {
+                    return (bGetMyTeam) ? Player1Allies : Player2Allies;
+                }
+            }
+        }
+
+        return null;
     }
 
     public List<PlayingCard> GetDiscardPile(bool bGetMyDiscardPile)

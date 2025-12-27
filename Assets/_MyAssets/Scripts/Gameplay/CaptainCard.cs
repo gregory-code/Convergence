@@ -67,7 +67,7 @@ public abstract class CaptainCard : BaseCard
         {
             physical += card.myCard.physicalStatLinger;
         }
-        physical = GetTeammatePhysicalBuffs();
+        physical += GetTeammatePhysicalBuffs();
         return physical;
     }
 
@@ -210,6 +210,9 @@ public abstract class CaptainCard : BaseCard
 
     public override void Init(UserPlayer ownerPlayer)
     {
+        if (thisCard == null)
+            return;
+
         SetToFullHealth();
     }
 

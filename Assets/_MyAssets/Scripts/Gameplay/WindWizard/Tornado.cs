@@ -49,7 +49,7 @@ public class Tornado : CaptainCard
 
         if (thisPlayingCard.DoIOwnThis())
         {
-            List<PlayingCard> enemies = StaticGameplayDelegates.GetAllAllies(false);
+            List<PlayingCard> enemies = StaticGameplayDelegates.GetAllAllies(false, CaptainWhoPlayedMe);
             player.currentReactionCard = thisPlayingCard;
             player.reactionCaptainUsingAnticipating = thisPlayingCard;
             player.reactionCaptainTargetingAnticipating = enemies;
