@@ -5,6 +5,9 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "TCG/Prince/Prince")]
 public class PrinceCard : CaptainCard
 {
+    UserPlayer player;
+    public int sparkAmount { get; private set; }
+
     public override void Init(UserPlayer ownerPlayer)
     {
         base.Init(ownerPlayer);
@@ -19,41 +22,67 @@ public class PrinceCard : CaptainCard
         yield return new WaitForEndOfFrame();
     }
 
-    private void TurnStarted(bool bPlayers1Turn)
+    public override IEnumerator ActivateEffect(PlayingCard thisPlayingCard)
     {
-        List<PlayingCard> allyTeam = StaticGameplayDelegates.GetAllAllies(true); // this fails sadly
-        foreach (PlayingCard card in allyTeam)
-        {
-            if (card.myCard is PrinceCard captain)
-            {
-                if(card.myCard == this)
-                    thisCard = card;
-            }
-        }
-
-        if(thisCard == null)
-        {
-            return;
-        }
-
-        if (thisCard.bIsPlayer1 != bPlayers1Turn)
-            return;
+        yield return base.ActivateEffect(thisPlayingCard);
 
         int sparkGain = 0;
 
-        foreach(PlayingCard card in allyTeam)
+        List<PlayingCard> allyTeam = StaticGameplayDelegates.GetAllAllies(true);
+        foreach (PlayingCard card in allyTeam)
         {
-            if(card.myCard is CaptainCard captain)
+            if (card.myCard is CaptainCard captain)
             {
+                if (captain.bIsAllyCard)
+                    continue;
                 if (captain.currentHealth >= captain.maxHealth && card.DoIOwnThis() && captain != this)
+                {
                     sparkGain++;
+                }
             }
         }
 
-        if (sparkGain <= 0 && thisCard != null)
+        player.RemoveChioceCard(thisPlayingCard);
+
+        if (sparkGain <= 0)
+            yield break;
+
+        FindAnyObjectByType<GameMaster>().RequestIncreaseSpark(thisPlayingCard, sparkGain);
+    }
+
+    private void TurnStarted(UserPlayer player, bool bPlayers1Turn)
+    {
+        int sparkGain = 0;
+
+        List<PlayingCard> allyTeam = StaticGameplayDelegates.GetAllAllies(true);
+        foreach (PlayingCard card in allyTeam)
+        {
+            if (card.myCard is CaptainCard captain)
+            {
+                if (captain.bIsAllyCard)
+                    continue;
+
+                if (captain.currentHealth >= captain.maxHealth && card.DoIOwnThis() && captain != this)
+                {
+                    sparkGain++;
+                }
+            }
+        }
+
+        this.player = player;
+
+        if (thisCard == null)
             return;
 
-        FindAnyObjectByType<GameMaster>().RequestIncreaseSpark(thisCard, sparkGain);
+        if (thisCard.bIsPlayer1 != bPlayers1Turn || thisCard.DoIOwnThis() == false)
+            return;
+
+        sparkAmount = sparkGain;
+
+        if(sparkAmount > 0)
+        {
+            player.AddToDaybreak(thisCard);
+        }
     }
 
     public override void Cleanup()

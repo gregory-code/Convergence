@@ -4610,6 +4610,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 9525ea9fabfe95445a3b98c7861bba35, type: 2}
   - {fileID: 11400000, guid: 9a051f7140dd2934ba16d0c848d4c3f2, type: 2}
   - {fileID: 11400000, guid: 0667a70247c54b84ea1ae09848aaae1c, type: 2}
+  - {fileID: 11400000, guid: c085fea512755c444a5fe642aa2c7266, type: 2}
+  - {fileID: 11400000, guid: 2c14be6d23740cd41819bc42632164f7, type: 2}
   CaptainCardsLibrary:
   - {fileID: 11400000, guid: 8a38af1188c326a4d8a11fe641a2318c, type: 2}
   - {fileID: 11400000, guid: 3c9c4a75f2a511d408cf0fb92b91ca06, type: 2}
@@ -4620,6 +4622,12 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 6eb88eb0489d7f84e9d433297bc515eb, type: 2}
   - {fileID: 11400000, guid: baa7a53ba580cb84ab2593383a604be6, type: 2}
   - {fileID: 11400000, guid: 6ef7641e8b2e7c8499c21bb5a7cadbef, type: 2}
+  - {fileID: 11400000, guid: 5902307366459724b94ad9d99a308a8a, type: 2}
+  - {fileID: 11400000, guid: e747ea3a54a5b504697de5ca60eb0e9c, type: 2}
+  - {fileID: 11400000, guid: 1d4ff143d2b3d3743a0409998f8fea8f, type: 2}
+  - {fileID: 11400000, guid: d0f26277b7b3f7c45ac0565085896935, type: 2}
+  - {fileID: 11400000, guid: 4fc2fdf1c4d564d4699cf92788ba3678, type: 2}
+  - {fileID: 11400000, guid: f7c55e9a4cf15804fb76ace01db16e44, type: 2}
   CardLibrary:
   - {fileID: 11400000, guid: ee6ef29608136ba4b9564ca955982143, type: 2}
   - {fileID: 11400000, guid: 61c9e250889c6294ba092079e62ede7f, type: 2}
@@ -4634,6 +4642,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: aa9940e3e4b4d724abf2fa5c18c37ad2, type: 2}
   - {fileID: 11400000, guid: 5487ff9f1ced39549875c6e6531a1a1a, type: 2}
   - {fileID: 11400000, guid: 2d0efb8d3149d374994b0d16a84b4e87, type: 2}
+  - {fileID: 11400000, guid: 5a7c97655ea196143b83e1cafabea4af, type: 2}
   CardLibraryTransform: {fileID: 158896872}
   CardPreviewPrefab: {fileID: 2450607815523520782, guid: db57ee80dd977914ab43f7855c527a7e, type: 3}
   CardBarTransform: {fileID: 556933579}
@@ -4895,7 +4904,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 0/30
+  m_text: 0/40
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 70244adfe4912444d9a7d7d15789eda0, type: 2}
   m_sharedMaterial: {fileID: 118355438670989509, guid: 70244adfe4912444d9a7d7d15789eda0, type: 2}
@@ -9619,6 +9628,7 @@ MonoBehaviour:
   Overlay: {fileID: 1589559475506017407}
   RightVial: {fileID: 4250202411584565162}
   LeftVial: {fileID: 6934333829984572182}
+  CardBack: {fileID: 0}
   CardName: {fileID: 9128478469391868118}
   CardEffectText: {fileID: 6606535758776534081}
   HealthText: {fileID: 8265648048666170956}

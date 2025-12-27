@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -38,6 +39,13 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
     [SerializeField] private CanvasGroup playerOptionsCanvasGroup;
     [SerializeField] private CanvasGroup playerReactionCanvasGroup;
 
+    [SerializeField] private TextMeshProUGUI ChoicePanelButtonText;
+    [SerializeField] private Image ChoicePanelButtonImage;
+    [SerializeField] private GameObject ChoicePanelButton;
+    [SerializeField] private Sprite ChoicePanelButtonShowTable;
+    [SerializeField] private Sprite ChoicePanelButtonHideTable;
+    [SerializeField] private Sprite ChoicePanelButtonExit;
+
     [SerializeField] private GameObject playerReactionHoldUpGroup;
     [SerializeField] private Image reactionTimerImage;
     private float reactionTime;
@@ -71,6 +79,17 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
     [SerializeField] private PlayingCard playingCardPrefab;
     [SerializeField] private List<PlayingCard> PlayingCardsInHand = new List<PlayingCard>(); // FOR TESTING TO SEE THE VALUES
     private List<PlayingCard> CardsToMulligan = new List<PlayingCard>();
+
+    private List<PlayingCard> DaybreakCards = new List<PlayingCard>();
+    private List<ChoiceCard> ChoiceCards = new List<ChoiceCard>();
+    [SerializeField] private ChoiceCard ChoiceCardPrefab;
+    [SerializeField] private Transform ChoiceCardPanelTransform;
+    [SerializeField] private CanvasGroup ChoicePanel;
+    [SerializeField] private TextMeshProUGUI ChoicePanelInstructions;
+
+    public PlayingCard captainPlayingAlly { get; private set; }
+
+    public void AddToDaybreak(PlayingCard thisCard) { DaybreakCards.Add(thisCard); }
 
     private bool bIsInspecting;
 
@@ -120,20 +139,38 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
 
     public void WaitingForReaction(bool bWaiting, PlayingCard captainToPlay)
     {
-        BlockHand(bWaiting);
-        StartCoroutine(GetPlayerOptions(!bWaiting));
+        if (DaybreakCards.Count > 0)
+        {
+            BlockHand(true);
+            StartCoroutine(GetPlayerOptions(false));
+        }
+        else
+        {
+            BlockHand(bWaiting);
+            StartCoroutine(GetPlayerOptions(!bWaiting));
+        }
 
         if(currentReactionCard != null && bWaiting)
         {
-            StartCoroutine(currentReactionCard.PlayReaction(captainToPlay, captainToPlay.transform.parent, currentReactionCard.myCard));
+            if(currentReactionCard.myCard.Type.type == CardType.Ally)
+            {
+
+            }
+            else
+            {
+                StartCoroutine(currentReactionCard.PlayReaction(captainToPlay, captainToPlay.transform.parent, currentReactionCard.myCard));
+            }
         }
     }
 
     // This is when it sees an enemy throwing out a reaction //
     public bool bAllowingReactions { get; private set; }
-    public BaseCard reactionAnticipating { get; private set; }
-    public PlayingCard reactionCaptainUsingAnticipating { get; private set; }
-    public List<PlayingCard> reactionCaptainTargetingAnticipating { get; private set; }
+    [HideInInspector]
+    public BaseCard reactionAnticipating;
+    [HideInInspector]
+    public PlayingCard reactionCaptainUsingAnticipating;
+    [HideInInspector]
+    public List<PlayingCard> reactionCaptainTargetingAnticipating;
     public void AllowReaction(bool bAllow, BaseCard cardToPlay, PlayingCard captainUsing, bool bTargetingEnemy, List<PlayingCard> captainTargeting)
     {
         bAllowingReactions = bAllow;
@@ -177,8 +214,9 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
     public void EnemyFinishReaction()
     {
         currentReactionCard.myCard.bWaitForReaction = false;
-        BlockHand(false);
-        StartCoroutine(GetPlayerOptions(true));
+
+        BlockHand(DaybreakCards.Count > 0);
+        StartCoroutine(GetPlayerOptions(DaybreakCards.Count <= 0));
 
         List<PlayingCard> enemies = StaticGameplayDelegates.GetAllAllies(false);
         foreach (PlayingCard enemy in enemies)
@@ -210,7 +248,8 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
         currentCard = cardToPlay;
         currentCaptain = captainUsing;
         currentTargets = captainTargeting;
-        gameMaster.RequestPlayCard(cardToPlay, captainUsing, bTargetingEnemy, captainTargeting, false);
+        captainPlayingAlly = captainUsing;
+        gameMaster.RequestPlayCard(cardToPlay, captainUsing, bTargetingEnemy, captainTargeting, false, false);
     }
 
     public void PlayClientCard(bool bTargetingEnemy)
@@ -223,9 +262,80 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
         StartCoroutine(RemoveCardFromHand(currentCard));
     }
 
+    public void ClickedChoicePanelButton()
+    {
+        if(bInChoiceMenu)
+        {
+            bShowingTable = !bShowingTable;
+            SetPanelButtonTableState(bShowingTable);
+
+            SetChoicePanel(bShowingTable, false);
+        }
+
+        if(bInDiscardPile)
+        {
+            SetChoicePanel(false, true);
+            ChoicePanelButton.SetActive(false);
+            bInDiscardPile = false;
+        }
+    }
+
+    public void ShowDiscardPile(bool bMyDiscardPile)
+    {
+        if (bInChoiceMenu)
+            return;
+
+        ChoicePanelInstructions.text = "Discard Pile";
+
+        ChoicePanelButton.SetActive(true);
+
+        SetChoicePanel(true, false);
+        ChoicePanelButtonImage.sprite = ChoicePanelButtonExit;
+        ChoicePanelButtonText.text = "Close Menu";
+        bInDiscardPile = true;
+
+        List<PlayingCard> discardPile = gameMaster.GetDiscardPile(bMyDiscardPile);
+
+        foreach (ChoiceCard choice in ChoiceCards)
+        {
+            Destroy(choice.gameObject);
+        }
+        ChoiceCards.Clear();
+
+        foreach (PlayingCard card in discardPile)
+        {
+            ChoiceCard newDiscardCard = Instantiate(ChoiceCardPrefab, ChoiceCardPanelTransform.transform);
+            newDiscardCard.Init(this, card);
+            ChoiceCards.Add(newDiscardCard);
+        }
+    }
+
+    private bool bInChoiceMenu;
+    private bool bInDiscardPile;
+    private bool bShowingTable;
+
+    private void SetPanelButtonTableState(bool ShowTable)
+    {
+        ChoicePanelButtonImage.sprite = (ShowTable) ? ChoicePanelButtonShowTable : ChoicePanelButtonHideTable ;
+        ChoicePanelButtonText.text = (ShowTable) ? "Show Table" : "Hide Table" ;
+    }
+
+    private void SetChoicePanel(bool bShow, bool bFullyHide)
+    {
+        ChoicePanel.alpha = bShow ? 0.7f : 0.2f;
+        ChoicePanel.interactable = bShow ? true : false ;
+        ChoicePanel.blocksRaycasts = bShow ? true : false ;
+        if (bFullyHide)
+        {
+            ChoicePanel.alpha = 0.0f;
+            ChoicePanelButton.gameObject.SetActive(false);
+        }
+    }
+
     public void StartPickNewCaptain()
     {
         BlockHand(true);
+        SetChoicePanel(false, true);
         StartCoroutine(GetPlayerOptions(false));
         StartCoroutine(PickNewCaptain());
     }
@@ -249,12 +359,78 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
 
     public void StartTurn(bool shouldDraw)
     {
-        StartCoroutine(GetPlayerOptions(true));
-        bBlockHand = false;
+        bBlockHand = true;
 
         if(shouldDraw)
         {
             gameMaster.RequestDrawCards(1);
+        }
+
+        DaybreakCards.Clear();
+        foreach(ChoiceCard choice in ChoiceCards)
+        {
+            Destroy(choice.gameObject);
+        }
+        ChoiceCards.Clear();
+
+        StartCoroutine(DaybreakCheck());
+
+        StaticGameplayDelegates.TurnStarted(this, bIsPlayer1);
+    }
+
+    public IEnumerator DaybreakCheck()
+    {
+        yield return new WaitForSeconds(0.1f);
+
+        if(DaybreakCards.Count > 0)
+        {
+            ChoicePanelInstructions.text = "Trigger the effects";
+
+            bInChoiceMenu = true;
+            bInDiscardPile = false;
+            bShowingTable = true;
+            ChoicePanelButton.SetActive(true);
+
+            SetPanelButtonTableState(true);
+            SetChoicePanel(true, false);
+
+            foreach (PlayingCard card in DaybreakCards)
+            {
+                ChoiceCard newDaybreak = Instantiate(ChoiceCardPrefab, ChoiceCardPanelTransform.transform);
+                newDaybreak.Init(this, card);
+                ChoiceCards.Add(newDaybreak);
+            }
+
+            while(DaybreakCards.Count > 0)
+            {
+                yield return new WaitForEndOfFrame();
+            }
+        }
+
+        gameMaster.RequestRemoveLingers();
+
+        bInChoiceMenu = false;
+        ChoicePanelButton.SetActive(false);
+
+        StartCoroutine(GetPlayerOptions(true));
+        SetChoicePanel(false, true);
+        bBlockHand = false;
+    }
+
+    public void StopAndWaitChoosingSomething()
+    {
+        ChoicePanelButton.SetActive(false);
+        SetChoicePanel(false, false);
+    }
+
+    public void RemoveChioceCard(PlayingCard daybreakCard)
+    {
+        DaybreakCards.Remove(daybreakCard);
+
+        if (DaybreakCards.Count > 0)
+        {
+            SetChoicePanel(true, false);
+            ChoicePanelButton.SetActive(true);
         }
     }
 
@@ -295,6 +471,8 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
     public void EndTurn()
     {
         StartCoroutine(GetPlayerOptions(false));
+        DaybreakCards.Clear();
+        SetChoicePanel(false, true);
         gameMaster.RequestSwitchTurns();
     }
 
@@ -332,12 +510,17 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
     public void AddCardToHand(BaseCard newCardToadd)
     {
         PlayingCard newPlayingCard = Instantiate(playingCardPrefab, this.transform);
-        newPlayingCard.Init(this, newCardToadd, bIsPlayer1);
+        newPlayingCard.Init(this, newCardToadd, bIsPlayer1, -1);
         newPlayingCard.transform.localPosition = new Vector3(0, -150, 0);
         PlayingCardsInHand.Add(newPlayingCard);
         newPlayingCard.StartMoveCard(-5.0f, false, 0.5f);
 
         ReOrganizeHand();
+    }
+
+    public void PlayAllyCard(PlayingCard allyCard)
+    {
+        StartCoroutine(RemoveCardFromHand(allyCard));
     }
 
     private IEnumerator RemoveCardFromHand(PlayingCard cardToRemove)

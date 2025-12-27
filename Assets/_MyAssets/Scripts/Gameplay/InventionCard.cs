@@ -14,6 +14,16 @@ public abstract class InventionCard : BaseCard
         yield return new WaitForEndOfFrame();
     }
 
+    public override IEnumerator ActivateEffect(PlayingCard thisPlayingCard)
+    {
+        yield return new WaitForEndOfFrame();
+    }
+
+    public override IEnumerator SecondaryPlayCard(PlayingCard thisPlayingCard, PlayingCard captainUsing, bool bTargetingEnemy, List<PlayingCard> captainTargeting)
+    {
+        yield return new WaitForEndOfFrame();
+    }
+
     public override CardPlayContext PredictCard(PlayingCard thisPlayingCard, PlayingCard captainUsing, bool bTargetingEnemy, PlayingCard captainTargeting)
     {
         CardPlayContext context = new CardPlayContext

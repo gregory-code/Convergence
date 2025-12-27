@@ -41,7 +41,9 @@ public class VisibleCard : MonoBehaviour
         if(CardBack != null)
             CardBack.SetActive(false);
 
-        if (card.Type.type != CardType.Captain)
+        RightVial.sprite = card.Type.icon;
+
+        if (card.Type.type == CardType.Invention || card.Type.type == CardType.Action || card.Type.type == CardType.Equipment || card.Type.type == CardType.Reaction)
         {
             HealthText.text = "";
             EquipmentText.text = "";
@@ -54,10 +56,19 @@ public class VisibleCard : MonoBehaviour
             if(captain)
             {
                 SetHealthText(captain.maxHealth, captain.maxHealth);
-                EquipmentText.text = "" + captain.maxEquipment;
-            }
 
-            LeftVial.sprite = card.Type.outline;
+                if (captain.bIsAllyCard == false)
+                {
+                    EquipmentText.text = "" + captain.maxEquipment;
+                    LeftVial.sprite = card.Type.outline;
+                }
+                else
+                {
+                    EquipmentText.text = "";
+                    LeftVial.sprite = card.Type.allyIcon;
+                    RightVial.sprite = card.Type.icon;
+                }
+            }
         }
 
         if(card.SeriesOverlay == null)
@@ -78,7 +89,7 @@ public class VisibleCard : MonoBehaviour
 
         CardArt.sprite = card.CardArt;
         CardName.text = card.CardName;
-        RightVial.sprite = card.Type.icon;
+
 
     }
 }

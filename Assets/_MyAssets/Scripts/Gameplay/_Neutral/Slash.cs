@@ -17,7 +17,7 @@ public class Slash : ActionCard
     public override IEnumerator PlayCard(PlayingCard thisPlayingCard, PlayingCard captainUsing, bool bTargetingEnemy, List<PlayingCard> captainTargeting)
     {
         StaticGameplayDelegates.onDealtDamage += DamageWasDealt;
-        StaticGameplayDelegates.onTurnStarted += TurnHasStarted;
+        StaticGameplayDelegates.onRemoveLingers += RemoveLingers;
 
         yield return base.PlayCard(thisPlayingCard, captainUsing, bTargetingEnemy, captainTargeting);
 
@@ -54,7 +54,7 @@ public class Slash : ActionCard
                 bActiveInEffectLinger = true;
                 attachedCaptain = allyDealingDamage;
 
-                cardThatWasUsed.BeginCardAttachment(allyDealingDamage, captain.GetSlotsInEffect());
+                cardThatWasUsed.BeginCardAttachment(allyDealingDamage, captain.GetNextAvailiableSlots());
                 captain.AttachLinger(cardThatWasUsed, allyDealingDamage);
 
                 return;
@@ -64,7 +64,7 @@ public class Slash : ActionCard
         cardThatWasUsed.BeginPlayAndDiscard(allyDealingDamage);
     }
 
-    private void TurnHasStarted(bool bPlayers1Turn)
+    private void RemoveLingers(bool bPlayers1Turn)
     {
         if(bPlayers1Turn == bIsPlayer1 && bActiveInEffectLinger)
         {
@@ -82,6 +82,6 @@ public class Slash : ActionCard
         base.Cleanup();
 
         StaticGameplayDelegates.onDealtDamage -= DamageWasDealt;
-        StaticGameplayDelegates.onTurnStarted -= TurnHasStarted;
+        StaticGameplayDelegates.onRemoveLingers -= RemoveLingers;
     }
 }

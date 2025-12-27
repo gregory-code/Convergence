@@ -16,7 +16,7 @@ public class Guard : ReactionCard
 
     public override IEnumerator PlayCard(PlayingCard thisPlayingCard, PlayingCard captainUsing, bool bTargetingEnemy, List<PlayingCard> captainTargeting)
     {
-        StaticGameplayDelegates.onTurnStarted += TurnHasStarted;
+        StaticGameplayDelegates.onRemoveLingers += RemoveLingers;
 
         yield return base.PlayCard(thisPlayingCard, captainUsing, bTargetingEnemy, captainTargeting);
 
@@ -26,14 +26,14 @@ public class Guard : ReactionCard
             bActiveInEffectLinger = true;
             attachedCaptain = captainTargeting[0];
 
-            thisPlayingCard.BeginCardAttachment(captainTargeting[0], captain.GetSlotsInEffect());
+            thisPlayingCard.BeginCardAttachment(captainTargeting[0], captain.GetNextAvailiableSlots());
             captain.AttachLinger(thisPlayingCard, captainUsing);
         }
 
         yield return new WaitForEndOfFrame();
     }
 
-    private void TurnHasStarted(bool bPlayers1Turn)
+    private void RemoveLingers(bool bPlayers1Turn)
     {
         if (bPlayers1Turn == bIsPlayer1 && bActiveInEffectLinger)
         {
@@ -50,6 +50,6 @@ public class Guard : ReactionCard
     {
         base.Cleanup();
 
-        StaticGameplayDelegates.onTurnStarted -= TurnHasStarted;
+        StaticGameplayDelegates.onRemoveLingers -= RemoveLingers;
     }
 }

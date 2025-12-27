@@ -16,7 +16,7 @@ public abstract class EquipmentCard : BaseCard
     {
         if (allyGettingTheEquipment.myCard is CaptainCard captain)
         {
-            equipment.BeginCardAttachment(allyGettingTheEquipment, captain.GetSlotsInEffect());
+            equipment.BeginCardAttachment(allyGettingTheEquipment, captain.GetNextAvailiableSlots());
             captain.AttachEquipment(equipment, allyDoingTheEquipping);
         }
 
@@ -61,6 +61,16 @@ public abstract class EquipmentCard : BaseCard
 
         AttachEquipment(thisPlayingCard, captainUsing, captainTargeting[0]);
         
+        yield return new WaitForEndOfFrame();
+    }
+
+    public override IEnumerator ActivateEffect(PlayingCard thisPlayingCard)
+    {
+        yield return new WaitForEndOfFrame();
+    }
+
+    public override IEnumerator SecondaryPlayCard(PlayingCard thisPlayingCard, PlayingCard captainUsing, bool bTargetingEnemy, List<PlayingCard> captainTargeting)
+    {
         yield return new WaitForEndOfFrame();
     }
 

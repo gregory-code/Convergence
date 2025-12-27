@@ -56,7 +56,7 @@ public class AuthRegister : MonoBehaviour
             FirebaseException firebaseException = loginTask.Exception.GetBaseException() as FirebaseException;
             AuthError error = (AuthError)firebaseException.ErrorCode;
 
-            string message = "Failed";
+            /*string message = "Failed";
             switch (error)
             {
                 case AuthError.MissingEmail: message = "No Email"; break;
@@ -65,7 +65,7 @@ public class AuthRegister : MonoBehaviour
                 case AuthError.InvalidEmail: message = "Wrong Email"; break;
                 case AuthError.UserNotFound: message = "User does not exist"; break;
                 case AuthError.NetworkRequestFailed: message = "There's no internet"; break;
-            }
+            }*/
             //NotificationScript.createNotif($"Failed to login: {message}", Color.red);
 
             //loading.hide();
@@ -112,7 +112,7 @@ public class AuthRegister : MonoBehaviour
                 FirebaseException firebaseException = registerTask.Exception.GetBaseException() as FirebaseException;
                 AuthError errorCode = (AuthError)firebaseException.ErrorCode;
 
-                string message = "Failed";
+                /*string message = "Failed";
                 switch (errorCode)
                 {
                     case AuthError.MissingEmail: message = "Missing Email"; break;
@@ -120,7 +120,7 @@ public class AuthRegister : MonoBehaviour
                     case AuthError.WeakPassword: message = "Weak Password"; break;
                     case AuthError.EmailAlreadyInUse: message = "Email Already in use"; StartCoroutine(Login(email, password)); break;
                     case AuthError.NetworkRequestFailed: message = "There's no internet"; break;
-                }
+                }*/
                 //NotificationScript.createNotif($"Failed register: {message}", Color.red);
                 //loading.hide();
             }

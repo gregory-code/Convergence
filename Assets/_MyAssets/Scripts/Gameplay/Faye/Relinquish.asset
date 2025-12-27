@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f3336a2d62315f840aaf96b4b65825be, type: 3}
+  m_Name: Relinquish
+  m_EditorClassIdentifier: 
+  CardName: Relinquish
+  Type: {fileID: 11400000, guid: 724df9a1411ec954ebc6263a1c337930, type: 2}
+  Rarity: {fileID: 11400000, guid: 10f3481ff2e893245a2600427e96d2bd, type: 2}
+  Captain: 12
+  SeriesOverlay: {fileID: 21300000, guid: c658b0989cc96c64eaf067201fabaed0, type: 3}
+  CardArt: {fileID: 21300000, guid: a61ccd63537122541a6b8625712fa118, type: 3}
+  CardArtAdjustment: {x: -70.85, y: 0}
+  CardArtSize: {x: 0.16, y: 0.34}
+  CardPreviewArt: {fileID: 21300000, guid: a97cc4c8a219c41499b18adb3730c88c, type: 3}
+  bTargetsSelf: 0
+  bTargetsAllies: 0
+  bTargetsAlliesExceptSelf: 0
+  bTargetsEnemies: 1
+  bTargetsAll: 0
+  bSwift: 0
+  DescriptionText: 
+  bActiveInEffectLinger: 0
+  physicalStatLinger: 0
+  magicStatLinger: 0
+  defenseStatLinger: 0
+  thisCard: {fileID: 0}
+  bOncePerTurn: 1
+  bWaitForReaction: 0
+  bDead: 0
+  respawnTurns: 0
+  bAttackingCard: 0
+  bHasPredcition: 0
+  CaptainTargeting: []

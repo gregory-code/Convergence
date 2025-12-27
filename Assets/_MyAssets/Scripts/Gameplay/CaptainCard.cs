@@ -10,20 +10,31 @@ public abstract class CaptainCard : BaseCard
 
     public int maxEquipment;
     public bool bIsAllyCard;
+
+    [HideInInspector]
+    public PlayingCard CaptainWhoPlayedMe;
+
     private List<PlayingCard> EquipmentsAttached = new List<PlayingCard>();
     private List<PlayingCard> LingersInEffect = new List<PlayingCard>();
+
+    private const int maxSlots = 6;
+    Dictionary<int, PlayingCard> slots = new Dictionary<int, PlayingCard>(maxSlots);
+
+
 
     public bool bActivateableAbility;
 
     public List<PlayingCard> GetEquipments() { return EquipmentsAttached; }
     public List<PlayingCard> GetLingersInEffect() { return LingersInEffect; }
 
-    public int GetSlotsInEffect()
+    public int GetNextAvailiableSlots()
     {
-        int slots = 0;
-        slots += EquipmentsAttached.Count;
-        slots += LingersInEffect.Count;
-        return slots;
+        for(int i = 0; i < maxSlots; i++)
+        {
+            if(slots.ContainsKey(i) == false)
+                return i;
+        }
+        return 0;
     }
 
     public int GetBonusHealth()
@@ -93,11 +104,27 @@ public abstract class CaptainCard : BaseCard
     public void AttachEquipment(PlayingCard equipment, PlayingCard allyDoingTheEquipping)
     {
         EquipmentsAttached.Add(equipment);
+        for (int i = 0; i < maxSlots; i++)
+        {
+            if (slots.ContainsKey(i) == false)
+            {
+                slots[i] = equipment;
+                return;
+            }
+        }
     }
 
     public void RemoveEquipment(PlayingCard equipment, PlayingCard allyDoingTheUnEquipping)
     {
         EquipmentsAttached.Remove(equipment);
+        for (int i = 0; i < maxSlots; i++)
+        {
+            if (slots.TryGetValue(i, out PlayingCard equip) && equip == equipment)
+            {
+                slots.Remove(i);
+                return;
+            }
+        }
     }
 
     public void AttachLinger(PlayingCard linger, PlayingCard allyDoingTheEquipping)
@@ -126,8 +153,24 @@ public abstract class CaptainCard : BaseCard
         
         if(currentHealth <= 0)
         {
-            allyRecivingDamage.Die();
-            StaticGameplayDelegates.Killed(damageDealt, usedCard, allyDealingDamage, allyRecivingDamage);
+            if(bIsAllyCard)
+            {
+                thisCard.BeginEnergize();
+                thisCard.BeginPlayAndDiscard(thisCard);
+
+                if(thisCard.DoIOwnThis())
+                {
+                    FindFirstObjectByType<GameMaster>().RequestRemoveAllyFromBoard(thisCard);
+                }
+
+                bDead = true;
+                Cleanup();
+            }
+            else
+            {
+                allyRecivingDamage.Die();
+                StaticGameplayDelegates.Killed(damageDealt, usedCard, allyDealingDamage, allyRecivingDamage);
+            }
         }
     }
 
@@ -162,6 +205,16 @@ public abstract class CaptainCard : BaseCard
     }
 
     public override IEnumerator PlayCard(PlayingCard thisPlayingCard, PlayingCard captainUsing, bool bTargetingEnemy, List<PlayingCard> captainTargeting)
+    {
+        yield return new WaitForEndOfFrame();
+    }
+
+    public override IEnumerator ActivateEffect(PlayingCard thisPlayingCard)
+    {
+        yield return new WaitForEndOfFrame();
+    }
+
+    public override IEnumerator SecondaryPlayCard(PlayingCard thisPlayingCard, PlayingCard captainUsing, bool bTargetingEnemy, List<PlayingCard> captainTargeting)
     {
         yield return new WaitForEndOfFrame();
     }

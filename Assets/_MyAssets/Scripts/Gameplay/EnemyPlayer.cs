@@ -79,7 +79,7 @@ public class EnemyPlayer : MonoBehaviour
     public void AddCardToHand(BaseCard newCardToadd)
     {
         PlayingCard newPlayingCard = Instantiate(playingCardPrefab, this.transform);
-        newPlayingCard.Init(null, newCardToadd, bIsPlayer1);
+        newPlayingCard.Init(null, newCardToadd, bIsPlayer1, -1);
         newPlayingCard.transform.localPosition = new Vector3(0, 150, 0);
         PlayingCardsInHand.Add(newPlayingCard);
         newPlayingCard.StartMoveCard(-5, false, 0.5f);
@@ -164,14 +164,27 @@ public class EnemyPlayer : MonoBehaviour
             }
         }
 
+
         if (cardToPlay is CaptainCard captain)
-        { // Passive Proc or activatable ability
-            StartCoroutine(cardToPlay.PlayCard(captainUsing, captainUsing, bTargetingEnemy, null));
+        {
+            if(captain.bIsAllyCard == false)
+            {
+                // Passive Proc or activatable ability
 
-            if (cardToPlay.bSwift == false)
-                StartCoroutine(captainUsing.EnergizeAndExhaust(false));
+                StartCoroutine(cardToPlay.PlayCard(captainUsing, captainUsing, bTargetingEnemy, null));
 
-            return;
+                if (cardToPlay.bSwift == false)
+                    StartCoroutine(captainUsing.EnergizeAndExhaust(false));
+
+                return;
+            }
+            else
+            {
+                if (cardToPlay.bSwift == false)
+                    StartCoroutine(captainUsing.EnergizeAndExhaust(false));
+
+                return;
+            }
         }
 
         PlayingCardsInHand[0].SetCard(cardToPlay);
@@ -180,6 +193,12 @@ public class EnemyPlayer : MonoBehaviour
             StartCoroutine(captainUsing.EnergizeAndExhaust(false));
 
         StartCoroutine(cardToPlay.PlayCard(PlayingCardsInHand[0], captainUsing, bTargetingEnemy, captainTargeting));
+        StartCoroutine(RemoveCardFromHand());
+    }
+
+    public void PlayAllyCard(PlayingCard allyCard)
+    {
+        PlayingCardsInHand[0].StartMoveCard(350.0f, false, 0.5f);
         StartCoroutine(RemoveCardFromHand());
     }
 
@@ -193,12 +212,26 @@ public class EnemyPlayer : MonoBehaviour
     private PlayingCard reactionCardPrediction;
     public void EnemyIsAttackingPredicition(BaseCard cardToPlay, PlayingCard captainUsing, bool bTargetingEnemy, List<PlayingCard> captainTargeting)
     {
-        PlayingCardsInHand[0].SetCard(cardToPlay);
+        if(captainUsing.myCard.Type.type == CardType.Ally)
+        {
+            reactionCardPrediction = captainUsing;
+            captainUsing.DisplayAttackStats(false, false, captainUsing, captainUsing);
+        }
+        else
+        {
+            PlayingCardsInHand[0].SetCard(cardToPlay);
 
-        if (cardToPlay.bSwift == false)
-            StartCoroutine(captainUsing.EnergizeAndExhaust(false));
+            if (cardToPlay.bSwift == false)
+                StartCoroutine(captainUsing.EnergizeAndExhaust(false));
 
-        captainUsing.DisplayAttackStats(false, false, PlayingCardsInHand[0], captainUsing);
+            StartCoroutine(PlayingCardsInHand[0].PlayReaction(captainUsing, captainUsing.transform.parent, cardToPlay));
+
+            //StartCoroutine(cardToPlay.PlayCard(PlayingCardsInHand[0], captainUsing, bTargetingEnemy, captainTargeting));
+            reactionCardPrediction = PlayingCardsInHand[0];
+            StartCoroutine(RemoveCardFromHand());
+
+            captainUsing.DisplayAttackStats(false, false, PlayingCardsInHand[0], captainUsing);
+        }
 
         for (int i = 0; i < captainTargeting.Count; i++)
         {
@@ -215,11 +248,6 @@ public class EnemyPlayer : MonoBehaviour
             }
         }
 
-        StartCoroutine(PlayingCardsInHand[0].PlayReaction(captainUsing, captainUsing.transform.parent, cardToPlay));
-
-        //StartCoroutine(cardToPlay.PlayCard(PlayingCardsInHand[0], captainUsing, bTargetingEnemy, captainTargeting));
-        reactionCardPrediction = PlayingCardsInHand[0];
-        StartCoroutine(RemoveCardFromHand());
     }
 
     public void EnemyFinishReaction()

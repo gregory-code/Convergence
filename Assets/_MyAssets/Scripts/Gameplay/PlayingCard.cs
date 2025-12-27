@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Xml;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEditor;
@@ -32,6 +33,8 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
     private bool bHovering;
 
+    public bool bInDiscard { get; private set; }
+
     [SerializeField] Vector2[] EquipmentPos;
 
     [SerializeField] private GameObject healthHealedVFX;
@@ -53,7 +56,7 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     [SerializeField] TextMeshProUGUI magicText;
     [SerializeField] TextMeshProUGUI defenseText;
 
-    public void Init(UserPlayer ownerplayer, BaseCard card, bool bIsPlayer1)
+    public void Init(UserPlayer ownerplayer, BaseCard card, bool bIsPlayer1, int uniqueID)
     {
         desiredPos = Vector3.zero;
         originalSize = this.transform.localScale;
@@ -65,9 +68,14 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         this.ownerPlayer = ownerplayer;
         SetCard(card);
 
+        if(myCard != null)
+        {
+            myCard.uniqueID = uniqueID;
+        }
+
+        StaticGameplayDelegates.onInspect += InspectCard;
         if(ownerplayer != null)
         {
-            StaticGameplayDelegates.onInspect += InspectCard;
             StaticGameplayDelegates.onTurnEnded += TurnEnds;
             StaticGameplayDelegates.onKilled += SomeoneKilled;
             myCard.Init(ownerplayer);
@@ -96,6 +104,8 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
             return;
 
         myCard = card;
+        myCard.thisCard = this;
+        myCard.uniqueID = -1;
         GetComponent<VisibleCard>().SetCard(card);
     }
 
@@ -232,6 +242,11 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         transform.localPosition = desiredPos;
     }
 
+    public void BeginEnergize()
+    {
+        StartCoroutine(EnergizeAndExhaust(true));
+    }
+
     public IEnumerator EnergizeAndExhaust(bool bEnergized)
     {
         this.bEnergized = bEnergized;
@@ -355,6 +370,7 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
         Transform discardPile = StaticGameplayDelegates.GetDiscardPileTransform(parentCharacter.bIsPlayer1);
         StaticGameplayDelegates.AddCardToDiscard(this, parentCharacter.bIsPlayer1);
+        bInDiscard = true;
 
         transform.SetParent(discardPile, true);
 
@@ -365,6 +381,7 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
     public void BeginPlayAndDiscard(PlayingCard usingCaptain)
     {
+        //Debug.LogError("Why are we discarding this: " + usingCaptain.myCard.CardName);
         StartCoroutine(PlayAndDiscard(usingCaptain, usingCaptain.transform.parent.transform));
     }
 
@@ -381,6 +398,7 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
         Transform discardPile = StaticGameplayDelegates.GetDiscardPileTransform(usingCaptain.bIsPlayer1);
         StaticGameplayDelegates.AddCardToDiscard(this, usingCaptain.bIsPlayer1);
+        bInDiscard = true;
 
         transform.SetParent(discardPile, true);
 
@@ -413,6 +431,7 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
         Transform discardPile = StaticGameplayDelegates.GetDiscardPileTransform(usingCaptain.bIsPlayer1);
         StaticGameplayDelegates.AddCardToDiscard(this, usingCaptain.bIsPlayer1);
+        bInDiscard = true;
 
         transform.SetParent(discardPile, true);
 
@@ -425,7 +444,14 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     {
         if(bHovering)
         {
-            ownerPlayer.InspectCard(this, DoIOwnThis());
+            if(bInDiscard)
+            {
+                FindFirstObjectByType<UserPlayer>().ShowDiscardPile(DoIOwnThis());
+            }
+            else
+            {
+                FindFirstObjectByType<UserPlayer>().InspectCard(this, DoIOwnThis());
+            }
         }
     }
 
@@ -468,17 +494,24 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         }
         else
         {
-            CardPlayContext context = cardUsing.myCard.PredictCard(cardUsing, captainUsing, true, captainUsing);
-
-            if (context.bMagicDamage)
+            if (cardUsing.myCard != null)
             {
-                MagicGameObject.SetActive(true);
-                magicText.text = context.damage + "";
+                CardPlayContext context = cardUsing.myCard.PredictCard(cardUsing, captainUsing, true, captainUsing);
+
+                if (context.bMagicDamage)
+                {
+                    MagicGameObject.SetActive(true);
+                    magicText.text = context.damage + "";
+                }
+                else
+                {
+                    PhysicalGameObject.SetActive(true);
+                    physicalText.text = context.damage + "";
+                }
             }
             else
             {
-                PhysicalGameObject.SetActive(true);
-                physicalText.text = context.damage + "";
+                Debug.Log($"It seems by all stretches of logic and the power invested in God and me that for some unforsaken reason only the depths of the ocean will know that {cardUsing}'s card is null. Even more amazingly it does not break anything despite all odds. So until a demon from hell erupts from my monitor and forces my hand through a bloody ritual to fix this issue it will not get fixed and I am not sorry.");
             }
         }
     }
@@ -594,7 +627,7 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
         }
 
-        if (myCard.Type.type == CardType.Captain && ownerPlayer.bChoosingTarget)
+        if ((myCard.Type.type == CardType.Captain || myCard.Type.type == CardType.Ally) && ownerPlayer.bChoosingTarget)
         {
             if(EligableTarget(ownerPlayer.currentCard) || (ownerPlayer.bSkipCaptainChoice && ownerPlayer.currentCard.myCard.bTargetsSelf && DoIOwnThis() && bEnergized == true))
             {
@@ -671,7 +704,7 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
             ownerPlayer.HoveringCard(false, this);
         }
 
-        if (myCard.Type.type == CardType.Captain && ownerPlayer.bChoosingTarget)
+        if ((myCard.Type.type == CardType.Captain || myCard.Type.type == CardType.Ally) && ownerPlayer.bChoosingTarget)
         {
             ownerPlayer.HoveringTarget(false, this);
         }

@@ -86,7 +86,7 @@ public class AuthManager : MonoBehaviour
             FirebaseException firebaseException = loginTask.Exception.GetBaseException() as FirebaseException;
             AuthError error = (AuthError)firebaseException.ErrorCode;
 
-            string message = "Failed";
+            /*string message = "Failed";
             switch (error)
             {
                 case AuthError.MissingEmail: message = "No Email"; break;
@@ -95,7 +95,7 @@ public class AuthManager : MonoBehaviour
                 case AuthError.InvalidEmail: message = "Wrong Email"; break;
                 case AuthError.UserNotFound: message = "User does not exist"; break;
                 case AuthError.NetworkRequestFailed: message = "There's no internet"; break;
-            }
+            }*/
             //NotificationScript.createNotif($"Failed to login: {message}", Color.red);
 
             //loading.hide();

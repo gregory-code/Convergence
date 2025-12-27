@@ -6,6 +6,7 @@ public class TypeCard : ScriptableObject
 {
     public CardType type;
     public Sprite icon;
+    public Sprite allyIcon;
     public Color color;
     public Sprite templateOutline;
     public Sprite templateCaptain;

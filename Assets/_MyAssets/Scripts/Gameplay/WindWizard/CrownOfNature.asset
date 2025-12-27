@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c102d3e77be5311428eacf36ff03f536, type: 3}
+  m_Name: CrownOfNature
+  m_EditorClassIdentifier: 
+  CardName: Crown of Nature
+  Type: {fileID: 11400000, guid: e24ba17bf00a2c84d8bf10383f710fed, type: 2}
+  Rarity: {fileID: 11400000, guid: b1e478010c8d91d4d9e3393c5ffeaf18, type: 2}
+  Captain: 13
+  SeriesOverlay: {fileID: 21300000, guid: bd7cfe12f79ba854c969b1f43b200363, type: 3}
+  CardArt: {fileID: 21300000, guid: b5b189a259ff7764480748cf35dfb382, type: 3}
+  CardArtAdjustment: {x: -70.85, y: 0}
+  CardArtSize: {x: 0.16, y: 0.34}
+  CardPreviewArt: {fileID: 21300000, guid: 4238972e92d6a5249a9e57d020b89f3d, type: 3}
+  bTargetsSelf: 1
+  bTargetsAllies: 0
+  bTargetsAlliesExceptSelf: 0
+  bTargetsEnemies: 0
+  bTargetsAll: 0
+  bSwift: 0
+  DescriptionText: "When equipped search your deck for 1 Ally, reveal it, and add
+    it to your hand (shuffle afterwards) \nAlly cards in play by this captain gain
+    +1 bonus health (exceeds its max) [Magic Item]"
+  bActiveInEffectLinger: 0
+  physicalStatLinger: 0
+  magicStatLinger: 0
+  defenseStatLinger: 0
+  uniqueID: 0
+  thisCard: {fileID: 0}
+  bOncePerTurn: 1
+  bWaitForReaction: 0
+  bDead: 0
+  respawnTurns: 0
+  bPrestige: 0
+  equipmentType: 1
+  bonusHealthStatChange: 0
+  physicalStatChange: 0
+  magicStatChange: 0
+  defenseStatChange: 0

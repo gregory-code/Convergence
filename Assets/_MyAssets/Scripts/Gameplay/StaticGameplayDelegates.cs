@@ -8,9 +8,13 @@ public static class StaticGameplayDelegates
     public static void Inspect() { onInspect?.Invoke(); }
 
     // ********** Hall of Delegates ********** //
-    public delegate void OnTurnStarted(bool bPlayers1Turn);
+    public delegate void OnTurnStarted(UserPlayer player, bool bPlayers1Turn);
     public static event OnTurnStarted onTurnStarted;
-    public static void TurnStarted(bool bPlayers1Turn) { onTurnStarted?.Invoke(bPlayers1Turn); }
+    public static void TurnStarted(UserPlayer player, bool bPlayers1Turn) { onTurnStarted?.Invoke(player, bPlayers1Turn); }
+
+    public delegate void OnRemoveLingers(bool bPlayers1Turn);
+    public static event OnRemoveLingers onRemoveLingers;
+    public static void RemoveLingers(bool bPlayers1Turn) { onRemoveLingers?.Invoke(bPlayers1Turn); }
 
     public delegate void OnTurnEnded(bool bPlayers1Turn);
     public static event OnTurnEnded onTurnEnded;
@@ -38,7 +42,7 @@ public static class StaticGameplayDelegates
     // ********** **************** ********** //
 
     public static int GetAllySparkCount() { return GameObject.FindFirstObjectByType<GameMaster>().allySparkValue; }
-    public static void RequestAttackPrediction(PlayingCard cardToPlay, PlayingCard captainUsing, bool bTargetingEnemy, List<PlayingCard> captainTargeting) { GameObject.FindFirstObjectByType<GameMaster>().RequestPlayCard(cardToPlay, captainUsing, bTargetingEnemy, captainTargeting, true); }
+    public static void RequestAttackPrediction(PlayingCard cardToPlay, PlayingCard captainUsing, bool bTargetingEnemy, List<PlayingCard> captainTargeting) { GameObject.FindFirstObjectByType<GameMaster>().RequestPlayCard(cardToPlay, captainUsing, bTargetingEnemy, captainTargeting, true, false); }
     public static List<PlayingCard> GetAllAllies(bool bGetMyTeam) { return GameObject.FindFirstObjectByType<GameMaster>().GetAllAllies(bGetMyTeam); }
     public static Transform GetDiscardPileTransform(bool isPlayer1) { return GameObject.FindFirstObjectByType<GameMaster>().GetDiscardPilieTransform(isPlayer1); }
     public static void AddCardToDiscard(PlayingCard cardtoAdd, bool isPlayer1) { GameObject.FindFirstObjectByType<GameMaster>().AddCardToDiscard(cardtoAdd, isPlayer1); }

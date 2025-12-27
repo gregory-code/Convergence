@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b3753362603d31c44aaad2c2c1f406dc, type: 3}
+  m_Name: WindWizard
+  m_EditorClassIdentifier: 
+  CardName: Wind Wizard
+  Type: {fileID: 11400000, guid: 7e379874b3426c546ae1a3a615a3ef70, type: 2}
+  Rarity: {fileID: 11400000, guid: b1e478010c8d91d4d9e3393c5ffeaf18, type: 2}
+  Captain: 13
+  SeriesOverlay: {fileID: 21300000, guid: bd7cfe12f79ba854c969b1f43b200363, type: 3}
+  CardArt: {fileID: 21300000, guid: 842a56058363412489d0552c759677d7, type: 3}
+  CardArtAdjustment: {x: -70.85, y: 0}
+  CardArtSize: {x: 0.16, y: 0.34}
+  CardPreviewArt: {fileID: 21300000, guid: f7e36ea0f0f77134584184e33670a7a1, type: 3}
+  bTargetsSelf: 0
+  bTargetsAllies: 0
+  bTargetsAlliesExceptSelf: 0
+  bTargetsEnemies: 0
+  bTargetsAll: 0
+  bSwift: 0
+  DescriptionText: "Daybreak \nGain +1 Spark for each Ally in play by Wind Wizard"
+  bActiveInEffectLinger: 0
+  physicalStatLinger: 0
+  magicStatLinger: 0
+  defenseStatLinger: 0
+  thisCard: {fileID: 0}
+  bOncePerTurn: 1
+  bWaitForReaction: 0
+  bDead: 0
+  respawnTurns: 0
+  maxHealth: 7
+  maxEquipment: 2
+  bIsAllyCard: 0
+  CaptainWhoPlayedMe: {fileID: 0}
+  bActivateableAbility: 0
