@@ -3,9 +3,11 @@ using Photon.Pun;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 
 
 public class GameMaster : MonoBehaviourPunCallbacks
@@ -26,9 +28,8 @@ public class GameMaster : MonoBehaviourPunCallbacks
     [SerializeField] private CardAmountHover clientSideDiscardAmount;
     [SerializeField] private CardAmountHover enemyDiscardAmount;
 
-    private List<PlayingCard> Player1Allies = new List<PlayingCard>();
+    private List<PlayingCard> ActivePlayingCards = new List<PlayingCard>();
     private List<PlayingCard> Player1Discard = new List<PlayingCard>();
-    private List<PlayingCard> Player2Allies = new List<PlayingCard>();
     private List<PlayingCard> Player2Discard = new List<PlayingCard>();
 
     private int uniqueID;
@@ -79,6 +80,21 @@ public class GameMaster : MonoBehaviourPunCallbacks
 
     [SerializeField] bool bDevTest;
     [SerializeField] bool bSkipMulligan;
+
+    //The reaction soup//
+
+    [HideInInspector]
+    public PlayingCard reactionPlayingCard;
+    [HideInInspector]
+    public PlayingCard reactionCaptainUsing;
+    [HideInInspector]
+    public List<PlayingCard> reactionCaptainTargeting;
+    [HideInInspector]
+    public bool bReactionTargetingEnemy;
+
+    /// <summary>
+    /// There is no summery, we are making soup
+    /// </summary>
 
     void Start()
     {
@@ -173,8 +189,8 @@ public class GameMaster : MonoBehaviourPunCallbacks
 
         WhoGoesFirstText.text = "";
 
-        if(bIsPlayer1)
-            yield return new WaitForEndOfFrame();
+        if (bIsPlayer1)
+            yield return new WaitForSeconds(0.3f);
 
         AddAllyToBoard(captainHolder, null);
 
@@ -206,61 +222,34 @@ public class GameMaster : MonoBehaviourPunCallbacks
 
     public void ResetAllDisplayAttackStats()
     {
-        foreach (PlayingCard enemy in Player1Allies)
+        foreach (PlayingCard character in ActivePlayingCards)
         {
-            enemy.DisplayAttackStats(true, true, null, null);
-        }
-        foreach (PlayingCard ally in Player2Allies)
-        {
-            ally.DisplayAttackStats(true, true, null, null);
+            character.DisplayAttackStats(true, true, null, null);
         }
     }
 
-    public List<PlayingCard> GetAllAllies(bool bGetMyTeam, PlayingCard captainForReference) 
+    public List<PlayingCard> GetTeammates(PlayingCard captainForReference) 
     {
-        if (bIsPlayer1)
+        bool bOwnerIsPlayer1 = captainForReference.bIsPlayer1;
+        List<PlayingCard> teammates = new List<PlayingCard>();
+        foreach(PlayingCard teammate in ActivePlayingCards)
         {
-            for (int i = 0; i < Player1Allies.Count; i++)
-            {
-                if (Player1Allies[i].myCard.uniqueID == captainForReference.myCard.uniqueID)
-                {
-                    return (bGetMyTeam) ? Player1Allies : Player2Allies;
-                }
-            }
+            if(teammate.bIsPlayer1 == bOwnerIsPlayer1)
+                teammates.Add(teammate);
         }
-        else if (bIsPlayer1 == false)
-        {
-            for (int i = 0; i < Player2Allies.Count; i++)
-            {
-                if (Player2Allies[i].myCard.uniqueID == captainForReference.myCard.uniqueID)
-                {
-                    return (bGetMyTeam) ? Player2Allies : Player1Allies;
-                }
-            }
-        }
+        return teammates;
+    }
 
-        if (bIsPlayer1) // an enemy call
+    public List<PlayingCard> GetEnemies(PlayingCard captainForReference)
+    {
+        bool bOwnerIsPlayer1 = captainForReference.bIsPlayer1;
+        List<PlayingCard> enemies = new List<PlayingCard>();
+        foreach (PlayingCard enemy in ActivePlayingCards)
         {
-            for (int i = 0; i < Player2Allies.Count; i++)
-            {
-                if (Player2Allies[i].myCard.uniqueID == captainForReference.myCard.uniqueID)
-                {
-                    return (bGetMyTeam) ? Player2Allies : Player1Allies;
-                }
-            }
+            if (enemy.bIsPlayer1 != bOwnerIsPlayer1)
+                enemies.Add(enemy);
         }
-        else if (bIsPlayer1 == false)
-        {
-            for (int i = 0; i < Player1Allies.Count; i++)
-            {
-                if (Player1Allies[i].myCard.uniqueID == captainForReference.myCard.uniqueID)
-                {
-                    return (bGetMyTeam) ? Player1Allies : Player2Allies;
-                }
-            }
-        }
-
-        return null;
+        return enemies;
     }
 
     public List<PlayingCard> GetDiscardPile(bool bGetMyDiscardPile)
@@ -274,54 +263,6 @@ public class GameMaster : MonoBehaviourPunCallbacks
             return (bIsPlayer1) ? Player2Discard : Player1Discard;
         }
     }
-
-    private int GetCaptainUsingIndex(PlayingCard captainUsing)
-    {
-        if (captainUsing == null)
-            return -1;
-
-        int captainUsingIndex = -1;
-        if (bIsPlayer1)
-        {
-            for (int i = 0; i < Player1Allies.Count; i++)
-            {
-                if (Player1Allies[i].myCard.uniqueID == captainUsing.myCard.uniqueID)
-                {
-                    captainUsingIndex = i;
-                }
-
-            }
-        }
-        else
-        {
-            for (int i = 0; i < Player2Allies.Count; i++)
-            {
-                if (Player2Allies[i].myCard.uniqueID == captainUsing.myCard.uniqueID)
-                {
-                    captainUsingIndex = i;
-                }
-            }
-        }
-
-        if (bIsPlayer1 && captainUsingIndex == -1)
-        {
-            for (int i = 0; i < Player2Allies.Count; i++)
-            {
-                if (Player2Allies[i].myCard.uniqueID == captainUsing.myCard.uniqueID)
-                    captainUsingIndex = i;
-            }
-        }
-        else if (bIsPlayer1 == false && captainUsingIndex == -1)
-        {
-            for (int i = 0; i < Player1Allies.Count; i++)
-            {
-                if (Player1Allies[i].myCard.uniqueID == captainUsing.myCard.uniqueID)
-                    captainUsingIndex = i;
-            }
-        }
-        return captainUsingIndex;
-    }
-
     private void HoveredClientDiscard(bool bStartedHover)
     {
         if (bStartedHover)
@@ -332,6 +273,36 @@ public class GameMaster : MonoBehaviourPunCallbacks
     {
         if (bStartedHover)
             enemyDiscardAmount.cardAmountText.text = (bIsPlayer1) ? "" + Player2Discard.Count : "" + Player1Discard.Count;
+    }
+
+    private int GetCaptainUsingIndex(PlayingCard captainUsing)
+    {
+        if (captainUsing == null)
+            return -1;
+
+        for(int i = 0; i < ActivePlayingCards.Count; i++)
+        {
+            if(captainUsing.uniqueID == ActivePlayingCards[i].uniqueID)
+                return i;
+        }
+
+        return -1;
+    }
+
+    private PlayingCard GetCaptainFromIndex(int captainIndex)
+    {
+        if (captainIndex == -1 || captainIndex > ActivePlayingCards.Count)
+            return null;
+
+        return ActivePlayingCards[captainIndex];
+    }
+
+    public int GetNextID()
+    {
+        uniqueID++;
+        CurrentIDText.text = "Recent ID: " + uniqueID;
+        CurrentIDText.gameObject.SetActive(bSkipMulligan);
+        return uniqueID;
     }
 
     public void AddAllyToBoard(BaseCard cardToAdd, PlayingCard captainPlayingThisAlly)
@@ -346,8 +317,7 @@ public class GameMaster : MonoBehaviourPunCallbacks
     [PunRPC]
     void AddAllyToBoard(bool isPlayer1, bool IsCaptain, int cardLibraryIndex, int captainPlayingIndex)
     {
-        List<PlayingCard> playerAllies = (isPlayer1) ? Player1Allies : Player2Allies;
-        PlayingCard captainPlayingAlly = (captainPlayingIndex == -1) ? null : playerAllies[captainPlayingIndex];
+        PlayingCard captainPlayingAlly = GetCaptainFromIndex(captainPlayingIndex);
 
         List<BaseCard> cardLibrary = (IsCaptain) ? CaptainLibrary : CardAndCaptainCardLibrary ;
         Transform side = (isPlayer1 == bIsPlayer1) ? allySide : enemySide;
@@ -356,11 +326,9 @@ public class GameMaster : MonoBehaviourPunCallbacks
 
         PlayingCard card = Instantiate(PlayingCardPrefab, side.transform);
         float startingYPos = (isPlayer1 == bIsPlayer1) ? -500.0f : 500.0f ;
-        card.Init(player, newCardCopy, isPlayer1, uniqueID, captainPlayingAlly);
-        uniqueID++;
-        CurrentIDText.text = "NEXT ID: " + uniqueID;
+        card.Init(player, newCardCopy, isPlayer1, GetNextID(), captainPlayingAlly);
         card.transform.localPosition = new Vector3(0, startingYPos, 0);
-        playerAllies.Add(card);
+        ActivePlayingCards.Add(card);
 
         if(card.myCard.Type.type == CardType.Ally)
         {
@@ -376,6 +344,13 @@ public class GameMaster : MonoBehaviourPunCallbacks
             {
                 enemy.PlayAllyCard(card);
             }
+        }
+
+        List<PlayingCard> playerAllies = new List<PlayingCard>();
+        for (int i = 0; i < ActivePlayingCards.Count; i++)
+        {
+            if (ActivePlayingCards[i].bIsPlayer1 == isPlayer1)
+                playerAllies.Add(ActivePlayingCards[i]);
         }
 
         ReOrganize(playerAllies);
@@ -412,14 +387,24 @@ public class GameMaster : MonoBehaviourPunCallbacks
     {
         int captainUsingIndex = GetCaptainUsingIndex(allyToRemove);
 
+        if (captainUsingIndex == -1)
+            return;
+
         this.photonView.RPC("RemoveAllyFromBoard", RpcTarget.AllBuffered, bIsPlayer1, captainUsingIndex);
     }
 
     [PunRPC]
     void RemoveAllyFromBoard(bool isPlayer1, int allyIndex)
     {
-        List<PlayingCard> playerAllies = (isPlayer1) ? Player1Allies : Player2Allies;
-        playerAllies.RemoveAt(allyIndex);
+        ActivePlayingCards.RemoveAt(allyIndex);
+
+        List<PlayingCard> playerAllies = new List<PlayingCard>();
+        for (int i = 0; i < ActivePlayingCards.Count; i++)
+        {
+            if (ActivePlayingCards[i].bIsPlayer1 == isPlayer1)
+                playerAllies.Add(ActivePlayingCards[i]);
+        }
+
         ReOrganize(playerAllies);
     }
 
@@ -428,56 +413,12 @@ public class GameMaster : MonoBehaviourPunCallbacks
         bool bIsCaptain = (cardToPlay.myCard.Type.type == CardType.Captain);
         int cardIndex = (bIsCaptain) ? GetCardIndexForLibrary(cardToPlay.myCard, CaptainLibrary) : GetCardIndexForLibrary(cardToPlay.myCard, CardAndCaptainCardLibrary);
 
-        int captainUsingIndex = -1;
+        int captainUsingIndex = GetCaptainUsingIndex(captainUsing);
         List<int> captainTargetingIndex = new List<int>();
-        if (bIsPlayer1)
+        foreach (PlayingCard target in captainTargeting)
         {
-            for(int i = 0; i < Player1Allies.Count; i++)
-            {
-                if (Player1Allies[i].myCard.uniqueID == captainUsing.myCard.uniqueID)
-                    captainUsingIndex = i;
-            }
+            captainTargetingIndex.Add(GetCaptainUsingIndex(target));
 
-            foreach (PlayingCard targets in captainTargeting)
-                captainTargetingIndex.Add((bTargetingEnemy) ? Player2Allies.IndexOf(targets) : Player1Allies.IndexOf(targets));
-        }
-        else
-        {
-            for (int i = 0; i < Player2Allies.Count; i++)
-            {
-                if (Player2Allies[i].myCard.uniqueID == captainUsing.myCard.uniqueID)
-                    captainUsingIndex = i;
-            }
-
-            foreach (PlayingCard targets in captainTargeting)
-                captainTargetingIndex.Add((bTargetingEnemy) ? Player1Allies.IndexOf(targets) : Player2Allies.IndexOf(targets));
-        }
-
-        if(bIsPlayer1 && captainUsingIndex == -1)
-        {
-            for (int i = 0; i < Player2Allies.Count; i++)
-            {
-                if (Player2Allies[i].myCard.uniqueID == captainUsing.myCard.uniqueID)
-                    captainUsingIndex = i;
-            }
-
-            captainTargetingIndex.Clear();
-
-            foreach (PlayingCard targets in captainTargeting)
-                captainTargetingIndex.Add((bTargetingEnemy) ? Player1Allies.IndexOf(targets) : Player2Allies.IndexOf(targets));
-        }
-        else if(bIsPlayer1 == false && captainUsingIndex == -1)
-        {
-            for (int i = 0; i < Player1Allies.Count; i++)
-            {
-                if (Player1Allies[i].myCard.uniqueID == captainUsing.myCard.uniqueID)
-                    captainUsingIndex = i;
-            }
-
-            captainTargetingIndex.Clear();
-
-            foreach (PlayingCard targets in captainTargeting)
-                captainTargetingIndex.Add((bTargetingEnemy) ? Player2Allies.IndexOf(targets) : Player1Allies.IndexOf(targets));
         }
 
         if (bAttackPrediction)
@@ -493,21 +434,11 @@ public class GameMaster : MonoBehaviourPunCallbacks
     [PunRPC]
     void PlayCard(bool isPlayer1, int cardToPlayIndex, int captainUsingIndex, bool bTargetingEnemy, int[] captainTargetingIndex, bool isCaptain, bool bDaybreakAbility)
     {
-        PlayingCard captainUsing = null;
+        PlayingCard captainUsing = GetCaptainFromIndex(captainUsingIndex);
         List<PlayingCard> captainTarget = new List<PlayingCard>();
-        if (isPlayer1)
+        for (int i = 0; i < captainTargetingIndex.Length; i++)
         {
-            captainUsing = Player1Allies[captainUsingIndex];
-
-            for (int i = 0; i < captainTargetingIndex.Length; i++)
-                captainTarget.Add((bTargetingEnemy) ? Player2Allies[captainTargetingIndex[i]] : Player1Allies[captainTargetingIndex[i]]);
-        }
-        else
-        {
-            captainUsing = Player2Allies[captainUsingIndex];
-
-            for (int i = 0; i < captainTargetingIndex.Length; i++)
-                captainTarget.Add((bTargetingEnemy) ? Player1Allies[captainTargetingIndex[i]] : Player2Allies[captainTargetingIndex[i]]);
+            captainTarget.Add(GetCaptainFromIndex(captainTargetingIndex[i]));
         }
 
         if (bDaybreakAbility)
@@ -530,47 +461,31 @@ public class GameMaster : MonoBehaviourPunCallbacks
     [PunRPC]
     void AttackPrediction(bool isPlayer1, int cardToPlayIndex, int captainUsingIndex, bool bTargetingEnemy, int[] captainTargetingIndex, bool isCaptain)
     {
+        PlayingCard captainUsing = GetCaptainFromIndex(captainUsingIndex);
+        List<PlayingCard> captainTarget = new List<PlayingCard>();
+        for (int i = 0; i < captainTargetingIndex.Length; i++)
+        {
+            captainTarget.Add(GetCaptainFromIndex(captainTargetingIndex[i]));
+        }
+
+        BaseCard cardToPlay = (isCaptain) ? CaptainLibrary[cardToPlayIndex] : CardAndCaptainCardLibrary[cardToPlayIndex];
+
+        reactionCaptainUsing = captainUsing;
+        reactionCaptainTargeting = captainTarget;
+        bReactionTargetingEnemy = bTargetingEnemy;
+
         if (isPlayer1 == bIsPlayer1) // Owner, this client
         {
-            PlayingCard captainUsing = null;
-            if (isPlayer1)
-            {
-                captainUsing = Player1Allies[captainUsingIndex];
-            }
-            else
-            {
-                captainUsing = Player2Allies[captainUsingIndex];
-            }
-
             WaitingForOpponent.SetActive(true);
             player.WaitingForReaction(true, captainUsing);
         }
         else // other player
         {
-            PlayingCard captainUsing = null;
-            List<PlayingCard> captainTarget = new List<PlayingCard>();
-            if (isPlayer1)
-            {
-                captainUsing = Player1Allies[captainUsingIndex];
-
-                for (int i = 0; i < captainTargetingIndex.Length; i++)
-                    captainTarget.Add((bTargetingEnemy) ? Player2Allies[captainTargetingIndex[i]] : Player1Allies[captainTargetingIndex[i]]);
-            }
-            else
-            {
-                captainUsing = Player2Allies[captainUsingIndex];
-
-                for (int i = 0; i < captainTargetingIndex.Length; i++)
-                    captainTarget.Add((bTargetingEnemy) ? Player1Allies[captainTargetingIndex[i]] : Player2Allies[captainTargetingIndex[i]]);
-            }
-
-            BaseCard cardToPlay = (isCaptain) ? CaptainLibrary[cardToPlayIndex] : CardAndCaptainCardLibrary[cardToPlayIndex];
             cardToPlay.bWaitForReaction = true;
-            player.AllowReaction(true, cardToPlay, captainUsing, bTargetingEnemy, captainTarget);
-            enemy.EnemyIsAttackingPredicition(cardToPlay, captainUsing, bTargetingEnemy, captainTarget);
+            player.AllowReaction(true);
+            enemy.EnemyIsAttackingPredicition(cardToPlay, captainUsing);
         }
     }
-
     public void RequestFinishReaction()
     {
         this.photonView.RPC("FinishReaction", RpcTarget.AllBuffered, bIsPlayer1);
@@ -590,6 +505,96 @@ public class GameMaster : MonoBehaviourPunCallbacks
             player.EnemyFinishReaction();
         }
     }
+
+    public void RequestChangeReaction(List<PlayingCard> newTargets, List<PlayingCard> targetsDamageIncreaseAffect, int damageIncrease)
+    {
+        if(newTargets == null)
+        {
+            int[] targetList = new int[1];
+            targetList[0] = -1;
+
+            List<int> targetsForHeartBreaker = new List<int>();
+
+            for (int i = 0; i < reactionCaptainTargeting.Count; i++)
+            {
+                targetsForHeartBreaker.Add(GetCaptainUsingIndex(reactionCaptainTargeting[i]));
+            }
+
+            this.photonView.RPC("ChangeReaction", RpcTarget.AllBuffered, bIsPlayer1, targetList, targetsForHeartBreaker.ToArray(), damageIncrease);
+            return;
+        }
+
+        List<int> captainTargetingIndex = new List<int>();
+        foreach (PlayingCard target in newTargets)
+        {
+            captainTargetingIndex.Add(GetCaptainUsingIndex(target));
+        }
+
+        List<int> targetsThatIsAffectedIndex = new List<int>();
+        foreach (PlayingCard target in targetsDamageIncreaseAffect)
+        {
+            targetsThatIsAffectedIndex.Add(GetCaptainUsingIndex(target));
+        }
+
+        this.photonView.RPC("ChangeReaction", RpcTarget.AllBuffered, bIsPlayer1, captainTargetingIndex.ToArray(), targetsThatIsAffectedIndex.ToArray(), damageIncrease);
+    }
+
+    [PunRPC]
+    void ChangeReaction(bool isPlayer1, int[] newTargetIndex, int[] targetsDamageIncraseAffectsIndex, int damageIncrease)
+    {
+        if(reactionPlayingCard != null)
+            reactionPlayingCard.myCard.predictionDamage = damageIncrease;
+
+        if (newTargetIndex[0] == -1) // this is heart breaker
+        {
+
+        }
+        else
+        {
+            List<PlayingCard> captainTarget = new List<PlayingCard>();
+            for (int i = 0; i < newTargetIndex.Length; i++)
+            {
+                captainTarget.Add(GetCaptainFromIndex(newTargetIndex[i]));
+            }
+
+            reactionCaptainTargeting = captainTarget;
+            reactionPlayingCard.myCard.CaptainTargeting = captainTarget;
+        }
+
+        List<PlayingCard> captainsAffecting = new List<PlayingCard>();
+        for (int i = 0; i < targetsDamageIncraseAffectsIndex.Length; i++)
+        {
+            captainsAffecting.Add(GetCaptainFromIndex(targetsDamageIncraseAffectsIndex[i]));
+        }
+
+        if (reactionPlayingCard != null)
+            reactionPlayingCard.myCard.captainsAffectedByPredictionDamageIncrease = captainsAffecting;
+    }
+
+    public void RequestDevotionHealthSwap(PlayingCard devotionPlayer, PlayingCard beingSavedPlayer)
+    {
+        int devotionIndex = GetCaptainUsingIndex(devotionPlayer);
+        int beingSavedIndex = GetCaptainUsingIndex(beingSavedPlayer);
+
+        this.photonView.RPC("DevotionHealthSwap", RpcTarget.AllBuffered, bIsPlayer1, devotionIndex, beingSavedIndex);
+    }
+
+    [PunRPC]
+    void DevotionHealthSwap(bool isPlayer1, int devotionIndex, int beingSavedIndex)
+    {
+        PlayingCard devotionPlayer = GetCaptainFromIndex(devotionIndex);
+        PlayingCard beingSavedPlayer = GetCaptainFromIndex(beingSavedIndex);
+
+        if(devotionPlayer.myCard is CaptainCard captainDevotionPlayer)
+        {
+            if(beingSavedPlayer.myCard is CaptainCard beingDevotionCard)
+            {
+                beingDevotionCard.currentHealth = captainDevotionPlayer.currentHealth;
+                beingSavedPlayer.SetHealthText();
+            }
+        }
+    }
+
 
     public void RequestRemoveLingers()
     {
@@ -647,10 +652,7 @@ public class GameMaster : MonoBehaviourPunCallbacks
 
     public void RequestIncreaseSpark(PlayingCard captainGainingSpark, int SparkToAdd)
     {
-        int captainUsingIndex = (bIsPlayer1) ? Player1Allies.IndexOf(captainGainingSpark) : Player2Allies.IndexOf(captainGainingSpark);
-
-        if(captainUsingIndex == -1)
-            captainUsingIndex = (bIsPlayer1) ? Player2Allies.IndexOf(captainGainingSpark) : Player1Allies.IndexOf(captainGainingSpark);
+        int captainUsingIndex = GetCaptainUsingIndex(captainGainingSpark);
 
         this.photonView.RPC("IncreaseSpark", RpcTarget.AllBuffered, bIsPlayer1, captainUsingIndex, SparkToAdd);
     }
@@ -658,30 +660,22 @@ public class GameMaster : MonoBehaviourPunCallbacks
     [PunRPC]
     void IncreaseSpark(bool isPlayer1, int captainGainingSparkIndex, int SparkToAdd)
     {
-        Vector3 vfxSpawnPos = new Vector3();
         if (isPlayer1 == bIsPlayer1) // Owner, this client
         {
-            if(bIsPlayer1)
-                vfxSpawnPos = Player1Allies[captainGainingSparkIndex].transform.position;
-            else
-                vfxSpawnPos = Player2Allies[captainGainingSparkIndex].transform.position;
             
             allySparkValue += SparkToAdd;
             allySparkText.text = allySparkValue + "/20";
         }
         else // other player
         {
-            if(bIsPlayer1)
-                vfxSpawnPos = Player2Allies[captainGainingSparkIndex].transform.position;
-            else
-                vfxSpawnPos = Player1Allies[captainGainingSparkIndex].transform.position;
-
             opponentSparkValue += SparkToAdd;
             opponentSparkText.text = opponentSparkValue + "/20";
         }
 
         #region Extremely Sad Spark Spawn Logic
 
+        Vector3 vfxSpawnPos = new Vector3();
+        vfxSpawnPos = ActivePlayingCards[captainGainingSparkIndex].transform.position;
         vfxSpawnPos.y = vfxYSpawn;
 
         GameObject sparkPrefab = (bIsPlayer1 == isPlayer1) ? allySparkGainParticleSystem : enemySparkGainParticleSystem;
@@ -767,31 +761,15 @@ public class GameMaster : MonoBehaviourPunCallbacks
 
         bPlayer1sTurn = !bPlayer1sTurn;
 
-        if(bPlayer1sTurn)
+        foreach (PlayingCard teammate in ActivePlayingCards)
         {
-            foreach(PlayingCard teammate in Player1Allies)
-            {
-                if (teammate.myCard.bDead == true)
-                    continue;
+            if (teammate.myCard.bDead == true || teammate.bIsPlayer1 != bPlayer1sTurn)
+                continue;
 
-                teammate.myCard.bOncePerTurn = true;
+            teammate.myCard.bOncePerTurn = true;
 
-                if(teammate.myCard is CaptainCard captain && captain.bIsAllyCard == false)
-                    StartCoroutine(teammate.EnergizeAndExhaust(true));
-            }
-        }
-        else
-        {
-            foreach (PlayingCard teammate in Player2Allies)
-            {
-                if (teammate.myCard.bDead == true)
-                    continue;
-
-                teammate.myCard.bOncePerTurn = true;
-
-                if (teammate.myCard is CaptainCard captain && captain.bIsAllyCard == false)
-                    StartCoroutine(teammate.EnergizeAndExhaust(true));
-            }
+            if (teammate.myCard is CaptainCard captain && captain.bIsAllyCard == false)
+                StartCoroutine(teammate.EnergizeAndExhaust(true));
         }
 
         if (bIsPlayer1 == bPlayer1sTurn)

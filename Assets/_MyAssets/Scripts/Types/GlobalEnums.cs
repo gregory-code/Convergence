@@ -64,7 +64,9 @@ public enum EquipmentType
 public enum ReactionType
 {
     TargetAttackedAlly,
+    TargetKilledAlly,
     TargetAttackingEnemy,
+    TargetAnotherAlly,
     TargetSelf,
 }
 

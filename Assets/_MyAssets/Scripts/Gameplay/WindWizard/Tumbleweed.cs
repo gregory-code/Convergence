@@ -45,10 +45,11 @@ public class Tumbleweed : CaptainCard
 
     private void TurnStarted(UserPlayer player, bool bPlayers1Turn)
     {
-        if (uniqueID == -1)
-        {
+        if (thisCard.uniqueID == -1)
             return;
-        }
+
+        if (CaptainWhoPlayedMe == null)
+            return;
 
         if (thisCard.bIsPlayer1 != bPlayers1Turn || thisCard.DoIOwnThis() == false)
             return;

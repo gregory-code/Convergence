@@ -72,8 +72,6 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
     [HideInInspector]
     public List<PlayingCard> currentTargets = new List<PlayingCard>();
 
-    [HideInInspector]
-    public PlayingCard currentReactionCard;
     public PlayingCard currentCard { get; private set; }
 
     [SerializeField] private PlayingCard playingCardPrefab;
@@ -119,7 +117,10 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
             }
             else
             {
-                StaticGameplayDelegates.Inspect();
+                if(bInUniqueMenu == false && bInDiscardPile == false && bInChoiceMenu == false)
+                {
+                    StaticGameplayDelegates.Inspect();
+                }
             }
         }
 
@@ -135,7 +136,7 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
         InspectionPanel.SetActive(false);
     }
 
-    public void WaitingForReaction(bool bWaiting, PlayingCard captainToPlay)
+    public void WaitingForReaction(bool bWaiting, PlayingCard captainUsing)
     {
         if (DaybreakCards.Count > 0)
         {
@@ -148,42 +149,34 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
             StartCoroutine(GetPlayerOptions(!bWaiting));
         }
 
-        if(currentReactionCard != null && bWaiting)
+        if(gameMaster.reactionPlayingCard != null && bWaiting)
         {
-            if(currentReactionCard.myCard.Type.type == CardType.Ally)
+            if(gameMaster.reactionPlayingCard.myCard.Type.type == CardType.Ally)
             {
 
             }
             else
             {
-                StartCoroutine(currentReactionCard.PlayReaction(captainToPlay, captainToPlay.transform.parent, currentReactionCard.myCard));
+                StartCoroutine(gameMaster.reactionPlayingCard.PlayReaction(captainUsing, captainUsing.transform.parent, gameMaster.reactionPlayingCard.myCard));
             }
         }
     }
 
     // This is when it sees an enemy throwing out a reaction //
     public bool bAllowingReactions { get; private set; }
-    [HideInInspector]
-    public BaseCard reactionAnticipating;
-    [HideInInspector]
-    public PlayingCard reactionCaptainUsingAnticipating;
-    [HideInInspector]
-    public List<PlayingCard> reactionCaptainTargetingAnticipating;
-    public void AllowReaction(bool bAllow, BaseCard cardToPlay, PlayingCard captainUsing, bool bTargetingEnemy, List<PlayingCard> captainTargeting)
+
+    public void AllowReaction(bool bAllow)
     {
         bAllowingReactions = bAllow;
         BlockHand(!bAllow);
         StartCoroutine(GetReactionOptions(bAllow));
+
         playerReactionHoldUpGroup.SetActive(bAllow);
 
         if (bAllow)
         {
             reactionTime = 5.0f;
             reactionTimerCorotine = StartCoroutine(ReactionTime());
-
-            reactionAnticipating = cardToPlay;
-            reactionCaptainUsingAnticipating = captainUsing;
-            reactionCaptainTargetingAnticipating = captainTargeting;
         }
     }
 
@@ -204,17 +197,24 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
         if(reactionTimerCorotine != null)
             StopCoroutine(reactionTimerCorotine);
 
-        AllowReaction(false, null, null, false, null);
+        AllowReaction(false);
 
         gameMaster.RequestFinishReaction();
     }
 
     public void EnemyFinishReaction()
     {
-        currentReactionCard.myCard.bWaitForReaction = false;
+        if (gameMaster.reactionPlayingCard != null)
+        {
+            gameMaster.reactionPlayingCard.myCard.bWaitForReaction = false;
+        }
 
-        BlockHand(DaybreakCards.Count > 0);
-        StartCoroutine(GetPlayerOptions(DaybreakCards.Count <= 0));
+
+        if(gameMaster.bPlayer1sTurn == bIsPlayer1)
+        {
+            BlockHand(DaybreakCards.Count > 0);
+            StartCoroutine(GetPlayerOptions(DaybreakCards.Count <= 0));
+        }
 
         gameMaster.ResetAllDisplayAttackStats();
     }
@@ -333,7 +333,6 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
                     AddItemToChoice(null, card);
                 }
             }
-            return;
         }
 
         if (ChoiceCards.Count <= 0)
@@ -565,7 +564,7 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
     public void AddCardToHand(BaseCard newCardToadd)
     {
         PlayingCard newPlayingCard = Instantiate(playingCardPrefab, this.transform);
-        newPlayingCard.Init(this, newCardToadd, bIsPlayer1, -1, null);
+        newPlayingCard.Init(this, newCardToadd, bIsPlayer1, gameMaster.GetNextID(), null);
         newPlayingCard.transform.localPosition = new Vector3(0, -150, 0);
         PlayingCardsInHand.Add(newPlayingCard);
         newPlayingCard.StartMoveCard(-5.0f, false, 0.5f);
@@ -788,7 +787,7 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
     {
         currentTargets.Clear();
 
-        foreach(PlayingCard card in StaticGameplayDelegates.GetAllAllies(true, captainUsing))
+        foreach(PlayingCard card in StaticGameplayDelegates.GetTeammates(captainUsing))
             currentTargets.Add(card);
 
         ClearLineAttacks();

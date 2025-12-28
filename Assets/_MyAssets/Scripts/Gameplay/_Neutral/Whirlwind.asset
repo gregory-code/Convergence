@@ -9,25 +9,26 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3a3f2ef63b82f9144a441a9c10a36158, type: 3}
-  m_Name: Heartbreaker
+  m_Script: {fileID: 11500000, guid: a18fd154536d43043b8aed1d39895990, type: 3}
+  m_Name: Whirlwind
   m_EditorClassIdentifier: 
-  CardName: Heartbreaker
+  CardName: Whirlwind
   Type: {fileID: 11400000, guid: 067b8d4f5ee7d7d4db9abaab0a0a0c46, type: 2}
-  Rarity: {fileID: 11400000, guid: 10f3481ff2e893245a2600427e96d2bd, type: 2}
-  Captain: 6
-  SeriesOverlay: {fileID: 21300000, guid: 73a0f5082a4a2584594d9309801360f2, type: 3}
-  CardArt: {fileID: 21300000, guid: cb4622f9eecd74e48a3e4831b7f65711, type: 3}
-  CardArtAdjustment: {x: -70.85, y: 0}
-  CardArtSize: {x: 0.16, y: 0.34}
-  CardPreviewArt: {fileID: 21300000, guid: c795a7c782ccf6542b32bb504f60abf5, type: 3}
+  Rarity: {fileID: 11400000, guid: 4d89e1e08f97ead4bb80c04b5453801a, type: 2}
+  Captain: 0
+  SeriesOverlay: {fileID: 0}
+  CardArt: {fileID: 21300000, guid: 35eb2ab57af147042b35b8e47ac2b302, type: 3}
+  CardArtAdjustment: {x: 42, y: 0}
+  CardArtSize: {x: 0.13, y: 0.15}
+  CardPreviewArt: {fileID: 21300000, guid: b3c76745a1a065d49ad07a3b531a41d8, type: 3}
   bTargetsSelf: 0
   bTargetsAllies: 1
   bTargetsAlliesExceptSelf: 0
   bTargetsEnemies: 0
   bTargetsAll: 0
-  bSwift: 0
-  DescriptionText: Enemy attack deals 0 damage
+  bSwift: 1
+  DescriptionText: "Swift \nEnemy attack (unless it targets each enemy) is redirected
+    to an ally of your choice"
   bActiveInEffectLinger: 0
   physicalStatLinger: 0
   magicStatLinger: 0
@@ -39,4 +40,4 @@ MonoBehaviour:
   respawnTurns: 0
   CaptainTargeting: []
   predictionDamage: 0
-  reactionType: 2
+  reactionType: 3

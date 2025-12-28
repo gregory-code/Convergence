@@ -32,9 +32,6 @@ public abstract class BaseCard : ScriptableObject
     public int magicStatLinger;
     public int defenseStatLinger;
 
-    [HideInInspector] // if it's a card in hand and not a captain or ally this has a value of -1
-    public int uniqueID = 0;
-
     [HideInInspector]
     public PlayingCard thisCard;
     [HideInInspector]
@@ -46,13 +43,22 @@ public abstract class BaseCard : ScriptableObject
     [HideInInspector]
     public int respawnTurns = 0;
 
+    [HideInInspector]
+    public List<PlayingCard> CaptainTargeting = new List<PlayingCard>();
+
+    [HideInInspector]
+    public int predictionDamage = 0;
+
+    [HideInInspector]
+    public List<PlayingCard> captainsAffectedByPredictionDamageIncrease = new List<PlayingCard>();
+
     public IEnumerator WaitForReaction(PlayingCard thisPlayingCard, PlayingCard captainUsing, bool bTargetingEnemy, List<PlayingCard> captainTargeting)
     {
         if (bTargetingEnemy == false || captainTargeting.Count <= 0)
             yield break;
 
-        List<PlayingCard> allyTeam = StaticGameplayDelegates.GetAllAllies(true, captainUsing);
-        List<PlayingCard> enemyTeam = StaticGameplayDelegates.GetAllAllies(false, captainUsing);
+        List<PlayingCard> allyTeam = StaticGameplayDelegates.GetTeammates(captainUsing);
+        List<PlayingCard> enemyTeam = StaticGameplayDelegates.GetEnemies(captainUsing);
 
         bool bEnemyIsEnergized = false;
 
@@ -85,8 +91,8 @@ public abstract class BaseCard : ScriptableObject
 
     public int CalculateAttackDamage(int baseDamage, bool bIsMagic, bool bIgnoreDefense, PlayingCard thisPlayingCard, PlayingCard captainUsing, bool bTargetingEnemy, PlayingCard captainTargeting)
     {
-        List<PlayingCard> allyTeam = StaticGameplayDelegates.GetAllAllies(true, captainUsing);
-        List<PlayingCard> enemyTeam = StaticGameplayDelegates.GetAllAllies(false, captainUsing);
+        List<PlayingCard> allyTeam = StaticGameplayDelegates.GetTeammates(captainUsing);
+        List<PlayingCard> enemyTeam = StaticGameplayDelegates.GetEnemies(captainUsing);
 
         int damage = baseDamage;
 
@@ -111,6 +117,18 @@ public abstract class BaseCard : ScriptableObject
             damage -= (bIgnoreDefense) ? 0 : enemyDefenseBuff;
         }
 
+        foreach (PlayingCard target in captainsAffectedByPredictionDamageIncrease)
+        {
+            if (target != null)
+            {
+                if (captainTargeting.uniqueID == target.uniqueID)
+                {
+                    damage += predictionDamage;
+                    break;
+                }
+            }
+        }
+
         damage = Mathf.Max(damage, 0);
 
         return damage;
@@ -121,29 +139,35 @@ public abstract class BaseCard : ScriptableObject
         return 0;
     }
 
-    public int GetTeammateBonusHealthBuffs()
+    public int GetTeammateDefenseBuffs()
     {
-        int bonusHealth = 0;
+        int defense = 0;
 
-        if(this is CaptainCard thisCapatain)
+        if (this is CaptainCard thisCapatain)
         {
-            List<PlayingCard> allies = StaticGameplayDelegates.GetAllAllies(true, thisCapatain.thisCard);
-            if(thisCapatain.Type.type == CardType.Ally)
-            {
-                if (allies == null)
-                    return 0;
+            List<PlayingCard> allies = StaticGameplayDelegates.GetTeammates(thisCapatain.thisCard);
+            if (allies == null)
+                return 0;
 
-                foreach (PlayingCard ally in allies)
+            foreach (PlayingCard ally in allies)
+            {
+                if (ally.myCard is CaptainCard allyCaptain)
                 {
-                    if (ally.myCard is CaptainCard allyCaptain)
+                    if (allyCaptain.bDead)
+                        continue;
+
+                    foreach (PlayingCard equipment in allyCaptain.GetEquipments())
                     {
-                        foreach (PlayingCard equipment in allyCaptain.GetEquipments())
+                        if (equipment.myCard is CrownOfNature crown)
                         {
-                            if (equipment.myCard is CrownOfNature crown)
+                            if (crown.crownsOwner != null)
                             {
-                                if (thisCapatain.CaptainWhoPlayedMe == crown.crownsOwner)
+                                if (thisCapatain.CaptainWhoPlayedMe != null)
                                 {
-                                    bonusHealth++;
+                                    if (thisCapatain.CaptainWhoPlayedMe.uniqueID == crown.crownsOwner.uniqueID)
+                                    {
+                                        defense += 1;
+                                    }
                                 }
                             }
                         }
@@ -152,7 +176,7 @@ public abstract class BaseCard : ScriptableObject
             }
         }
 
-        return bonusHealth;
+        return defense;
     }
 
     public int GetEnemyDefenseBuffs()

@@ -16,6 +16,15 @@ public class CardsMenu : MonoBehaviour, IDataPersistence
     [SerializeField] private CanvasGroup SelectDeckCanvasGroup;
     [SerializeField] private CanvasGroup EditDeckCanvasGroup;
 
+    [SerializeField] private Image CaptainToggle;
+    [SerializeField] private Image ActionToggle;
+    [SerializeField] private Image ReactionToggle;
+    [SerializeField] private Image EquipmentToggle;
+    [SerializeField] private Image AllyToggle;
+
+    [SerializeField] private Sprite checkedSprite;
+    [SerializeField] private Sprite unCheckedSprite;
+
     [SerializeField] private VisibleCard VisibleCardPreview;
     [SerializeField] private List<BaseCard> CaptainLibrary = new List<BaseCard>();
     [SerializeField] private List<BaseCard> CaptainCardsLibrary = new List<BaseCard>();
@@ -95,6 +104,110 @@ public class CardsMenu : MonoBehaviour, IDataPersistence
                 if (AddCardFromID(cardID, CaptainCardsLibrary))
                     continue;
             }
+        }
+    }
+
+    private void RemoveType(CardType typeToRemove)
+    {
+        for (int i = 0; i < CardPreviewLibrary.Count; i++)
+        {
+            if (CardPreviewLibrary[i].Card.Type.type == typeToRemove)
+            {
+                Destroy(CardPreviewLibrary[i].gameObject);
+                CardPreviewLibrary.RemoveAt(i);
+                i--;
+            }
+        }
+    }
+
+    private void AddType(CardType typeToAdd)
+    {
+        List<BaseCard> cardToAdd = new List<BaseCard>();
+        for (int i = 0; i < CardLibrary.Count; i++)
+        {
+            if (CardLibrary[i].Type.type == typeToAdd)
+            {
+                cardToAdd.Add(CardLibrary[i]);
+            }
+        }
+
+        for (int i = 0; i < currentDeck.Count; i++)
+        {
+            if (currentDeck[i].Type.type == CardType.Captain)
+            {
+                AddCardsToLibrary(GetCaptainsSignatureCards(currentDeck[i].Captain));
+            }
+        }
+        AddCardsToLibrary(cardToAdd);
+    }
+
+    public void EditCaptainToggle()
+    {
+        if(CaptainToggle.sprite == checkedSprite) // was true
+        {
+            CaptainToggle.sprite = unCheckedSprite;
+            RemoveType(CardType.Captain);
+        }
+        else // was false
+        {
+            CaptainToggle.sprite = checkedSprite;
+            AddCardsToLibrary(CaptainLibrary);
+        }
+    }
+
+    public void EditActionToggle()
+    {
+        if (ActionToggle.sprite == checkedSprite) // was true
+        {
+            ActionToggle.sprite = unCheckedSprite;
+            RemoveType(CardType.Action);
+        }
+        else // was false
+        {
+            ActionToggle.sprite = checkedSprite;
+            AddType(CardType.Action);
+        }
+    }
+
+    public void EditReactionToggle()
+    {
+        if (ReactionToggle.sprite == checkedSprite) // was true
+        {
+            ReactionToggle.sprite = unCheckedSprite;
+            RemoveType(CardType.Reaction);
+        }
+        else // was false
+        {
+            ReactionToggle.sprite = checkedSprite;
+            AddType(CardType.Reaction);
+        }
+    }
+
+    public void EditEquipmentToggle()
+    {
+        if (EquipmentToggle.sprite == checkedSprite) // was true
+        {
+            EquipmentToggle.sprite = unCheckedSprite;
+            RemoveType(CardType.Equipment);
+        }
+        else // was false
+        {
+            EquipmentToggle.sprite = checkedSprite;
+            AddType(CardType.Equipment);
+        }
+    }
+
+    public void EditAllyToggle()
+    {
+        if (AllyToggle.sprite == checkedSprite) // was true
+        {
+            AllyToggle.sprite = unCheckedSprite;
+            RemoveType(CardType.Ally);
+        }
+        else // was false
+        {
+            AllyToggle.sprite = checkedSprite;
+            AddType(CardType.Ally);
         }
     }
 
@@ -208,7 +321,28 @@ public class CardsMenu : MonoBehaviour, IDataPersistence
         {
             if(card.Captain == captain)
             {
-                newLibrary.Add(card);
+                switch(card.Type.type)
+                {
+                    case CardType.Action:
+                        if(ActionToggle.sprite == checkedSprite)
+                            newLibrary.Add(card);
+                        break;
+
+                    case CardType.Reaction:
+                        if (ReactionToggle.sprite == checkedSprite)
+                            newLibrary.Add(card);
+                        break;
+
+                    case CardType.Equipment:
+                        if (EquipmentToggle.sprite == checkedSprite)
+                            newLibrary.Add(card);
+                        break;
+
+                    case CardType.Ally:
+                        if (AllyToggle.sprite == checkedSprite)
+                            newLibrary.Add(card);
+                        break;
+                }
             }
         }
 

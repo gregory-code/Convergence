@@ -49,13 +49,14 @@ public class Tornado : CaptainCard
 
         if (thisPlayingCard.DoIOwnThis())
         {
-            List<PlayingCard> enemies = StaticGameplayDelegates.GetAllAllies(false, CaptainWhoPlayedMe);
-            player.currentReactionCard = thisPlayingCard;
-            player.reactionCaptainUsingAnticipating = thisPlayingCard;
-            player.reactionCaptainTargetingAnticipating = enemies;
-            player.reactionAnticipating = this;
+            List<PlayingCard> enemies = StaticGameplayDelegates.GetEnemies(CaptainWhoPlayedMe);
 
-            FindAnyObjectByType<GameMaster>().RequestPlayCard(thisCard, thisCard, true, enemies, false, true);
+            GameMaster gameMaster = FindFirstObjectByType<GameMaster>();
+            gameMaster.reactionPlayingCard = thisPlayingCard;
+            gameMaster.reactionCaptainUsing = thisPlayingCard;
+            gameMaster.reactionCaptainTargeting = enemies;
+
+            gameMaster.RequestPlayCard(thisCard, thisCard, true, enemies, false, true);
         }
     }
 
@@ -79,10 +80,11 @@ public class Tornado : CaptainCard
 
     private void TurnStarted(UserPlayer player, bool bPlayers1Turn)
     {
-        if(uniqueID == -1)
-        {
+        if(thisCard.uniqueID == -1)
             return;
-        }
+
+        if (CaptainWhoPlayedMe == null)
+            return;
 
         if (thisCard.bIsPlayer1 != bPlayers1Turn || thisCard.DoIOwnThis() == false)
             return;

@@ -2,8 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "TCG/Faye/Devotion")]
-public class Devotion : ReactionCard
+[CreateAssetMenu(menuName = "TCG/Neutral/Whirlwind")]
+public class Whirlwind : ReactionCard
 {
 
     public override void Init(UserPlayer ownerPlayer)
@@ -18,17 +18,10 @@ public class Devotion : ReactionCard
 
         thisPlayingCard.BeginPlayAndDiscard(captainUsing);
 
-        List<PlayingCard> newTarget = new List<PlayingCard>();
-        newTarget.Add(captainUsing);
-
         if (thisPlayingCard.DoIOwnThis())
         {
-            FindFirstObjectByType<GameMaster>().RequestDevotionHealthSwap(captainUsing, captainTargeting[0]);
-
-            FindFirstObjectByType<GameMaster>().RequestChangeReaction(newTarget, newTarget, 999);
+            FindFirstObjectByType<GameMaster>().RequestChangeReaction(captainTargeting, captainTargeting,  0);
         }
-
-        FindFirstObjectByType<UserPlayer>().FinishReaction();
 
         yield return new WaitForEndOfFrame();
     }

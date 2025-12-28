@@ -4147,7 +4147,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &794415387
 RectTransform:
   m_ObjectHideFlags: 0
@@ -4187,7 +4187,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'NEXT ID: 0'
+  m_text: 
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -8581,6 +8581,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: d0f26277b7b3f7c45ac0565085896935, type: 2}
   - {fileID: 11400000, guid: 4fc2fdf1c4d564d4699cf92788ba3678, type: 2}
   - {fileID: 11400000, guid: f7c55e9a4cf15804fb76ace01db16e44, type: 2}
+  - {fileID: 11400000, guid: 95892b61590e24549b3a22cce6945f60, type: 2}
   WaitingForOpponent: {fileID: 584005826}
   clientSideDiscardAmount: {fileID: 533937078}
   enemyDiscardAmount: {fileID: 147383718}

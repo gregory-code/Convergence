@@ -50,6 +50,7 @@ public abstract class EquipmentCard : BaseCard
                         {
                             equipmentAttached.RemoveEquipment(equipmentPlayingCard, captainUsing, captainUsing);
                             bSwift = true;
+                            captainTargeting[0].BeginEnergize();
                             break;
                         }
                     }

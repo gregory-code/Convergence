@@ -15,6 +15,13 @@ public class Heartbreaker : ReactionCard
     {
         yield return base.PlayCard(thisPlayingCard, captainUsing, bTargetingEnemy, captainTargeting);
 
+        thisPlayingCard.BeginPlayAndDiscard(captainUsing);
+
+        if (thisPlayingCard.DoIOwnThis())
+        {
+            FindFirstObjectByType<GameMaster>().RequestChangeReaction(null, null, -999);
+        }
+
         yield return new WaitForEndOfFrame();
     }
 

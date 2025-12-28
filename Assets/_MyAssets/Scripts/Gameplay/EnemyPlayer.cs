@@ -8,6 +8,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Rendering;
 using UnityEngine.UI;
+using static UnityEngine.EventSystems.EventTrigger;
 
 public class EnemyPlayer : MonoBehaviour
 {
@@ -49,21 +50,6 @@ public class EnemyPlayer : MonoBehaviour
         StartCoroutine(DrawCardsToHand(cardsToDraw));
     }
 
-    public IEnumerator RevealCardAndDraw(BaseCard cardToDraw)
-    {
-        PlayingCard newPlayingCard = Instantiate(playingCardPrefab, this.transform);
-        newPlayingCard.Init(null, cardToDraw, bIsPlayer1, -1, null);
-        newPlayingCard.transform.localPosition = new Vector3(0, 250, 0);
-        newPlayingCard.StartMoveCard(-550, false, 0.5f);
-
-        yield return new WaitForSeconds(0.8f);
-
-        newPlayingCard.StartMoveCard(250, false, 0.3f);
-
-        yield return new WaitForSeconds(0.3f);
-
-        AddCardToHand(null);
-    }
 
 
     private IEnumerator DrawCardsToHand(int cardsToDraw)
@@ -96,12 +82,31 @@ public class EnemyPlayer : MonoBehaviour
     public void AddCardToHand(BaseCard newCardToadd)
     {
         PlayingCard newPlayingCard = Instantiate(playingCardPrefab, this.transform);
-        newPlayingCard.Init(null, newCardToadd, bIsPlayer1, -1, null);
+        newPlayingCard.Init(null, newCardToadd, bIsPlayer1, gameMaster.GetNextID(), null);
         newPlayingCard.transform.localPosition = new Vector3(0, 150, 0);
         PlayingCardsInHand.Add(newPlayingCard);
         newPlayingCard.StartMoveCard(-5, false, 0.5f);
 
         ReOrganizeHand();
+    }
+
+    public IEnumerator RevealCardAndDraw(BaseCard cardToDraw)
+    {
+        enemyDeck.DrawTopCard();
+        yield return new WaitForSeconds(0.04f);
+
+        PlayingCard newPlayingCard = Instantiate(playingCardPrefab, this.transform);
+        newPlayingCard.Init(null, cardToDraw, bIsPlayer1, -1, null); // THIS IS -1 BECAUSE OTHERWISE IT CREATES A UNIQUE CARD THAT THE CLIENT NEVER SEES, THUS MAKING UNIQUE ID DIFFERENT VALUES
+        newPlayingCard.transform.localPosition = new Vector3(0, 250, 0);
+        newPlayingCard.StartMoveCard(-550, false, 0.5f);
+
+        yield return new WaitForSeconds(0.8f);
+
+        newPlayingCard.StartMoveCard(250, false, 0.3f);
+
+        yield return new WaitForSeconds(0.3f);
+
+        AddCardToHand(null);
     }
 
     public IEnumerator MullgianWrapUp(int cardsToMulligan)
@@ -164,7 +169,7 @@ public class EnemyPlayer : MonoBehaviour
         {
             if(action.bAttackingCard)
             {
-                List<PlayingCard> myTeam = StaticGameplayDelegates.GetAllAllies(false, captainUsing);
+                List<PlayingCard> myTeam = StaticGameplayDelegates.GetEnemies(captainUsing);
                 bool bAllyIsEnergized = false;
 
                 foreach (PlayingCard ally in myTeam)
@@ -226,12 +231,14 @@ public class EnemyPlayer : MonoBehaviour
         return worldMousePos;
     }
 
-    private PlayingCard reactionCardPrediction;
-    public void EnemyIsAttackingPredicition(BaseCard cardToPlay, PlayingCard captainUsing, bool bTargetingEnemy, List<PlayingCard> captainTargeting)
+    private bool bWaitingForReaction;
+    public void EnemyIsAttackingPredicition(BaseCard cardToPlay, PlayingCard captainUsing)
     {
-        if(captainUsing.myCard.Type.type == CardType.Ally)
+        bWaitingForReaction = true;
+
+        if (captainUsing.myCard.Type.type == CardType.Ally)
         {
-            reactionCardPrediction = captainUsing;
+            gameMaster.reactionPlayingCard = captainUsing;
             captainUsing.DisplayAttackStats(false, false, captainUsing, captainUsing);
         }
         else
@@ -244,33 +251,53 @@ public class EnemyPlayer : MonoBehaviour
             StartCoroutine(PlayingCardsInHand[0].PlayReaction(captainUsing, captainUsing.transform.parent, cardToPlay));
 
             //StartCoroutine(cardToPlay.PlayCard(PlayingCardsInHand[0], captainUsing, bTargetingEnemy, captainTargeting));
-            reactionCardPrediction = PlayingCardsInHand[0];
+            gameMaster.reactionPlayingCard = PlayingCardsInHand[0];
             StartCoroutine(RemoveCardFromHand());
 
             captainUsing.DisplayAttackStats(false, false, PlayingCardsInHand[0], captainUsing);
         }
+        StartCoroutine(WaitingForReactionLoop());
 
-        for (int i = 0; i < captainTargeting.Count; i++)
+    }
+
+    private IEnumerator WaitingForReactionLoop()
+    {
+        while(bWaitingForReaction && gameMaster.reactionPlayingCard != null)
         {
-            LineAttackPredictionScript lineAttack = Instantiate(lineAttackPredictionPrefab);
-            lineAttack.ShowPrediction(captainUsing.transform.position, captainTargeting[i].transform.position, Color.red);
-            lineAttacks.Add(lineAttack);
+            ClearLineAttacks();
 
-            CardPlayContext context = cardToPlay.PredictCard(PlayingCardsInHand[0], captainUsing, bTargetingEnemy, captainTargeting[i]);
-
-            if (captainTargeting[i].myCard is CaptainCard captain)
+            for (int i = 0; i < gameMaster.reactionCaptainTargeting.Count; i++)
             {
-                captainTargeting[i].DisplayHealthChange(captain.currentHealth - context.damage);
-                captainTargeting[i].DisplayAttackStats(false, true, PlayingCardsInHand[0], captainUsing);
+                LineAttackPredictionScript lineAttack = Instantiate(lineAttackPredictionPrefab);
+                lineAttack.ShowPrediction(gameMaster.reactionPlayingCard.transform.position, gameMaster.reactionCaptainTargeting[i].transform.position, Color.red);
+                lineAttacks.Add(lineAttack);
+
+                CardPlayContext context = gameMaster.reactionPlayingCard.myCard.PredictCard(gameMaster.reactionPlayingCard, gameMaster.reactionCaptainUsing, gameMaster.bReactionTargetingEnemy, gameMaster.reactionCaptainTargeting[i]);
+
+                if (gameMaster.reactionCaptainTargeting[i].myCard is CaptainCard captain)
+                {
+                    gameMaster.reactionCaptainTargeting[i].DisplayHealthChange(captain.currentHealth - context.damage);
+                    gameMaster.reactionCaptainTargeting[i].DisplayAttackStats(false, true, gameMaster.reactionPlayingCard, gameMaster.reactionCaptainUsing);
+                }
             }
+
+            yield return new WaitForSeconds(0.5f);
         }
 
+        bWaitingForReaction = false;
     }
 
     public void EnemyFinishReaction()
     {
-        reactionCardPrediction.myCard.bWaitForReaction = false;
+
+        if(gameMaster.reactionPlayingCard != null)
+        {
+            gameMaster.reactionPlayingCard.myCard.bWaitForReaction = false;
+        }
+
         ClearLineAttacks();
+
+        bWaitingForReaction = false;
 
         gameMaster.ResetAllDisplayAttackStats();
     }

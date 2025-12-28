@@ -27,7 +27,8 @@ MonoBehaviour:
   bTargetsEnemies: 0
   bTargetsAll: 0
   bSwift: 0
-  DescriptionText: 
+  DescriptionText: "An ally taking fatal damage is kept alive at the same health
+    of this captain \nThis captain dies to the attack instead"
   bActiveInEffectLinger: 0
   physicalStatLinger: 0
   magicStatLinger: 0
@@ -37,4 +38,4 @@ MonoBehaviour:
   bWaitForReaction: 0
   bDead: 0
   respawnTurns: 0
-  reactionType: 0
+  reactionType: 1

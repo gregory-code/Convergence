@@ -11,7 +11,7 @@ public class LibraryCardPreview : MonoBehaviour, IPointerEnterHandler, IPointerE
     [SerializeField] Image RarityIcon;
 
     private CardsMenu OwnerMenu;
-    private BaseCard Card;
+    public BaseCard Card { get; private set; }
 
     public void Init(CardsMenu ownerMenu, BaseCard card)
     {

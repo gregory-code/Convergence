@@ -49,7 +49,6 @@ public abstract class CaptainCard : BaseCard
                 health += equipment.bonusHealthStatChange;
             }
         }
-        health += GetTeammateBonusHealthBuffs();
         return health;
     }
 
@@ -102,6 +101,7 @@ public abstract class CaptainCard : BaseCard
         {
             defense += card.myCard.defenseStatLinger;
         }
+        defense += GetTeammateDefenseBuffs();
         return defense;
     }
 
@@ -151,7 +151,7 @@ public abstract class CaptainCard : BaseCard
             damageDealt--;
         }
 
-        allyRecivingDamage.SetHealthText(currentHealth, maxHealth);
+        allyRecivingDamage.SetHealthText();
         allyRecivingDamage.DisplayHitDamageVFX(damageDealt, bWasMagic);
         StaticGameplayDelegates.DealtDamage(damageDealt, bWasMagic, usedCard, allyDealingDamage, allyRecivingDamage);
         
@@ -171,6 +171,7 @@ public abstract class CaptainCard : BaseCard
 
     public void AllyDeath()
     {
+        //Debug.Log("Ally death: " + thisCard.myCard.CardName);
         thisCard.BeginEnergize();
         thisCard.BeginPlayAndDiscard(thisCard);
 
@@ -180,6 +181,7 @@ public abstract class CaptainCard : BaseCard
         }
 
         bDead = true;
+
         Cleanup();
     }
 
@@ -193,7 +195,7 @@ public abstract class CaptainCard : BaseCard
             healthHealed--;
         }
 
-        allyBeingHealed.SetHealthText(currentHealth, maxHealth);
+        allyBeingHealed.SetHealthText();
         allyBeingHealed.DisplayHealVFX(healthHealed);
         StaticGameplayDelegates.Healed(healthHealed, usedCard, allyDoingTheHealing, allyBeingHealed);
     }

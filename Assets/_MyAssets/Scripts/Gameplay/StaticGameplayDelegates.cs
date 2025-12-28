@@ -43,7 +43,8 @@ public static class StaticGameplayDelegates
 
     public static int GetAllySparkCount() { return GameObject.FindFirstObjectByType<GameMaster>().allySparkValue; }
     public static void RequestAttackPrediction(PlayingCard cardToPlay, PlayingCard captainUsing, bool bTargetingEnemy, List<PlayingCard> captainTargeting) { GameObject.FindFirstObjectByType<GameMaster>().RequestPlayCard(cardToPlay, captainUsing, bTargetingEnemy, captainTargeting, true, false); }
-    public static List<PlayingCard> GetAllAllies(bool bGetMyTeam, PlayingCard captainForReference) { return GameObject.FindFirstObjectByType<GameMaster>().GetAllAllies(bGetMyTeam, captainForReference); }
+    public static List<PlayingCard> GetTeammates(PlayingCard captainForReference) { return GameObject.FindFirstObjectByType<GameMaster>().GetTeammates(captainForReference); }
+    public static List<PlayingCard> GetEnemies(PlayingCard captainForReference) { return GameObject.FindFirstObjectByType<GameMaster>().GetEnemies(captainForReference); }
     public static Transform GetDiscardPileTransform(bool isPlayer1) { return GameObject.FindFirstObjectByType<GameMaster>().GetDiscardPilieTransform(isPlayer1); }
     public static void AddCardToDiscard(PlayingCard cardtoAdd, bool isPlayer1) { GameObject.FindFirstObjectByType<GameMaster>().AddCardToDiscard(cardtoAdd, isPlayer1); }
     public static Sprite[] GetNumberSpriteWholes() { return GameObject.FindFirstObjectByType<GameMaster>().GetNumberSpriteWholes(); }

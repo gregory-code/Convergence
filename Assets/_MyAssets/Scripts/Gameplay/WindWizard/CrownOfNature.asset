@@ -29,12 +29,11 @@ MonoBehaviour:
   bSwift: 0
   DescriptionText: "When equipped search your deck for 1 Ally, reveal it, and add
     it to your hand (shuffle afterwards) \nAlly cards in play by this captain gain
-    +1 bonus health (exceeds its max) [Magic Item]"
+    +1 defense [Magic Item]"
   bActiveInEffectLinger: 0
   physicalStatLinger: 0
   magicStatLinger: 0
   defenseStatLinger: 0
-  uniqueID: 0
   thisCard: {fileID: 0}
   bOncePerTurn: 1
   bWaitForReaction: 0

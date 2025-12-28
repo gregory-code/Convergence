@@ -28,7 +28,7 @@ public class WindWizard : CaptainCard
 
         int sparkGain = 0;
 
-        List<PlayingCard> allyTeam = StaticGameplayDelegates.GetAllAllies(true, thisCard);
+        List<PlayingCard> allyTeam = StaticGameplayDelegates.GetTeammates(thisCard);
         foreach (PlayingCard card in allyTeam)
         {
             if (card.myCard is CaptainCard captain)
@@ -58,7 +58,7 @@ public class WindWizard : CaptainCard
         if (thisCard == null)
             return;
 
-        List<PlayingCard> allyTeam = StaticGameplayDelegates.GetAllAllies(true, thisCard);
+        List<PlayingCard> allyTeam = StaticGameplayDelegates.GetTeammates(thisCard);
 
         foreach (PlayingCard card in allyTeam)
         {
@@ -74,7 +74,7 @@ public class WindWizard : CaptainCard
             }
         }
 
-        if (thisCard.bIsPlayer1 != bPlayers1Turn || thisCard.DoIOwnThis() == false)
+        if (thisCard.bIsPlayer1 != bPlayers1Turn || thisCard.DoIOwnThis() == false || bDead)
             return;
 
         sparkAmount = sparkGain;

@@ -12,7 +12,9 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 {
 
     private int originalIndex;
+
     public BaseCard myCard { get; private set; }
+    public int uniqueID { get; private set; }
 
     [SerializeField] private UserPlayer ownerPlayer;
     [SerializeField] private GameObject mulliganOverlay;
@@ -63,7 +65,9 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
         bEnergized = true;
 
+
         this.bIsPlayer1 = bIsPlayer1;
+        this.uniqueID = uniqueID;
 
         this.ownerPlayer = ownerplayer;
         SetCard(card);
@@ -71,8 +75,6 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
         if(myCard != null)
         {
-            myCard.uniqueID = uniqueID;
-
             if (myCard.Type.type == CardType.Ally)
                 if (myCard is CaptainCard newAlly)
                     if (captainPlayingAlly != null)
@@ -80,11 +82,15 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         }
 
         StaticGameplayDelegates.onInspect += InspectCard;
-        if(ownerplayer != null)
+        if(ownerplayer != null && uniqueID != -1)
         {
             StaticGameplayDelegates.onTurnEnded += TurnEnds;
             StaticGameplayDelegates.onKilled += SomeoneKilled;
             myCard.Init(ownerplayer);
+            myCard.bWaitForReaction = false;
+            myCard.predictionDamage = 0;
+
+            SetHealthText();
         }
 
 
@@ -94,9 +100,16 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         }
     }
 
-    public void SetHealthText(int newHealth, int maxHealth)
-    { 
-        GetComponent<VisibleCard>().SetHealthText(newHealth, maxHealth); 
+    public void SetHealthText()
+    {
+        if (myCard == null)
+            return;
+
+        if(myCard is CaptainCard captain)
+        {
+            GetComponent<VisibleCard>().SetHealthText(captain.currentHealth, captain.maxHealth); 
+        }
+
     }
 
     public void PreventRegularMoving()
@@ -111,7 +124,7 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
         myCard = card;
         myCard.thisCard = this;
-        myCard.uniqueID = -1;
+        myCard.predictionDamage = 0;
         GetComponent<VisibleCard>().SetCard(card);
     }
 
@@ -137,7 +150,20 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
             {
                 if (ownerPlayer.bAllowingReactions && ownerPlayer.currentCard.myCard is ReactionCard reaction)
                 {
-                    if(reaction.reactionType == ReactionType.TargetAttackedAlly && ownerPlayer.reactionCaptainTargetingAnticipating.Contains(this))
+                    if(FindFirstObjectByType<GameMaster>().reactionCaptainTargeting.Contains(this))
+                    {
+                        if (reaction.reactionType == ReactionType.TargetAttackedAlly)
+                        {
+                            return true;
+                        }
+
+                        if (reaction.reactionType == ReactionType.TargetKilledAlly && predictingNewHealthChange <= 0)
+                        {
+                            return true;
+                        }
+                    }
+
+                    if(reaction.reactionType == ReactionType.TargetAnotherAlly)
                     {
                         return true;
                     }
@@ -181,6 +207,14 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
                     }
                 }
                 else
+                {
+                    return true;
+                }
+            }
+
+            if (ownerPlayer.bAllowingReactions && ownerPlayer.currentCard.myCard is ReactionCard secondCheck)
+            {
+                if (secondCheck.reactionType == ReactionType.TargetAttackingEnemy)
                 {
                     return true;
                 }
@@ -315,7 +349,7 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         if(myCard is CaptainCard capatin)
         {
             capatin.SetToFullHealth();
-            SetHealthText(capatin.currentHealth, capatin.maxHealth);
+            SetHealthText();
         }
     }
 
@@ -527,6 +561,7 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         }
     }
 
+    private int predictingNewHealthChange;
     public void DisplayHealthChange(int newHealth)
     {
         if(myCard is CaptainCard captain)
@@ -545,6 +580,7 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
 
             newHealth = Mathf.Min(newHealth, (captain.maxHealth + captain.GetBonusHealth()));
+            predictingNewHealthChange = newHealth;
 
             int maxHealth = captain.maxHealth;
             int currentHealth = captain.currentHealth;
@@ -589,6 +625,7 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     {
         Vector3 vfxSpawnPos = transform.position;
         vfxSpawnPos.y = -3.0f;
+
 
         GameObject damagePrefab = (bIsMagic) ? magicDamageVFX[0] : physicalDamageVFX[0];
         switch(damage)
@@ -698,20 +735,19 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     {
         bHovering = false;
 
-        if(myCard != null)
+        if (uniqueID != -1 && bInDiscard == false)
         {
-            if(myCard.uniqueID != -1)
+            List<PlayingCard> enemies = StaticGameplayDelegates.GetEnemies(this);
+            if (enemies != null)
             {
-                List<PlayingCard> enemies = StaticGameplayDelegates.GetAllAllies(false, this);
                 foreach (PlayingCard enemy in enemies)
                 {
                     enemy.AttackPredictionPanel.SetActive(false);
                 }
             }
-
         }
 
-        if(ownerPlayer != null)
+        if (ownerPlayer != null)
             ownerPlayer.ClearLineAttacks();
 
         if (ownerPlayer == null) // for enemy cards
@@ -792,7 +828,7 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
                 {
                     ownerPlayer.currentCaptain.DisplayAttackStats(false, false, ownerPlayer.currentCard, ownerPlayer.currentCaptain);
 
-                    List<PlayingCard> enemies = StaticGameplayDelegates.GetAllAllies(false, ownerPlayer.currentCaptain);
+                    List<PlayingCard> enemies = StaticGameplayDelegates.GetEnemies(ownerPlayer.currentCaptain);
                     foreach(PlayingCard enemy in enemies)
                     {
                         enemy.DisplayAttackStats(false, true, ownerPlayer.currentCard, ownerPlayer.currentCaptain);
@@ -830,7 +866,21 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         if(ownerPlayer.bChoosingTarget && ownerPlayer.bSkipCaptainChoice == false)
         {
             bool bTargetingEnemy = (ownerPlayer.currentCaptain.DoIOwnThis() && ownerPlayer.currentTargets[0].DoIOwnThis()) ? false : true;
-            ownerPlayer.currentReactionCard = ownerPlayer.currentCard;
+
+            GameMaster gameMaster = FindFirstObjectByType<GameMaster>();
+
+            if(ownerPlayer.currentCard.myCard is ReactionCard reaction)
+            {
+
+            }
+            else
+            {
+                gameMaster.reactionPlayingCard = ownerPlayer.currentCard;
+                gameMaster.reactionCaptainUsing = ownerPlayer.currentCaptain;
+                gameMaster.reactionCaptainTargeting = ownerPlayer.currentTargets;
+                gameMaster.bReactionTargetingEnemy = bTargetingEnemy;
+            }
+
             ownerPlayer.RequestPlayCard(ownerPlayer.currentCard, ownerPlayer.currentCaptain, bTargetingEnemy, ownerPlayer.currentTargets);
             CancelUsingCard();
         }
