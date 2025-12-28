@@ -20,6 +20,7 @@ public abstract class EquipmentCard : BaseCard
             captain.AttachEquipment(equipment, allyDoingTheEquipping);
         }
 
+        StaticGameplayDelegates.EquipmentAttached(equipment, allyDoingTheEquipping, allyGettingTheEquipment);
     }
 
     public void RemoveEquipment(PlayingCard equipment, PlayingCard allyRemovingTheEquipment, PlayingCard allyWhoHadTheEquipment)
@@ -29,6 +30,8 @@ public abstract class EquipmentCard : BaseCard
             equipment.RemoveCardAttachment(allyWhoHadTheEquipment);
             captain.RemoveEquipment(equipment, allyRemovingTheEquipment);
         }
+
+        StaticGameplayDelegates.EquipmentRemoved(equipment, allyRemovingTheEquipment, allyWhoHadTheEquipment);
     }
 
     public override void Init(UserPlayer ownerPlayer)

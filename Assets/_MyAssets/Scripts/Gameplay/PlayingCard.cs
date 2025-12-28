@@ -1,3 +1,4 @@
+using ExitGames.Client.Photon.StructWrapping;
 using System.Collections;
 using System.Collections.Generic;
 using System.Xml;
@@ -707,6 +708,69 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         Destroy(num, sparkParticleNum.main.duration + sparkParticleNum.main.startLifetime.constantMax);
     }
 
+    private bool CheckBackpack(bool IamACaptain)
+    {
+        if (ownerPlayer.currentCard == null)
+            return false;
+
+        if (ownerPlayer.currentCard.myCard is EquipmentCard equipment)
+        {
+            BaseCard cardToCheck = myCard;
+
+            if(!IamACaptain)
+            {
+                if (ownerPlayer.currentTargets.Count > 0)
+                {
+                    cardToCheck = ownerPlayer.currentTargets[0].myCard;
+                }
+            }
+
+            if (cardToCheck is CaptainCard captain)
+            {
+                foreach (PlayingCard attachedEquip in captain.GetEquipments())
+                {
+                    if (attachedEquip.myCard is Backpack backpack)
+                    {
+                        Debug.Log("We're going backpacking");
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private void TargetAction()
+    {
+        if (ownerPlayer.currentCard.myCard is ActionCard action)
+        {
+            if (ownerPlayer.currentCard.myCard.bTargetsAll)
+            {
+                ownerPlayer.TargetAllWithLineRenders(ownerPlayer.currentCaptain);
+            }
+
+            if (action.bHasPredcition || action.bAttackingCard)
+            {
+                for (int i = 0; i < ownerPlayer.currentTargets.Count; i++)
+                {
+                    if (action.bAttackingCard && ownerPlayer.currentTargets[i].bEnergized == true)
+                        continue;
+
+                    CardPlayContext context;
+                    if (ownerPlayer.bSkipCaptainChoice)
+                        context = ownerPlayer.currentCard.myCard.PredictCard(ownerPlayer.currentCard, ownerPlayer.currentTargets[i], true, ownerPlayer.currentTargets[i]);
+                    else
+                        context = ownerPlayer.currentCard.myCard.PredictCard(ownerPlayer.currentCard, ownerPlayer.currentCaptain, true, ownerPlayer.currentTargets[i]);
+
+                    if (ownerPlayer.currentTargets[i].myCard is CaptainCard captain)
+                    {
+                        ownerPlayer.currentTargets[i].DisplayHealthChange(captain.currentHealth - context.damage);
+                    }
+                }
+            }
+        }
+    }
+
     public void OnPointerEnter(PointerEventData eventData)
     {
         bHovering = true;
@@ -714,15 +778,22 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         if (ownerPlayer == null) // for enemy cards
             return;
 
-        if (myCard.Type.type == CardType.Captain && ownerPlayer.bChoosingCaptain && DoIOwnThis() && bEnergized == true)
+        if (myCard.Type.type == CardType.Captain && DoIOwnThis() && bEnergized == true)
         {
-            ownerPlayer.HoveringCard(true, this);
+            if(CheckBackpack(true) && ownerPlayer.bSkipCaptainChoice)
+            {
+                ownerPlayer.ForceChooseCaptain(true);
+            }
 
+            if (ownerPlayer.bChoosingCaptain)
+            {
+                ownerPlayer.HoveringCard(true, this);
+            }
         }
 
         if ((myCard.Type.type == CardType.Captain || myCard.Type.type == CardType.Ally) && ownerPlayer.bChoosingTarget)
-        {
-            if(EligableTarget(ownerPlayer.currentCard) || (ownerPlayer.bSkipCaptainChoice && ownerPlayer.currentCard.myCard.bTargetsSelf && DoIOwnThis() && bEnergized == true))
+        {    
+            if (EligableTarget(ownerPlayer.currentCard) || (ownerPlayer.bSkipCaptainChoice && ownerPlayer.currentCard.myCard.bTargetsSelf && DoIOwnThis() && bEnergized == true))
             {
                 if(ownerPlayer.currentCard.myCard is EquipmentCard equipment)
                 {
@@ -733,33 +804,7 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
                 {
                     ownerPlayer.HoveringTarget(bHovering, this);
 
-                    if (ownerPlayer.currentCard.myCard is ActionCard action)
-                    {
-                        if (ownerPlayer.currentCard.myCard.bTargetsAll)
-                        {
-                            ownerPlayer.TargetAllWithLineRenders(ownerPlayer.currentCaptain);
-                        }
-
-                        if (action.bHasPredcition || action.bAttackingCard)
-                        {
-                            for(int i = 0; i < ownerPlayer.currentTargets.Count; i++)
-                            {
-                                if (action.bAttackingCard && ownerPlayer.currentTargets[i].bEnergized == true)
-                                    continue;
-
-                                CardPlayContext context;
-                                if(ownerPlayer.bSkipCaptainChoice)
-                                    context = ownerPlayer.currentCard.myCard.PredictCard(ownerPlayer.currentCard, ownerPlayer.currentTargets[i], true, ownerPlayer.currentTargets[i]);
-                                else
-                                    context = ownerPlayer.currentCard.myCard.PredictCard(ownerPlayer.currentCard, ownerPlayer.currentCaptain, true, ownerPlayer.currentTargets[i]);
-                                
-                                if(ownerPlayer.currentTargets[i].myCard is CaptainCard captain)
-                                {
-                                    ownerPlayer.currentTargets[i].DisplayHealthChange(captain.currentHealth - context.damage);
-                                }
-                            }
-                        }
-                    }
+                    TargetAction();
                 }
             }
         }
@@ -797,6 +842,12 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
         if (ownerPlayer == null) // for enemy cards
             return;
+
+        if(ownerPlayer.bForceChoosingCaptain)
+        {
+            ownerPlayer.ForceChooseCaptain(false);
+            ownerPlayer.HoveringCard(false, this);
+        }
 
         if (myCard.Type.type == CardType.Captain && ownerPlayer.bChoosingCaptain && DoIOwnThis())
         {
@@ -860,6 +911,15 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
         if(ownerPlayer.bChoosingTarget && ownerPlayer.bSkipCaptainChoice && ownerPlayer.currentTargets.Count > 0)
         {
+            if(CheckBackpack(false))
+            {
+                ownerPlayer.currentCaptain = this;
+                ownerPlayer.currentCard.myCard.bTargetsSelf = false;
+                ownerPlayer.currentCard.myCard.bTargetsAllies = true;
+                ownerPlayer.ChooseCaptainWhileLineIsRendering();
+                return;
+            }
+
             ownerPlayer.RequestPlayCard(ownerPlayer.currentCard, ownerPlayer.currentTargets[0], false, ownerPlayer.currentTargets);
         }
 
@@ -890,6 +950,21 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
     public void CancelUsingCard()
     {
+        // THERE'S NO WAY THIS CAN STAY PLEASE REEVALUATE IT
+        // THERE'S NO WAY THIS CAN STAY PLEASE REEVALUATE IT
+        // THERE'S NO WAY THIS CAN STAY PLEASE REEVALUATE IT
+        // THERE'S NO WAY THIS CAN STAY PLEASE REEVALUATE IT
+        // THERE'S NO WAY THIS CAN STAY PLEASE REEVALUATE IT
+        // THERE'S NO WAY THIS CAN STAY PLEASE REEVALUATE IT
+        // THERE'S NO WAY THIS CAN STAY PLEASE REEVALUATE IT
+        // THERE'S NO WAY THIS CAN STAY PLEASE REEVALUATE IT
+        // THERE'S NO WAY THIS CAN STAY PLEASE REEVALUATE IT
+        if(CheckBackpack(false))
+        {
+            ownerPlayer.currentCard.myCard.bTargetsSelf = true;
+            ownerPlayer.currentCard.myCard.bTargetsAllies = false;
+        }
+
         ownerPlayer.StartStopLineRenderer(false, this, Color.white);
         ownerPlayer.BlockHand(false);
 

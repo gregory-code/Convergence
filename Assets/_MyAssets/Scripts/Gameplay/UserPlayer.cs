@@ -777,6 +777,16 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
         }
     }
 
+    public bool bForceChoosingCaptain { get; private set; }
+    public void ForceChooseCaptain(bool bForce)
+    {
+        bForceChoosingCaptain = bForce;
+
+        bSkipCaptainChoice = !bForce;
+        bChoosingCaptain = bForce;
+        bChoosingTarget = !bForce;
+    }
+
     public void ChooseCaptainWhileLineIsRendering()
     {
         bChoosingCaptain = false;
