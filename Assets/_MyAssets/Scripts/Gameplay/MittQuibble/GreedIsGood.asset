@@ -24,8 +24,22 @@ MonoBehaviour:
   bTargetsSelf: 1
   bTargetsAllies: 0
   bTargetsAlliesExceptSelf: 0
+  bCaptainsOnly: 0
   bTargetsEnemies: 0
+  bTargetsAll: 0
   bSwift: 0
-  DescriptionText: 
-  bAttacking: 0
-  Damage: 0
+  DescriptionText: Draw 3 cards
+  bActiveInEffectLinger: 0
+  physicalStatLinger: 0
+  magicStatLinger: 0
+  defenseStatLinger: 0
+  thisCard: {fileID: 0}
+  bOncePerTurn: 1
+  bWaitForReaction: 0
+  bDead: 0
+  respawnTurns: 0
+  CaptainTargeting: []
+  predictionDamage: 0
+  captainsAffectedByPredictionDamageIncrease: []
+  bAttackingCard: 0
+  bHasPredcition: 0

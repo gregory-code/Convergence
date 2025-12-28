@@ -7,7 +7,6 @@ using System.Linq;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
-using static UnityEngine.GraphicsBuffer;
 
 
 public class GameMaster : MonoBehaviourPunCallbacks
@@ -122,6 +121,18 @@ public class GameMaster : MonoBehaviourPunCallbacks
         else
         {
             Player2Discard.Add(cardtoAdd);
+        }
+    }
+
+    public int GetCardsInHand(bool IsPlayer1)
+    {
+        if (IsPlayer1 == bIsPlayer1)
+        {
+            return player.GetCardsInHand();
+        }
+        else
+        {
+            return enemy.GetCardsInHand();
         }
     }
 

@@ -148,34 +148,16 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
             if (cardTryingToUse.myCard.bTargetsAllies)
             {
-                if (ownerPlayer.bAllowingReactions && ownerPlayer.currentCard.myCard is ReactionCard reaction)
-                {
-                    if(FindFirstObjectByType<GameMaster>().reactionCaptainTargeting.Contains(this))
-                    {
-                        if (reaction.reactionType == ReactionType.TargetAttackedAlly)
-                        {
-                            return true;
-                        }
-
-                        if (reaction.reactionType == ReactionType.TargetKilledAlly && predictingNewHealthChange <= 0)
-                        {
-                            return true;
-                        }
-                    }
-
-                    if(reaction.reactionType == ReactionType.TargetAnotherAlly)
-                    {
-                        return true;
-                    }
-                }
-                else
-                {
+                if(TargetAllies())
                     return true;
-                }
             }
 
             if (cardTryingToUse.myCard.bTargetsAlliesExceptSelf && ownerPlayer.currentCaptain != this)
             {
+                if (myCard is CaptainCard captain)
+                    if (captain.bIsAllyCard && cardTryingToUse.myCard.bCaptainsOnly)
+                        return false;
+
                 return true;
             }
 
@@ -197,27 +179,90 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         
         if(DoIOwnThis() == false)
         {
-            if (cardTryingToUse.myCard.bTargetsEnemies && bEnergized == false && myCard.bDead == false)
+            if(TargetEnemies(cardTryingToUse))
+                return true;
+        }
+
+        return false;
+    }
+
+    private bool TargetAllies()
+    {
+        if (ownerPlayer.bAllowingReactions && ownerPlayer.currentCard.myCard is ReactionCard reaction)
+        {
+            if (FindFirstObjectByType<GameMaster>().reactionCaptainTargeting.Contains(this))
             {
-                if (ownerPlayer.bAllowingReactions && ownerPlayer.currentCard.myCard is ReactionCard reaction)
+                if (reaction.reactionType == ReactionType.TargetAttackedAlly)
                 {
-                    if (reaction.reactionType == ReactionType.TargetAttackingEnemy)
-                    {
-                        return true;
-                    }
+                    return true;
                 }
-                else
+
+                if (reaction.reactionType == ReactionType.TargetKilledAlly && predictingNewHealthChange <= 0)
                 {
                     return true;
                 }
             }
 
-            if (ownerPlayer.bAllowingReactions && ownerPlayer.currentCard.myCard is ReactionCard secondCheck)
+            if (reaction.reactionType == ReactionType.TargetAnotherAlly)
             {
-                if (secondCheck.reactionType == ReactionType.TargetAttackingEnemy)
+                return true;
+            }
+        }
+        else
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    private bool TargetEnemies(PlayingCard cardTryingToUse)
+    {
+        if (cardTryingToUse.myCard is Relinquish relinquish)
+        {
+            if (bEnergized == false && myCard.bDead == false)
+            {
+                bool bAllyDead = false;
+
+                List<PlayingCard> allies = FindFirstObjectByType<GameMaster>().GetTeammates(ownerPlayer.currentCaptain);
+                foreach(PlayingCard ally in allies)
+                {
+                    if (ally.myCard.bDead)
+                        bAllyDead = true;
+                }
+
+                if(myCard is CaptainCard captain)
+                {
+                    if (captain.currentHealth <= 2)
+                        return true;
+
+                    if (captain.currentHealth <= 5 && bAllyDead)
+                        return true;
+                }
+            }
+            return false;
+        }
+
+        if (cardTryingToUse.myCard.bTargetsEnemies && bEnergized == false && myCard.bDead == false)
+        {
+            if (ownerPlayer.bAllowingReactions && ownerPlayer.currentCard.myCard is ReactionCard reaction)
+            {
+                if (reaction.reactionType == ReactionType.TargetAttackingEnemy)
                 {
                     return true;
                 }
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        if (ownerPlayer.bAllowingReactions && ownerPlayer.currentCard.myCard is ReactionCard secondCheck)
+        {
+            if (secondCheck.reactionType == ReactionType.TargetAttackingEnemy)
+            {
+                return true;
             }
         }
 

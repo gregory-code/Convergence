@@ -24,9 +24,11 @@ MonoBehaviour:
   bTargetsSelf: 0
   bTargetsAllies: 0
   bTargetsAlliesExceptSelf: 1
+  bCaptainsOnly: 1
   bTargetsEnemies: 0
+  bTargetsAll: 0
   bSwift: 0
-  DescriptionText: 
+  DescriptionText: "Energize an Exhausted ally captain \nDraw 1 card"
   bActiveInEffectLinger: 0
   physicalStatLinger: 0
   magicStatLinger: 0
@@ -36,5 +38,8 @@ MonoBehaviour:
   bWaitForReaction: 0
   bDead: 0
   respawnTurns: 0
-  bAttackingCard: 0
   CaptainTargeting: []
+  predictionDamage: 0
+  captainsAffectedByPredictionDamageIncrease: []
+  bAttackingCard: 0
+  bHasPredcition: 0

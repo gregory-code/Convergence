@@ -24,10 +24,12 @@ MonoBehaviour:
   bTargetsSelf: 0
   bTargetsAllies: 0
   bTargetsAlliesExceptSelf: 0
+  bCaptainsOnly: 0
   bTargetsEnemies: 1
   bTargetsAll: 0
   bSwift: 0
-  DescriptionText: 
+  DescriptionText: "Kill 1 Exhausted enemy with 2 or less health \n/If an allied
+    captain is dead/ \nKill 1 Exhausted enemy with 5 or less health instead"
   bActiveInEffectLinger: 0
   physicalStatLinger: 0
   magicStatLinger: 0
@@ -37,6 +39,8 @@ MonoBehaviour:
   bWaitForReaction: 0
   bDead: 0
   respawnTurns: 0
+  CaptainTargeting: []
+  predictionDamage: 0
+  captainsAffectedByPredictionDamageIncrease: []
   bAttackingCard: 0
   bHasPredcition: 0
-  CaptainTargeting: []

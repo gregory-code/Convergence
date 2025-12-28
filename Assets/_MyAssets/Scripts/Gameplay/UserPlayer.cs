@@ -75,7 +75,9 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
     public PlayingCard currentCard { get; private set; }
 
     [SerializeField] private PlayingCard playingCardPrefab;
-    [SerializeField] private List<PlayingCard> PlayingCardsInHand = new List<PlayingCard>(); // FOR TESTING TO SEE THE VALUES
+    private List<PlayingCard> PlayingCardsInHand = new List<PlayingCard>();
+    public int GetCardsInHand() { return PlayingCardsInHand.Count; }
+
     private List<PlayingCard> CardsToMulligan = new List<PlayingCard>();
 
     private List<PlayingCard> DaybreakCards = new List<PlayingCard>();

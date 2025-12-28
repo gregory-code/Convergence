@@ -2,8 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "TCG/Faye/Relinquish")]
-public class Relinquish : ActionCard
+[CreateAssetMenu(menuName = "TCG/Neutral/ShadowCloak")]
+public class ShadowCloak : EquipmentCard
 {
     public override void Init(UserPlayer ownerPlayer)
     {
@@ -14,11 +14,6 @@ public class Relinquish : ActionCard
     public override IEnumerator PlayCard(PlayingCard thisPlayingCard, PlayingCard captainUsing, bool bTargetingEnemy, List<PlayingCard> captainTargeting)
     {
         yield return base.PlayCard(thisPlayingCard, captainUsing, bTargetingEnemy, captainTargeting);
-
-        thisPlayingCard.BeginPlayAndDiscard(captainUsing);
-
-        captainTargeting[0].Die();
-        StaticGameplayDelegates.Killed(0, thisPlayingCard, captainUsing, captainTargeting[0]);
 
         yield return new WaitForEndOfFrame();
     }

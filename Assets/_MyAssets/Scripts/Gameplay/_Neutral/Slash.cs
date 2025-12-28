@@ -5,7 +5,6 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "TCG/Neutral/Slash")]
 public class Slash : ActionCard
 {
-    private bool bIsPlayer1;
     private PlayingCard attachedCaptain;
 
     public override void Init(UserPlayer ownerPlayer)
@@ -45,12 +44,11 @@ public class Slash : ActionCard
 
     public void DamageWasDealt(int damageDealt, bool bWasMagic, PlayingCard cardThatWasUsed, PlayingCard allyDealingDamage, PlayingCard allyRecivingDamage)
     {
-        if(cardThatWasUsed == thisCard && damageDealt > 0)
+        if(cardThatWasUsed.uniqueID == thisCard.uniqueID && damageDealt > 0)
         {
             // Apply linger
             if (allyDealingDamage.myCard is CaptainCard captain)
             {
-                bIsPlayer1 = allyDealingDamage.bIsPlayer1;
                 bActiveInEffectLinger = true;
                 attachedCaptain = allyDealingDamage;
 
@@ -66,7 +64,7 @@ public class Slash : ActionCard
 
     private void RemoveLingers(bool bPlayers1Turn)
     {
-        if(bPlayers1Turn == bIsPlayer1 && bActiveInEffectLinger)
+        if(bPlayers1Turn == thisCard.bIsPlayer1 && bActiveInEffectLinger)
         {
             if(attachedCaptain.myCard is CaptainCard captain)
             {

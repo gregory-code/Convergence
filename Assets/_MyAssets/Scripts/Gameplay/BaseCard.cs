@@ -19,6 +19,7 @@ public abstract class BaseCard : ScriptableObject
     public bool bTargetsSelf;
     public bool bTargetsAllies;
     public bool bTargetsAlliesExceptSelf;
+    public bool bCaptainsOnly;
     public bool bTargetsEnemies;
     public bool bTargetsAll;
 

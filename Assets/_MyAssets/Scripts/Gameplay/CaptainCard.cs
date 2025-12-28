@@ -96,6 +96,11 @@ public abstract class CaptainCard : BaseCard
             {
                 defense += equipment.defenseStatChange;
             }
+
+            if(card.myCard is MittsStash stash)
+            {
+                defense += GetMittsStash();
+            }
         }
         foreach (PlayingCard card in LingersInEffect)
         {
@@ -103,6 +108,15 @@ public abstract class CaptainCard : BaseCard
         }
         defense += GetTeammateDefenseBuffs();
         return defense;
+    }
+
+    private int GetMittsStash()
+    {
+        if(FindFirstObjectByType<GameMaster>().GetCardsInHand(thisCard.bIsPlayer1) >= 5)
+        {
+            return 2;
+        }
+        return 0;
     }
 
     public void AttachEquipment(PlayingCard equipment, PlayingCard allyDoingTheEquipping)

@@ -6820,16 +6820,12 @@ MonoBehaviour:
   lineAttackPredictionPrefab: {fileID: 4745052496178363599, guid: c2b7c95b7945a2d469fb58a4ab297f08, type: 3}
   currentCaptain: {fileID: 0}
   currentTargets: []
-  currentReactionCard: {fileID: 0}
   playingCardPrefab: {fileID: 1047151496080733996, guid: 0735616eb3573c94d9c7e0b8bdefaf5a, type: 3}
   PlayingCardsInHand: []
   ChoiceCardPrefab: {fileID: 2753910295015668104, guid: 2cd6d98d3f0e8444486f46b939c692e3, type: 3}
   ChoiceCardPanelTransform: {fileID: 1426634406}
   ChoicePanel: {fileID: 1577362779}
   ChoicePanelInstructions: {fileID: 500974436}
-  reactionAnticipating: {fileID: 0}
-  reactionCaptainUsingAnticipating: {fileID: 0}
-  reactionCaptainTargetingAnticipating: []
 --- !u!114 &1366958863
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8582,6 +8578,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 4fc2fdf1c4d564d4699cf92788ba3678, type: 2}
   - {fileID: 11400000, guid: f7c55e9a4cf15804fb76ace01db16e44, type: 2}
   - {fileID: 11400000, guid: 95892b61590e24549b3a22cce6945f60, type: 2}
+  - {fileID: 11400000, guid: 112c1beb1fec7f346a48944e58b2d85c, type: 2}
+  - {fileID: 11400000, guid: d331e8513f9a05a4e9f211c2fb296e9a, type: 2}
   WaitingForOpponent: {fileID: 584005826}
   clientSideDiscardAmount: {fileID: 533937078}
   enemyDiscardAmount: {fileID: 147383718}
@@ -8620,6 +8618,10 @@ MonoBehaviour:
   FirebasePlayer: {fileID: 1584138423}
   bDevTest: 0
   bSkipMulligan: 1
+  reactionPlayingCard: {fileID: 0}
+  reactionCaptainUsing: {fileID: 0}
+  reactionCaptainTargeting: []
+  bReactionTargetingEnemy: 0
 --- !u!4 &1584138420
 Transform:
   m_ObjectHideFlags: 0

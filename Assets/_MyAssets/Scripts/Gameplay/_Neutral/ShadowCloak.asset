@@ -9,18 +9,18 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 59a8054db722bfa4eb055712aa2c3b01, type: 3}
-  m_Name: NighthawkCloak
+  m_Script: {fileID: 11500000, guid: 57db6ee6df0431e4498b49de5507a986, type: 3}
+  m_Name: ShadowCloak
   m_EditorClassIdentifier: 
-  CardName: Nighthawk Cloak
+  CardName: Shadow Cloak
   Type: {fileID: 11400000, guid: e24ba17bf00a2c84d8bf10383f710fed, type: 2}
-  Rarity: {fileID: 11400000, guid: 10f3481ff2e893245a2600427e96d2bd, type: 2}
-  Captain: 1
-  SeriesOverlay: {fileID: 21300000, guid: 0cf8a2009c66b5144b21755bf40ace98, type: 3}
-  CardArt: {fileID: 21300000, guid: 5e0f9a56c774a5d49a6f71b21a60073d, type: 3}
-  CardArtAdjustment: {x: -70.85, y: 0}
-  CardArtSize: {x: 0.16, y: 0.34}
-  CardPreviewArt: {fileID: 21300000, guid: b56a6626f24cfc64587fda3be19e1cae, type: 3}
+  Rarity: {fileID: 11400000, guid: 4d89e1e08f97ead4bb80c04b5453801a, type: 2}
+  Captain: 0
+  SeriesOverlay: {fileID: 0}
+  CardArt: {fileID: 21300000, guid: beef90e5d58575946a8433dee16c36fd, type: 3}
+  CardArtAdjustment: {x: 42, y: 0}
+  CardArtSize: {x: 0.13, y: 0.15}
+  CardPreviewArt: {fileID: 21300000, guid: cfb2f67afa77e2f4fa4de17bd7675c61, type: 3}
   bTargetsSelf: 1
   bTargetsAllies: 0
   bTargetsAlliesExceptSelf: 0
@@ -28,8 +28,7 @@ MonoBehaviour:
   bTargetsEnemies: 0
   bTargetsAll: 0
   bSwift: 0
-  DescriptionText: 'Once per turn when this captain deals 3 or more damage to an
-    enemy, stay Energized and draw 1 card [Clothing]'
+  DescriptionText: "Gain +1 physical and +1 magic \nGain -1 defense [Clothing]"
   bActiveInEffectLinger: 0
   physicalStatLinger: 0
   magicStatLinger: 0
@@ -42,9 +41,9 @@ MonoBehaviour:
   CaptainTargeting: []
   predictionDamage: 0
   captainsAffectedByPredictionDamageIncrease: []
-  bPrestige: 1
+  bPrestige: 0
   equipmentType: 3
   bonusHealthStatChange: 0
-  physicalStatChange: 0
-  magicStatChange: 0
-  defenseStatChange: 0
+  physicalStatChange: 1
+  magicStatChange: 1
+  defenseStatChange: -1

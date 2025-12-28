@@ -24,8 +24,27 @@ MonoBehaviour:
   bTargetsSelf: 1
   bTargetsAllies: 0
   bTargetsAlliesExceptSelf: 0
+  bCaptainsOnly: 0
   bTargetsEnemies: 0
+  bTargetsAll: 0
   bSwift: 0
-  DescriptionText: 
+  DescriptionText: 'While you have 5 or more cards in your hand, gain +2 defense
+    [Shield]'
+  bActiveInEffectLinger: 0
+  physicalStatLinger: 0
+  magicStatLinger: 0
+  defenseStatLinger: 0
+  thisCard: {fileID: 0}
+  bOncePerTurn: 1
+  bWaitForReaction: 0
+  bDead: 0
+  respawnTurns: 0
+  CaptainTargeting: []
+  predictionDamage: 0
+  captainsAffectedByPredictionDamageIncrease: []
   bPrestige: 0
   equipmentType: 4
+  bonusHealthStatChange: 0
+  physicalStatChange: 0
+  magicStatChange: 0
+  defenseStatChange: 0

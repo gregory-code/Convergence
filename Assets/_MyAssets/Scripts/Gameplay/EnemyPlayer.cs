@@ -8,7 +8,6 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Rendering;
 using UnityEngine.UI;
-using static UnityEngine.EventSystems.EventTrigger;
 
 public class EnemyPlayer : MonoBehaviour
 {
@@ -23,6 +22,8 @@ public class EnemyPlayer : MonoBehaviour
 
     [SerializeField] private PlayingCard playingCardPrefab;
     private List<PlayingCard> PlayingCardsInHand = new List<PlayingCard>(); // these are for testing you can remove them
+
+    public int GetCardsInHand() { return PlayingCardsInHand.Count; }
 
     private bool bIsPlayer1;
 

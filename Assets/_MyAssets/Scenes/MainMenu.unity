@@ -5001,6 +5001,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 2d0efb8d3149d374994b0d16a84b4e87, type: 2}
   - {fileID: 11400000, guid: 5a7c97655ea196143b83e1cafabea4af, type: 2}
   - {fileID: 11400000, guid: 95892b61590e24549b3a22cce6945f60, type: 2}
+  - {fileID: 11400000, guid: d331e8513f9a05a4e9f211c2fb296e9a, type: 2}
+  - {fileID: 11400000, guid: 112c1beb1fec7f346a48944e58b2d85c, type: 2}
   CardLibraryTransform: {fileID: 158896872}
   CardPreviewPrefab: {fileID: 2450607815523520782, guid: db57ee80dd977914ab43f7855c527a7e, type: 3}
   CardBarTransform: {fileID: 556933579}

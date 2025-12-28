@@ -15,6 +15,13 @@ public class Encore : ActionCard
     {
         yield return base.PlayCard(thisPlayingCard, captainUsing, bTargetingEnemy, captainTargeting);
 
+        thisPlayingCard.BeginPlayAndDiscard(captainUsing);
+
+        captainTargeting[0].BeginEnergize();
+
+        if (thisPlayingCard.DoIOwnThis())
+            FindFirstObjectByType<GameMaster>().RequestDrawCards(1);
+
         yield return new WaitForEndOfFrame();
     }
 
