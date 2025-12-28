@@ -708,24 +708,14 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         Destroy(num, sparkParticleNum.main.duration + sparkParticleNum.main.startLifetime.constantMax);
     }
 
-    private bool CheckBackpack(bool IamACaptain)
+    private bool CheckBackpack()
     {
         if (ownerPlayer.currentCard == null)
             return false;
 
         if (ownerPlayer.currentCard.myCard is EquipmentCard equipment)
         {
-            BaseCard cardToCheck = myCard;
-
-            if(!IamACaptain)
-            {
-                if (ownerPlayer.currentTargets.Count > 0)
-                {
-                    cardToCheck = ownerPlayer.currentTargets[0].myCard;
-                }
-            }
-
-            if (cardToCheck is CaptainCard captain)
+            if (myCard is CaptainCard captain)
             {
                 foreach (PlayingCard attachedEquip in captain.GetEquipments())
                 {
@@ -780,9 +770,11 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
         if (myCard.Type.type == CardType.Captain && DoIOwnThis() && bEnergized == true)
         {
-            if(CheckBackpack(true) && ownerPlayer.bSkipCaptainChoice)
+            if(CheckBackpack() && ownerPlayer.bSkipCaptainChoice && ownerPlayer.bForceChoosingCaptain == false)
             {
                 ownerPlayer.ForceChooseCaptain(true);
+                ownerPlayer.currentCard.myCard.bTargetsSelf = false;
+                ownerPlayer.currentCard.myCard.bTargetsAllies = true;
             }
 
             if (ownerPlayer.bChoosingCaptain)
@@ -837,15 +829,22 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
             }
         }
 
-        if (ownerPlayer != null)
-            ownerPlayer.ClearLineAttacks();
 
         if (ownerPlayer == null) // for enemy cards
             return;
+        
+        ownerPlayer.ClearTargetAllRenders();
 
         if(ownerPlayer.bForceChoosingCaptain)
         {
             ownerPlayer.ForceChooseCaptain(false);
+
+            if (ownerPlayer.currentCard != null)
+            {
+                ownerPlayer.currentCard.myCard.bTargetsSelf = true;
+                ownerPlayer.currentCard.myCard.bTargetsAllies = false;
+            }
+
             ownerPlayer.HoveringCard(false, this);
         }
 
@@ -911,15 +910,6 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
         if(ownerPlayer.bChoosingTarget && ownerPlayer.bSkipCaptainChoice && ownerPlayer.currentTargets.Count > 0)
         {
-            if(CheckBackpack(false))
-            {
-                ownerPlayer.currentCaptain = this;
-                ownerPlayer.currentCard.myCard.bTargetsSelf = false;
-                ownerPlayer.currentCard.myCard.bTargetsAllies = true;
-                ownerPlayer.ChooseCaptainWhileLineIsRendering();
-                return;
-            }
-
             ownerPlayer.RequestPlayCard(ownerPlayer.currentCard, ownerPlayer.currentTargets[0], false, ownerPlayer.currentTargets);
         }
 
@@ -950,25 +940,10 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
     public void CancelUsingCard()
     {
-        // THERE'S NO WAY THIS CAN STAY PLEASE REEVALUATE IT
-        // THERE'S NO WAY THIS CAN STAY PLEASE REEVALUATE IT
-        // THERE'S NO WAY THIS CAN STAY PLEASE REEVALUATE IT
-        // THERE'S NO WAY THIS CAN STAY PLEASE REEVALUATE IT
-        // THERE'S NO WAY THIS CAN STAY PLEASE REEVALUATE IT
-        // THERE'S NO WAY THIS CAN STAY PLEASE REEVALUATE IT
-        // THERE'S NO WAY THIS CAN STAY PLEASE REEVALUATE IT
-        // THERE'S NO WAY THIS CAN STAY PLEASE REEVALUATE IT
-        // THERE'S NO WAY THIS CAN STAY PLEASE REEVALUATE IT
-        if(CheckBackpack(false))
-        {
-            ownerPlayer.currentCard.myCard.bTargetsSelf = true;
-            ownerPlayer.currentCard.myCard.bTargetsAllies = false;
-        }
-
         ownerPlayer.StartStopLineRenderer(false, this, Color.white);
         ownerPlayer.BlockHand(false);
 
-        ownerPlayer.ClearLineAttacks();
+        ownerPlayer.ClearTargetAllRenders();
 
         FindFirstObjectByType<GameMaster>().ResetAllDisplayAttackStats();
 

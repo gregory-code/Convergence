@@ -8622,6 +8622,7 @@ MonoBehaviour:
   reactionCaptainUsing: {fileID: 0}
   reactionCaptainTargeting: []
   bReactionTargetingEnemy: 0
+  lineAttackPredictionPrefab: {fileID: 4745052496178363599, guid: c2b7c95b7945a2d469fb58a4ab297f08, type: 3}
 --- !u!4 &1584138420
 Transform:
   m_ObjectHideFlags: 0
@@ -10319,7 +10320,6 @@ MonoBehaviour:
   firebasePlayerInfo: {fileID: 1584138423}
   enemyHandCardAmount: {fileID: 1645290892}
   enemyDeckCardAmount: {fileID: 1605049045}
-  lineAttackPredictionPrefab: {fileID: 4745052496178363599, guid: c2b7c95b7945a2d469fb58a4ab297f08, type: 3}
   playingCardPrefab: {fileID: 1047151496080733996, guid: 0735616eb3573c94d9c7e0b8bdefaf5a, type: 3}
 --- !u!222 &1858297384
 CanvasRenderer:

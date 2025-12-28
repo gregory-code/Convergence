@@ -485,6 +485,9 @@ public class GameMaster : MonoBehaviourPunCallbacks
         reactionCaptainTargeting = captainTarget;
         bReactionTargetingEnemy = bTargetingEnemy;
 
+        bWaitingForReaction = true;
+        StartCoroutine(WaitingForReactionLoop());
+
         if (isPlayer1 == bIsPlayer1) // Owner, this client
         {
             WaitingForOpponent.SetActive(true);
@@ -497,6 +500,52 @@ public class GameMaster : MonoBehaviourPunCallbacks
             enemy.EnemyIsAttackingPredicition(cardToPlay, captainUsing);
         }
     }
+
+    private bool bWaitingForReaction;
+    [SerializeField] private LineAttackPredictionScript lineAttackPredictionPrefab;
+    private List<LineAttackPredictionScript> lineAttacks = new List<LineAttackPredictionScript>();
+    private IEnumerator WaitingForReactionLoop()
+    {
+        while (bWaitingForReaction)
+        {
+            if(reactionCaptainTargeting.Count <= 0 || reactionCaptainUsing == null || reactionPlayingCard == null)
+            {
+                yield return new WaitForEndOfFrame();
+                continue;
+            }    
+
+            ClearLineAttacks();
+
+            for (int i = 0; i < reactionCaptainTargeting.Count; i++)
+            {
+                LineAttackPredictionScript lineAttack = Instantiate(lineAttackPredictionPrefab);
+                lineAttack.ShowPrediction(reactionPlayingCard.transform.position, reactionCaptainTargeting[i].transform.position, Color.red);
+                lineAttacks.Add(lineAttack);
+
+                CardPlayContext context = reactionPlayingCard.myCard.PredictCard(reactionPlayingCard, reactionCaptainUsing, bReactionTargetingEnemy, reactionCaptainTargeting[i]);
+
+                if (reactionCaptainTargeting[i].myCard is CaptainCard captain)
+                {
+                    reactionCaptainTargeting[i].DisplayHealthChange(captain.currentHealth - context.damage);
+                    reactionCaptainTargeting[i].DisplayAttackStats(false, true, reactionPlayingCard, reactionCaptainUsing);
+                }
+            }
+
+            yield return new WaitForSeconds(0.5f);
+        }
+
+        bWaitingForReaction = false;
+    }
+
+    public void ClearLineAttacks()
+    {
+        for (int i = 0; i < lineAttacks.Count; i++)
+        {
+            Destroy(lineAttacks[i].gameObject);
+        }
+        lineAttacks.Clear();
+    }
+
     public void RequestFinishReaction()
     {
         this.photonView.RPC("FinishReaction", RpcTarget.AllBuffered, bIsPlayer1);
@@ -505,6 +554,8 @@ public class GameMaster : MonoBehaviourPunCallbacks
     [PunRPC]
     void FinishReaction(bool isPlayer1)
     {
+        bWaitingForReaction = false;
+
         if (isPlayer1 == bIsPlayer1) // Owner, this client
         {
             enemy.EnemyFinishReaction();
@@ -512,7 +563,7 @@ public class GameMaster : MonoBehaviourPunCallbacks
         else // other player
         {
             WaitingForOpponent.SetActive(false);
-            enemy.ClearLineAttacks();
+            ClearLineAttacks();
             player.EnemyFinishReaction();
         }
     }

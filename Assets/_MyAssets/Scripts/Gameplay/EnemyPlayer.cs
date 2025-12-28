@@ -17,9 +17,6 @@ public class EnemyPlayer : MonoBehaviour
     [SerializeField] private CardAmountHover enemyHandCardAmount;
     [SerializeField] private CardAmountHover enemyDeckCardAmount;
 
-    [SerializeField] private LineAttackPredictionScript lineAttackPredictionPrefab;
-    private List<LineAttackPredictionScript> lineAttacks = new List<LineAttackPredictionScript>();
-
     [SerializeField] private PlayingCard playingCardPrefab;
     private List<PlayingCard> PlayingCardsInHand = new List<PlayingCard>(); // these are for testing you can remove them
 
@@ -232,11 +229,8 @@ public class EnemyPlayer : MonoBehaviour
         return worldMousePos;
     }
 
-    private bool bWaitingForReaction;
     public void EnemyIsAttackingPredicition(BaseCard cardToPlay, PlayingCard captainUsing)
     {
-        bWaitingForReaction = true;
-
         if (captainUsing.myCard.Type.type == CardType.Ally)
         {
             gameMaster.reactionPlayingCard = captainUsing;
@@ -257,35 +251,6 @@ public class EnemyPlayer : MonoBehaviour
 
             captainUsing.DisplayAttackStats(false, false, PlayingCardsInHand[0], captainUsing);
         }
-        StartCoroutine(WaitingForReactionLoop());
-
-    }
-
-    private IEnumerator WaitingForReactionLoop()
-    {
-        while(bWaitingForReaction && gameMaster.reactionPlayingCard != null)
-        {
-            ClearLineAttacks();
-
-            for (int i = 0; i < gameMaster.reactionCaptainTargeting.Count; i++)
-            {
-                LineAttackPredictionScript lineAttack = Instantiate(lineAttackPredictionPrefab);
-                lineAttack.ShowPrediction(gameMaster.reactionPlayingCard.transform.position, gameMaster.reactionCaptainTargeting[i].transform.position, Color.red);
-                lineAttacks.Add(lineAttack);
-
-                CardPlayContext context = gameMaster.reactionPlayingCard.myCard.PredictCard(gameMaster.reactionPlayingCard, gameMaster.reactionCaptainUsing, gameMaster.bReactionTargetingEnemy, gameMaster.reactionCaptainTargeting[i]);
-
-                if (gameMaster.reactionCaptainTargeting[i].myCard is CaptainCard captain)
-                {
-                    gameMaster.reactionCaptainTargeting[i].DisplayHealthChange(captain.currentHealth - context.damage);
-                    gameMaster.reactionCaptainTargeting[i].DisplayAttackStats(false, true, gameMaster.reactionPlayingCard, gameMaster.reactionCaptainUsing);
-                }
-            }
-
-            yield return new WaitForSeconds(0.5f);
-        }
-
-        bWaitingForReaction = false;
     }
 
     public void EnemyFinishReaction()
@@ -296,20 +261,9 @@ public class EnemyPlayer : MonoBehaviour
             gameMaster.reactionPlayingCard.myCard.bWaitForReaction = false;
         }
 
-        ClearLineAttacks();
-
-        bWaitingForReaction = false;
+        gameMaster.ClearLineAttacks();
 
         gameMaster.ResetAllDisplayAttackStats();
-    }
-
-    public void ClearLineAttacks()
-    {
-        for (int i = 0; i < lineAttacks.Count; i++)
-        {
-            Destroy(lineAttacks[i].gameObject);
-        }
-        lineAttacks.Clear();
     }
 
     private IEnumerator RemoveCardFromHand()
