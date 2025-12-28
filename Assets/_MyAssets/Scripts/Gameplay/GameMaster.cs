@@ -419,7 +419,7 @@ public class GameMaster : MonoBehaviourPunCallbacks
         ReOrganize(playerAllies);
     }
 
-    public void RequestPlayCard(PlayingCard cardToPlay, PlayingCard captainUsing, bool bTargetingEnemy, List<PlayingCard> captainTargeting, bool bAttackPrediction, bool bDaybreakAbility)
+    public void RequestPlayCard(PlayingCard cardToPlay, PlayingCard captainUsing, bool bTargetingEnemy, List<PlayingCard> captainTargeting, bool bAttackPrediction, bool bDaybreakAbility, bool bForceSwift)
     {
         bool bIsCaptain = (cardToPlay.myCard.Type.type == CardType.Captain);
         int cardIndex = (bIsCaptain) ? GetCardIndexForLibrary(cardToPlay.myCard, CaptainLibrary) : GetCardIndexForLibrary(cardToPlay.myCard, CardAndCaptainCardLibrary);
@@ -438,12 +438,12 @@ public class GameMaster : MonoBehaviourPunCallbacks
         }
         else
         {
-            this.photonView.RPC("PlayCard", RpcTarget.AllBuffered, bIsPlayer1, cardIndex, captainUsingIndex, bTargetingEnemy, captainTargetingIndex.ToArray(), bIsCaptain, bDaybreakAbility);
+            this.photonView.RPC("PlayCard", RpcTarget.AllBuffered, bIsPlayer1, cardIndex, captainUsingIndex, bTargetingEnemy, captainTargetingIndex.ToArray(), bIsCaptain, bDaybreakAbility, bForceSwift);
         }
     }
 
     [PunRPC]
-    void PlayCard(bool isPlayer1, int cardToPlayIndex, int captainUsingIndex, bool bTargetingEnemy, int[] captainTargetingIndex, bool isCaptain, bool bDaybreakAbility)
+    void PlayCard(bool isPlayer1, int cardToPlayIndex, int captainUsingIndex, bool bTargetingEnemy, int[] captainTargetingIndex, bool isCaptain, bool bDaybreakAbility, bool bForceSwift)
     {
         PlayingCard captainUsing = GetCaptainFromIndex(captainUsingIndex);
         List<PlayingCard> captainTarget = new List<PlayingCard>();
@@ -458,6 +458,8 @@ public class GameMaster : MonoBehaviourPunCallbacks
             return;
         }
 
+        player.bInUniqueMenu = false;
+
         if (isPlayer1 == bIsPlayer1) // Owner, this client
         {
             player.PlayClientCard(bTargetingEnemy);
@@ -465,7 +467,8 @@ public class GameMaster : MonoBehaviourPunCallbacks
         else // other player
         {
             BaseCard cardToPlay = (isCaptain) ? CaptainLibrary[cardToPlayIndex] : CardAndCaptainCardLibrary[cardToPlayIndex];
-            enemy.PlayEnemyCard(cardToPlay, captainUsing, bTargetingEnemy, captainTarget);
+
+            enemy.PlayEnemyCard(cardToPlay, captainUsing, bTargetingEnemy, captainTarget, bForceSwift);
         }
     }
 
@@ -666,13 +669,13 @@ public class GameMaster : MonoBehaviourPunCallbacks
     [PunRPC]
     void RemoveLingers(bool isPlayer1)
     {
+        StaticGameplayDelegates.RemoveLingers(bPlayer1sTurn);
+
         if (isPlayer1 == bIsPlayer1) // Owner, this client
         {
-            StaticGameplayDelegates.RemoveLingers(bPlayer1sTurn);
         }
         else // other player
         {
-            StaticGameplayDelegates.RemoveLingers(bPlayer1sTurn);
         }
     }
 

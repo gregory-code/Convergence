@@ -1,4 +1,11 @@
+using Firebase.Database;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class ChoiceCard : MonoBehaviour
@@ -9,6 +16,14 @@ public class ChoiceCard : MonoBehaviour
     private UserPlayer player;
     private PlayingCard myPlayingCard;
     private BaseCard myBaseCard;
+
+    [HideInInspector]
+    public bool bINeedMore;
+    [HideInInspector]
+    public bool bDestinyStopwatch;
+
+    [HideInInspector]
+    public PlayingCard usingCaptain;
 
     public void Init(UserPlayer player, PlayingCard myPlayingCard, BaseCard cardEffect)
     {
@@ -42,6 +57,18 @@ public class ChoiceCard : MonoBehaviour
 
     public void SelectedThisEffect()
     {
+        if (bINeedMore)
+        {
+            INeedMoreEffect();
+            return;
+        }
+
+        if (bDestinyStopwatch)
+        {
+            DestinyStopwatchEffect();
+            return;
+        }
+
         if (myPlayingCard == null)
         {
             DeckEffect();
@@ -64,7 +91,24 @@ public class ChoiceCard : MonoBehaviour
         if(myBaseCard.Type.type == CardType.Ally)
         {
             StartCoroutine(player.DrawCardFromDeck(myBaseCard));
+
             player.FinishUniqueChoice();
         }
+    }
+
+    private void INeedMoreEffect()
+    {
+        List<PlayingCard> targets = new List<PlayingCard>();
+        targets.Add(usingCaptain);
+
+        myPlayingCard.myCard.bSwift = true;
+        player.RequestPlayCard(myPlayingCard, usingCaptain, false, targets, true);
+
+        player.FinishUniqueChoice();
+    }
+
+    private void DestinyStopwatchEffect()
+    {
+
     }
 }

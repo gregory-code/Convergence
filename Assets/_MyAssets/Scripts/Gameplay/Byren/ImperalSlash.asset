@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CardName: Imperial Slash
   Type: {fileID: 11400000, guid: 724df9a1411ec954ebc6263a1c337930, type: 2}
-  Rarity: {fileID: 11400000, guid: 10f3481ff2e893245a2600427e96d2bd, type: 2}
+  Rarity: {fileID: 11400000, guid: 4d89e1e08f97ead4bb80c04b5453801a, type: 2}
   Captain: 1
   SeriesOverlay: {fileID: 21300000, guid: 0cf8a2009c66b5144b21755bf40ace98, type: 3}
   CardArt: {fileID: 21300000, guid: 448279148792d5442a4493bb49c34f3b, type: 3}
@@ -24,8 +24,22 @@ MonoBehaviour:
   bTargetsSelf: 0
   bTargetsAllies: 0
   bTargetsAlliesExceptSelf: 0
+  bCaptainsOnly: 0
   bTargetsEnemies: 1
+  bTargetsAll: 0
   bSwift: 0
   DescriptionText: Attack for 3 physical this attack ignores the opponents defense
+  bActiveInEffectLinger: 0
+  physicalStatLinger: 0
+  magicStatLinger: 0
+  defenseStatLinger: 0
+  thisCard: {fileID: 0}
   bOncePerTurn: 1
+  bWaitForReaction: 0
+  bDead: 0
+  respawnTurns: 0
+  CaptainTargeting: []
+  predictionDamage: 0
+  captainsAffectedByPredictionDamageIncrease: []
   bAttackingCard: 1
+  bHasPredcition: 0

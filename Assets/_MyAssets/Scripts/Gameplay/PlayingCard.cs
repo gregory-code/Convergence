@@ -139,9 +139,40 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
     private bool EligableTarget(PlayingCard cardTryingToUse)
     {
+        bool bDebugMode = false;
+        if(bDebugMode) Debug.Log("Checking card: " + cardTryingToUse.myCard.CardName);
 
         if (DoIOwnThis())
         {
+            if (bDebugMode) Debug.Log("I own it");
+
+            if (myCard.bDead)
+            {
+                if (bDebugMode) Debug.Log("Captain is dead");
+                return false;
+            }
+
+            if(ownerPlayer.bSkipCaptainChoice && ownerPlayer.currentCard.myCard.bTargetsSelf && bEnergized == true) // for equipments and INeedMore
+            {
+                if (cardTryingToUse.myCard is INeedMore iNeedMore)
+                {
+                    if (bDebugMode) Debug.Log("Checking I Need More!");
+
+                    return IsAnyEquipmentEligable(this);
+                }
+
+                if (bDebugMode) Debug.Log("Early Self Target True");
+
+                return true;
+            }
+
+            if(ownerPlayer.currentCaptain == null)
+            {
+                if (bDebugMode) Debug.Log("No Captain Yet");
+
+                return false;
+            }
+
             if (ownerPlayer.currentCaptain == this && ownerPlayer.currentCaptain.bEnergized == false)
             {
                 return false;
@@ -150,7 +181,12 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
             if (cardTryingToUse.myCard.bTargetsAllies)
             {
                 if(TargetAllies())
+                {
+                    if (bDebugMode) Debug.Log("True, target allies");
+
                     return true;
+                }
+
             }
 
             if (cardTryingToUse.myCard.bTargetsAlliesExceptSelf && ownerPlayer.currentCaptain != this)
@@ -159,29 +195,38 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
                     if (captain.bIsAllyCard && cardTryingToUse.myCard.bCaptainsOnly)
                         return false;
 
+                if (bDebugMode) Debug.Log("True, Allies Except Self");
+
                 return true;
             }
 
             if (cardTryingToUse.myCard.bTargetsSelf && ownerPlayer.currentCaptain == this)
             {
-                if (ownerPlayer.bAllowingReactions && ownerPlayer.currentCard.myCard is ReactionCard reaction)
+                if (ownerPlayer.bAllowingReactions && cardTryingToUse.myCard is ReactionCard reaction)
                 {
                     if (reaction.reactionType == ReactionType.TargetSelf)
                     {
+                        if (bDebugMode) Debug.Log("True, Reaction Self");
+
                         return true;
                     }
                 }
-                else
-                {
-                    return true;
-                }
+
+                if (bDebugMode) Debug.Log("True, Target Self");
+
+                return true;
             }
         }
         
         if(DoIOwnThis() == false)
         {
             if(TargetEnemies(cardTryingToUse))
+            {
+                if (bDebugMode)
+                    Debug.Log("True, Target Enemies");
+
                 return true;
+            }
         }
 
         return false;
@@ -270,7 +315,7 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         return false;
     }
 
-    private bool EligableEquipment(EquipmentCard equipment, PlayingCard captainEquipping)
+    public bool EligableEquipment(EquipmentCard equipment, PlayingCard captainEquipping)
     {
         bool bEligableBasicEquipment = true;
         bool bEligablePresitgeEquipment = true;
@@ -304,6 +349,22 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         if (equipment.bPrestige == false && bEligableBasicEquipment)
             return true;
 
+        return false;
+    }
+
+    public bool IsAnyEquipmentEligable(PlayingCard usingCaptain) // only call on captains
+    {
+        if (usingCaptain.myCard is CaptainCard usingCaptainCard)
+        {            
+            foreach (PlayingCard equipment in ownerPlayer.GetPlayingCardsInHand())
+            {
+                if(equipment.myCard is EquipmentCard equipmentCard)
+                {
+                    if (equipment.EligableEquipment(equipmentCard, usingCaptain))
+                        return true;
+                }
+            }
+        }
         return false;
     }
 
@@ -419,7 +480,7 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         StartCoroutine(MoveCard(parentCharacter.transform.localPosition.x, true, 0.2f));
         StartCoroutine(MoveCard(parentCharacter.transform.localPosition.y, false, 0.2f));
 
-        yield return new WaitForSeconds(0.3f);
+        yield return new WaitForSeconds(0.4f);
 
         Image[] images = this.transform.GetComponentsInChildren<Image>(true);
         foreach (Image img in images)
@@ -497,6 +558,46 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         StartCoroutine(ShrinkOrGrow(1.0f));
 
         //CleanupDestroy();
+    }
+
+    public void BeginWaitForMenuAndDiscard(PlayingCard usingCaptain)
+    {
+        //Debug.LogError("Why are we discarding this: " + usingCaptain.myCard.CardName);
+        StartCoroutine(WaitForMenuAndDiscard(usingCaptain, usingCaptain.transform.parent.transform));
+    }
+
+    private IEnumerator WaitForMenuAndDiscard(PlayingCard usingCaptain, Transform fieldTransform)
+    {
+        transform.SetParent(fieldTransform, false);
+        float y = usingCaptain.DoIOwnThis() ? -300 : 300;
+        float placementY = usingCaptain.DoIOwnThis() ? 100 : -100;
+        float placementX = usingCaptain.DoIOwnThis() ? -60 : 60;
+        transform.localPosition = new Vector3(0, y, 0);
+
+        StartCoroutine(MoveCard(usingCaptain.transform.localPosition.x + placementX, true, 0.3f));
+        StartCoroutine(MoveCard(usingCaptain.transform.localPosition.y + placementY, false, 0.3f));
+
+        StartCoroutine(ShrinkOrGrow(0.7f));
+
+        yield return new WaitForEndOfFrame();
+
+        UserPlayer player = FindFirstObjectByType<UserPlayer>();
+
+        while (player.bInUniqueMenu)
+        {
+            yield return new WaitForEndOfFrame();
+        }
+
+        Transform discardPile = StaticGameplayDelegates.GetDiscardPileTransform(usingCaptain.bIsPlayer1);
+        //StaticGameplayDelegates.AddCardToDiscard(this, usingCaptain.bIsPlayer1);
+        bInDiscard = true;
+        myCard.Cleanup();
+
+        transform.SetParent(discardPile, true);
+
+        StartCoroutine(MoveCard(0, true, 0.4f));
+        StartCoroutine(MoveCard(0, false, 0.4f));
+        StartCoroutine(ShrinkOrGrow(1.0f));
     }
 
     public IEnumerator PlayReaction(PlayingCard usingCaptain, Transform fieldTransform, BaseCard cardWeAreWaitingOn)
@@ -785,7 +886,7 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
         if ((myCard.Type.type == CardType.Captain || myCard.Type.type == CardType.Ally) && ownerPlayer.bChoosingTarget)
         {    
-            if (EligableTarget(ownerPlayer.currentCard) || (ownerPlayer.bSkipCaptainChoice && ownerPlayer.currentCard.myCard.bTargetsSelf && DoIOwnThis() && bEnergized == true))
+            if (EligableTarget(ownerPlayer.currentCard))
             {
                 if(ownerPlayer.currentCard.myCard is EquipmentCard equipment)
                 {
@@ -910,7 +1011,7 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
         if(ownerPlayer.bChoosingTarget && ownerPlayer.bSkipCaptainChoice && ownerPlayer.currentTargets.Count > 0)
         {
-            ownerPlayer.RequestPlayCard(ownerPlayer.currentCard, ownerPlayer.currentTargets[0], false, ownerPlayer.currentTargets);
+            ownerPlayer.RequestPlayCard(ownerPlayer.currentCard, ownerPlayer.currentTargets[0], false, ownerPlayer.currentTargets, false);
         }
 
         if (ownerPlayer.bChoosingCaptain && ownerPlayer.currentCaptain != null)
@@ -976,7 +1077,7 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
                 gameMaster.bReactionTargetingEnemy = bTargetingEnemy;
             }
 
-            ownerPlayer.RequestPlayCard(ownerPlayer.currentCard, ownerPlayer.currentCaptain, bTargetingEnemy, ownerPlayer.currentTargets);
+            ownerPlayer.RequestPlayCard(ownerPlayer.currentCard, ownerPlayer.currentCaptain, bTargetingEnemy, ownerPlayer.currentTargets, false);
             CancelUsingCard();
         }
 

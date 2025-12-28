@@ -161,7 +161,7 @@ public class EnemyPlayer : MonoBehaviour
     }
 
 
-    public void PlayEnemyCard(BaseCard cardToPlay, PlayingCard captainUsing, bool bTargetingEnemy, List<PlayingCard> captainTargeting)
+    public void PlayEnemyCard(BaseCard cardToPlay, PlayingCard captainUsing, bool bTargetingEnemy, List<PlayingCard> captainTargeting, bool bForceSwift)
     {
         if (cardToPlay is ActionCard action)
         {
@@ -184,7 +184,6 @@ public class EnemyPlayer : MonoBehaviour
             }
         }
 
-
         if (cardToPlay is CaptainCard captain)
         {
             if(captain.bIsAllyCard == false)
@@ -193,14 +192,14 @@ public class EnemyPlayer : MonoBehaviour
 
                 StartCoroutine(cardToPlay.PlayCard(captainUsing, captainUsing, bTargetingEnemy, null));
 
-                if (cardToPlay.bSwift == false)
+                if (cardToPlay.bSwift == false && bForceSwift == false)
                     StartCoroutine(captainUsing.EnergizeAndExhaust(false));
 
                 return;
             }
             else
             {
-                if (cardToPlay.bSwift == false)
+                if (cardToPlay.bSwift == false && bForceSwift == false)
                     StartCoroutine(captainUsing.EnergizeAndExhaust(false));
 
                 return;
@@ -209,7 +208,7 @@ public class EnemyPlayer : MonoBehaviour
 
         PlayingCardsInHand[0].SetCard(cardToPlay);
 
-        if (cardToPlay.bSwift == false)
+        if (cardToPlay.bSwift == false && bForceSwift == false)
             StartCoroutine(captainUsing.EnergizeAndExhaust(false));
 
         StartCoroutine(cardToPlay.PlayCard(PlayingCardsInHand[0], captainUsing, bTargetingEnemy, captainTargeting));

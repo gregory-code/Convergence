@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CardName: Greed is Good
   Type: {fileID: 11400000, guid: 724df9a1411ec954ebc6263a1c337930, type: 2}
-  Rarity: {fileID: 11400000, guid: 10f3481ff2e893245a2600427e96d2bd, type: 2}
+  Rarity: {fileID: 11400000, guid: 4d89e1e08f97ead4bb80c04b5453801a, type: 2}
   Captain: 10
   SeriesOverlay: {fileID: 21300000, guid: c658b0989cc96c64eaf067201fabaed0, type: 3}
   CardArt: {fileID: 21300000, guid: 23e5368a05846c542a6910f50bf6c2bd, type: 3}

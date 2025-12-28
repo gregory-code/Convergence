@@ -24,10 +24,11 @@ MonoBehaviour:
   bTargetsSelf: 0
   bTargetsAllies: 1
   bTargetsAlliesExceptSelf: 0
+  bCaptainsOnly: 0
   bTargetsEnemies: 0
   bTargetsAll: 1
   bSwift: 0
-  DescriptionText: 
+  DescriptionText: Heal each ally 3 magic
   bActiveInEffectLinger: 0
   physicalStatLinger: 0
   magicStatLinger: 0
@@ -37,6 +38,8 @@ MonoBehaviour:
   bWaitForReaction: 0
   bDead: 0
   respawnTurns: 0
+  CaptainTargeting: []
+  predictionDamage: 0
+  captainsAffectedByPredictionDamageIncrease: []
   bAttackingCard: 0
   bHasPredcition: 1
-  CaptainTargeting: []

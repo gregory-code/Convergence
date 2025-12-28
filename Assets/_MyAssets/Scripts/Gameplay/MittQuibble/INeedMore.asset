@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CardName: I Need More!
   Type: {fileID: 11400000, guid: 724df9a1411ec954ebc6263a1c337930, type: 2}
-  Rarity: {fileID: 11400000, guid: b1e478010c8d91d4d9e3393c5ffeaf18, type: 2}
+  Rarity: {fileID: 11400000, guid: 10f3481ff2e893245a2600427e96d2bd, type: 2}
   Captain: 10
   SeriesOverlay: {fileID: 21300000, guid: c658b0989cc96c64eaf067201fabaed0, type: 3}
   CardArt: {fileID: 21300000, guid: b738cecf5ed90344fa6899d06c9c3c41, type: 3}
@@ -24,8 +24,23 @@ MonoBehaviour:
   bTargetsSelf: 1
   bTargetsAllies: 0
   bTargetsAlliesExceptSelf: 0
+  bCaptainsOnly: 0
   bTargetsEnemies: 0
+  bTargetsAll: 0
   bSwift: 1
-  DescriptionText: 
-  bAttacking: 0
-  Damage: 0
+  DescriptionText: Swift Play an equipment from your hand onto this captain with
+    Swift
+  bActiveInEffectLinger: 0
+  physicalStatLinger: 0
+  magicStatLinger: 0
+  defenseStatLinger: 0
+  thisCard: {fileID: 0}
+  bOncePerTurn: 1
+  bWaitForReaction: 0
+  bDead: 0
+  respawnTurns: 0
+  CaptainTargeting: []
+  predictionDamage: 0
+  captainsAffectedByPredictionDamageIncrease: []
+  bAttackingCard: 0
+  bHasPredcition: 0

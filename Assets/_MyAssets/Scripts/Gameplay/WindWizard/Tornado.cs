@@ -56,7 +56,7 @@ public class Tornado : CaptainCard
             gameMaster.reactionCaptainUsing = thisPlayingCard;
             gameMaster.reactionCaptainTargeting = enemies;
 
-            gameMaster.RequestPlayCard(thisCard, thisCard, true, enemies, false, true);
+            gameMaster.RequestPlayCard(thisCard, thisCard, true, enemies, false, true, false);
         }
     }
 

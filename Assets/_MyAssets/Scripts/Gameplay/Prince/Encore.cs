@@ -19,9 +19,6 @@ public class Encore : ActionCard
 
         captainTargeting[0].BeginEnergize();
 
-        if (thisPlayingCard.DoIOwnThis())
-            FindFirstObjectByType<GameMaster>().RequestDrawCards(1);
-
         yield return new WaitForEndOfFrame();
     }
 

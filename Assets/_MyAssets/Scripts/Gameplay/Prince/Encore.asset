@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CardName: Encore
   Type: {fileID: 11400000, guid: 724df9a1411ec954ebc6263a1c337930, type: 2}
-  Rarity: {fileID: 11400000, guid: 10f3481ff2e893245a2600427e96d2bd, type: 2}
+  Rarity: {fileID: 11400000, guid: 4d89e1e08f97ead4bb80c04b5453801a, type: 2}
   Captain: 6
   SeriesOverlay: {fileID: 21300000, guid: 73a0f5082a4a2584594d9309801360f2, type: 3}
   CardArt: {fileID: 21300000, guid: 52de901295c8c7b438b8779f0627844a, type: 3}
@@ -28,7 +28,9 @@ MonoBehaviour:
   bTargetsEnemies: 0
   bTargetsAll: 0
   bSwift: 0
-  DescriptionText: "Energize an Exhausted ally captain \nDraw 1 card"
+  DescriptionText: 'Energize an Exhausted ally captain
+
+'
   bActiveInEffectLinger: 0
   physicalStatLinger: 0
   magicStatLinger: 0

@@ -15,6 +15,18 @@ public class DestinyStopwatch : ReactionCard
     {
         yield return base.PlayCard(thisPlayingCard, captainUsing, bTargetingEnemy, captainTargeting);
 
+        FindFirstObjectByType<UserPlayer>().bInUniqueMenu = true;
+
+        List<PlayingCard> newTarget = new List<PlayingCard>();
+        newTarget.Add(captainUsing);
+
+        if (thisPlayingCard.DoIOwnThis())
+        {
+            FindFirstObjectByType<UserPlayer>().DoUniqueChoice(thisPlayingCard, captainUsing);
+        }
+
+        thisPlayingCard.BeginWaitForMenuAndDiscard(captainUsing);
+
         yield return new WaitForEndOfFrame();
     }
 

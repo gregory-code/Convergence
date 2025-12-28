@@ -19,10 +19,9 @@ public class CrownOfNature : EquipmentCard
     {
         yield return base.PlayCard(thisPlayingCard, captainUsing, bTargetingEnemy, captainTargeting);
 
-        List<PlayingCard> allies = StaticGameplayDelegates.GetTeammates(captainUsing);
         if (thisPlayingCard.DoIOwnThis())
         {
-            FindFirstObjectByType<UserPlayer>().DoUniqueChoice(thisPlayingCard);
+            FindFirstObjectByType<UserPlayer>().DoUniqueChoice(thisPlayingCard, captainUsing);
         }
 
         crownsOwner = captainTargeting[0];

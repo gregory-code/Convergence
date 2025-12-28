@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CardName: Destiny Stopwatch
   Type: {fileID: 11400000, guid: 067b8d4f5ee7d7d4db9abaab0a0a0c46, type: 2}
-  Rarity: {fileID: 11400000, guid: b1e478010c8d91d4d9e3393c5ffeaf18, type: 2}
+  Rarity: {fileID: 11400000, guid: 10f3481ff2e893245a2600427e96d2bd, type: 2}
   Captain: 1
   SeriesOverlay: {fileID: 21300000, guid: 0cf8a2009c66b5144b21755bf40ace98, type: 3}
   CardArt: {fileID: 21300000, guid: 12b9a961ac73d6040a7b32f0db5bf897, type: 3}
@@ -24,7 +24,21 @@ MonoBehaviour:
   bTargetsSelf: 0
   bTargetsAllies: 1
   bTargetsAlliesExceptSelf: 0
+  bCaptainsOnly: 0
   bTargetsEnemies: 0
+  bTargetsAll: 0
   bSwift: 0
   DescriptionText: 
+  bActiveInEffectLinger: 0
+  physicalStatLinger: 0
+  magicStatLinger: 0
+  defenseStatLinger: 0
+  thisCard: {fileID: 0}
+  bOncePerTurn: 1
+  bWaitForReaction: 0
+  bDead: 0
+  respawnTurns: 0
+  CaptainTargeting: []
+  predictionDamage: 0
+  captainsAffectedByPredictionDamageIncrease: []
   reactionType: 2

@@ -41,7 +41,7 @@ public class InspectionItem : MonoBehaviour
             List<PlayingCard> playingCards = new List<PlayingCard>();
             playingCards.Add(playingCard);
 
-            ownerPlayer.RequestPlayCard(playingCard, playingCard, false, playingCards);
+            ownerPlayer.RequestPlayCard(playingCard, playingCard, false, playingCards, false);
         }
     }
 }

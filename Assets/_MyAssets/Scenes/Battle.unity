@@ -6825,6 +6825,7 @@ MonoBehaviour:
   ChoiceCardPanelTransform: {fileID: 1426634406}
   ChoicePanel: {fileID: 1577362779}
   ChoicePanelInstructions: {fileID: 500974436}
+  bInUniqueMenu: 0
 --- !u!114 &1366958863
 MonoBehaviour:
   m_ObjectHideFlags: 0

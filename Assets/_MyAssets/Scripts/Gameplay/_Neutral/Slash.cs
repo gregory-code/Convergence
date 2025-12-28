@@ -58,13 +58,16 @@ public class Slash : ActionCard
                 return;
             }
         }
+        else
+        {
+            cardThatWasUsed.BeginPlayAndDiscard(allyDealingDamage);
+        }
 
-        cardThatWasUsed.BeginPlayAndDiscard(allyDealingDamage);
     }
 
     private void RemoveLingers(bool bPlayers1Turn)
     {
-        if(bPlayers1Turn == thisCard.bIsPlayer1 && bActiveInEffectLinger)
+        if(bPlayers1Turn == attachedCaptain.bIsPlayer1 && bActiveInEffectLinger)
         {
             if(attachedCaptain.myCard is CaptainCard captain)
             {

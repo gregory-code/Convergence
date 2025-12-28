@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CardName: Mitt's Stash
   Type: {fileID: 11400000, guid: e24ba17bf00a2c84d8bf10383f710fed, type: 2}
-  Rarity: {fileID: 11400000, guid: 10f3481ff2e893245a2600427e96d2bd, type: 2}
+  Rarity: {fileID: 11400000, guid: b1e478010c8d91d4d9e3393c5ffeaf18, type: 2}
   Captain: 10
   SeriesOverlay: {fileID: 21300000, guid: c658b0989cc96c64eaf067201fabaed0, type: 3}
   CardArt: {fileID: 21300000, guid: d478d6a5f3bf44a449d7717d5d391cc6, type: 3}

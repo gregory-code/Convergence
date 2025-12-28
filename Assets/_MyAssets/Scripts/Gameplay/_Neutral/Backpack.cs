@@ -5,6 +5,7 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "TCG/Neutral/Backpack")]
 public class Backpack : EquipmentCard
 {
+    private PlayingCard ownerCaptain;
     public override void Init(UserPlayer ownerPlayer)
     {
         base.Init(ownerPlayer);
@@ -17,6 +18,8 @@ public class Backpack : EquipmentCard
 
         StaticGameplayDelegates.onEquipmentAttached += EquipmentAttached;
 
+        ownerCaptain = captainTargeting[0];
+
         if (thisCard.DoIOwnThis())
             FindFirstObjectByType<GameMaster>().RequestDrawCards(1);
 
@@ -25,8 +28,14 @@ public class Backpack : EquipmentCard
 
     private void EquipmentAttached(PlayingCard equipment, PlayingCard allyDoingTheEquipping, PlayingCard allyGettingTheEquipment)
     {
-        if (allyDoingTheEquipping.DoIOwnThis())
-            FindFirstObjectByType<GameMaster>().RequestDrawCards(1);
+        List<PlayingCard> allies = StaticGameplayDelegates.GetTeammates(ownerCaptain);
+
+        foreach(PlayingCard card in allies)
+        {
+            if(card.uniqueID == allyGettingTheEquipment.uniqueID)
+                if (allyGettingTheEquipment.DoIOwnThis())
+                    FindFirstObjectByType<GameMaster>().RequestDrawCards(1);
+        }
     }
 
     public override void Cleanup()

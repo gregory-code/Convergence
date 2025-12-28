@@ -15,6 +15,15 @@ public class INeedMore : ActionCard
     {
         yield return base.PlayCard(thisPlayingCard, captainUsing, bTargetingEnemy, captainTargeting);
 
+        FindFirstObjectByType<UserPlayer>().bInUniqueMenu = true;
+
+        if (thisPlayingCard.DoIOwnThis())
+        {
+            FindFirstObjectByType<UserPlayer>().DoUniqueChoice(thisPlayingCard, captainUsing);
+        }
+
+        thisPlayingCard.BeginWaitForMenuAndDiscard(captainUsing);
+
         yield return new WaitForEndOfFrame();
     }
 

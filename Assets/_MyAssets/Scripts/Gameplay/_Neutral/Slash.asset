@@ -24,15 +24,23 @@ MonoBehaviour:
   bTargetsSelf: 0
   bTargetsAllies: 0
   bTargetsAlliesExceptSelf: 0
+  bCaptainsOnly: 0
   bTargetsEnemies: 1
+  bTargetsAll: 0
   bSwift: 0
-  DescriptionText: 
-  bHasLingerEffect: 1
+  DescriptionText: Attack for 3 physical /Strike/ Linger Give this captain +1 defense
+  bActiveInEffectLinger: 0
   physicalStatLinger: 0
   magicStatLinger: 0
   defenseStatLinger: 1
+  thisCard: {fileID: 0}
   bOncePerTurn: 1
   bWaitForReaction: 0
   bDead: 0
   respawnTurns: 0
+  CaptainTargeting:
+  - {fileID: 0}
+  predictionDamage: 0
+  captainsAffectedByPredictionDamageIncrease: []
   bAttackingCard: 1
+  bHasPredcition: 0

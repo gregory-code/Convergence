@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CardName: Nighthawk Cloak
   Type: {fileID: 11400000, guid: e24ba17bf00a2c84d8bf10383f710fed, type: 2}
-  Rarity: {fileID: 11400000, guid: 10f3481ff2e893245a2600427e96d2bd, type: 2}
+  Rarity: {fileID: 11400000, guid: b1e478010c8d91d4d9e3393c5ffeaf18, type: 2}
   Captain: 1
   SeriesOverlay: {fileID: 21300000, guid: 0cf8a2009c66b5144b21755bf40ace98, type: 3}
   CardArt: {fileID: 21300000, guid: 5e0f9a56c774a5d49a6f71b21a60073d, type: 3}

@@ -75,7 +75,7 @@ public abstract class BaseCard : ScriptableObject
 
             if (thisPlayingCard.DoIOwnThis())
             {
-                StaticGameplayDelegates.RequestAttackPrediction(thisPlayingCard, captainUsing, bTargetingEnemy, captainTargeting);
+                StaticGameplayDelegates.RequestAttackPrediction(thisPlayingCard, captainUsing, bTargetingEnemy, captainTargeting, false);
             }
 
             while (bWaitForReaction)

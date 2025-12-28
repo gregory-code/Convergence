@@ -8,7 +8,6 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using static UnityEngine.Rendering.DebugUI;
 
 public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler, IPointerExitHandler
 {
@@ -77,6 +76,7 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
     [SerializeField] private PlayingCard playingCardPrefab;
     private List<PlayingCard> PlayingCardsInHand = new List<PlayingCard>();
     public int GetCardsInHand() { return PlayingCardsInHand.Count; }
+    public List<PlayingCard> GetPlayingCardsInHand() { return PlayingCardsInHand; }
 
     private List<PlayingCard> CardsToMulligan = new List<PlayingCard>();
 
@@ -233,12 +233,12 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
     public void SetIsPlayer1() { bIsPlayer1 = true; }
     public bool IsMyTurn() { return gameMaster.bPlayer1sTurn == bIsPlayer1; }
 
-    public void RequestPlayCard(PlayingCard cardToPlay, PlayingCard captainUsing, bool bTargetingEnemy, List<PlayingCard> captainTargeting)
+    public void RequestPlayCard(PlayingCard cardToPlay, PlayingCard captainUsing, bool bTargetingEnemy, List<PlayingCard> captainTargeting, bool bForceSwift)
     {
         currentCard = cardToPlay;
         currentCaptain = captainUsing;
         currentTargets = captainTargeting;
-        gameMaster.RequestPlayCard(cardToPlay, captainUsing, bTargetingEnemy, captainTargeting, false, false);
+        gameMaster.RequestPlayCard(cardToPlay, captainUsing, bTargetingEnemy, captainTargeting, false, false, bForceSwift);
     }
 
     public void PlayClientCard(bool bTargetingEnemy)
@@ -295,7 +295,10 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
 
     private bool bInChoiceMenu;
     private bool bInDiscardPile;
-    private bool bInUniqueMenu;
+
+    [HideInInspector]
+    public bool bInUniqueMenu;
+
     private bool bShowingTable;
 
     private void SetPanelButtonTableState(bool ShowTable)
@@ -316,7 +319,7 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
         }
     }
 
-    public void DoUniqueChoice(PlayingCard playingCardEffect)
+    public void DoUniqueChoice(PlayingCard playingCardEffect, PlayingCard usingCaptain)
     {
         BlockHand(true);
         SetChoicePanel(true, false);
@@ -333,6 +336,38 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
                 if(card.Type.type == CardType.Ally)
                 {
                     AddItemToChoice(null, card);
+                }
+            }
+        }
+
+        if (playingCardEffect.myCard is INeedMore)
+        {
+            foreach (PlayingCard card in PlayingCardsInHand)
+            {
+                if(card.myCard is EquipmentCard equipment)
+                {
+                    if (card.EligableEquipment(equipment, usingCaptain))
+                    {
+                        ChoiceCard newChoice = AddItemToChoice(card, card.myCard);
+                        newChoice.usingCaptain = usingCaptain;
+                        newChoice.bINeedMore = true;
+                    }
+                }
+            }
+        }
+
+        if (playingCardEffect.myCard is DestinyStopwatch)
+        {
+            foreach (PlayingCard card in PlayingCardsInHand)
+            {
+                if (card.myCard is ActionCard attackingAction)
+                {
+                    if (attackingAction.bAttackingCard)
+                    {
+                        ChoiceCard newChoice = AddItemToChoice(card, card.myCard);
+                        newChoice.usingCaptain = usingCaptain;
+                        newChoice.bDestinyStopwatch = true;
+                    }
                 }
             }
         }
@@ -424,11 +459,12 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
         ChoiceCards.Clear();
     }
 
-    private void AddItemToChoice(PlayingCard card, BaseCard cardEffect)
+    private ChoiceCard AddItemToChoice(PlayingCard card, BaseCard cardEffect)
     {
         ChoiceCard newChoice = Instantiate(ChoiceCardPrefab, ChoiceCardPanelTransform.transform);
         newChoice.Init(this, card, cardEffect);
         ChoiceCards.Add(newChoice);
+        return newChoice;
     }
 
     public IEnumerator DaybreakCheck()
