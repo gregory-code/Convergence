@@ -58,9 +58,9 @@ public class Slash : ActionCard
                 return;
             }
         }
-        else
+        else if(cardThatWasUsed.uniqueID == thisCard.uniqueID)
         {
-            cardThatWasUsed.BeginPlayAndDiscard(allyDealingDamage);
+            thisCard.BeginPlayAndDiscard(allyDealingDamage);
         }
 
     }
@@ -74,6 +74,8 @@ public class Slash : ActionCard
                 bActiveInEffectLinger = false;
                 thisCard.RemoveCardAttachment(attachedCaptain);
                 captain.RemoveLinger(thisCard, attachedCaptain);
+
+                StaticGameplayDelegates.onRemoveLingers -= RemoveLingers;
             }
         }
     }
@@ -83,6 +85,5 @@ public class Slash : ActionCard
         base.Cleanup();
 
         StaticGameplayDelegates.onDealtDamage -= DamageWasDealt;
-        StaticGameplayDelegates.onRemoveLingers -= RemoveLingers;
     }
 }

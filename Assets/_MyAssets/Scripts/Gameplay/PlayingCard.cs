@@ -518,6 +518,7 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         Transform discardPile = StaticGameplayDelegates.GetDiscardPileTransform(parentCharacter.bIsPlayer1);
         StaticGameplayDelegates.AddCardToDiscard(this, parentCharacter.bIsPlayer1);
         bInDiscard = true;
+
         myCard.Cleanup();
 
         transform.SetParent(discardPile, true);
@@ -548,7 +549,7 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         StaticGameplayDelegates.AddCardToDiscard(this, usingCaptain.bIsPlayer1);
         bInDiscard = true;
 
-        if(myCard != null)
+        if (myCard != null)
         myCard.Cleanup();
 
         transform.SetParent(discardPile, true);

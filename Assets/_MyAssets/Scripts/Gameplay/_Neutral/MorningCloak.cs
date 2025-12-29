@@ -32,6 +32,9 @@ public class MorningCloak : EquipmentCard
     {
         base.Cleanup();
 
+        if (equippedPlayer == null)
+            return;
+
         if (equippedPlayer.myCard is CaptainCard equippedCharacter)
         {
             equippedCharacter.currentHealth -= 3;

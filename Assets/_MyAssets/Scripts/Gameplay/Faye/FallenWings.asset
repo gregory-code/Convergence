@@ -28,8 +28,7 @@ MonoBehaviour:
   bTargetsEnemies: 0
   bTargetsAll: 0
   bSwift: 0
-  DescriptionText: 'Whenever an ally except this captain is damaged, this captain
-    receives 50% (rounded down) of the dealt damage instead [Unique]'
+  DescriptionText: 
   bActiveInEffectLinger: 0
   physicalStatLinger: 0
   magicStatLinger: 0
