@@ -545,20 +545,7 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
         yield return new WaitForSeconds(0.6f);
 
-        Transform discardPile = StaticGameplayDelegates.GetDiscardPileTransform(usingCaptain.bIsPlayer1);
-        StaticGameplayDelegates.AddCardToDiscard(this, usingCaptain.bIsPlayer1);
-        bInDiscard = true;
-
-        if (myCard != null)
-        myCard.Cleanup();
-
-        transform.SetParent(discardPile, true);
-
-        StartCoroutine(MoveCard(0, true, 0.4f));
-        StartCoroutine(MoveCard(0, false, 0.4f));
-        StartCoroutine(ShrinkOrGrow(1.0f));
-
-        //CleanupDestroy();
+        SendToDiscard(usingCaptain);
     }
 
     public void BeginWaitForMenuAndDiscard(PlayingCard usingCaptain)
@@ -589,16 +576,7 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
             yield return new WaitForEndOfFrame();
         }
 
-        Transform discardPile = StaticGameplayDelegates.GetDiscardPileTransform(usingCaptain.bIsPlayer1);
-        //StaticGameplayDelegates.AddCardToDiscard(this, usingCaptain.bIsPlayer1);
-        bInDiscard = true;
-        myCard.Cleanup();
-
-        transform.SetParent(discardPile, true);
-
-        StartCoroutine(MoveCard(0, true, 0.4f));
-        StartCoroutine(MoveCard(0, false, 0.4f));
-        StartCoroutine(ShrinkOrGrow(1.0f));
+        SendToDiscard(usingCaptain);
     }
 
     public IEnumerator PlayReaction(PlayingCard usingCaptain, Transform fieldTransform, BaseCard cardWeAreWaitingOn)
@@ -621,10 +599,17 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
             yield return new WaitForEndOfFrame();
         }
 
-        Transform discardPile = StaticGameplayDelegates.GetDiscardPileTransform(usingCaptain.bIsPlayer1);
-        //StaticGameplayDelegates.AddCardToDiscard(this, usingCaptain.bIsPlayer1);
+        SendToDiscard(usingCaptain);
+    }
+
+    private void SendToDiscard(PlayingCard parentCharacter)
+    {
+        Transform discardPile = StaticGameplayDelegates.GetDiscardPileTransform(parentCharacter.bIsPlayer1);
+        StaticGameplayDelegates.AddCardToDiscard(this, parentCharacter.bIsPlayer1);
         bInDiscard = true;
-        myCard.Cleanup();
+
+        if (myCard != null)
+            myCard.Cleanup();
 
         transform.SetParent(discardPile, true);
 
