@@ -206,7 +206,7 @@ public class EnemyPlayer : MonoBehaviour
             }
         }
 
-        PlayingCardsInHand[0].SetCard(cardToPlay);
+        PlayingCardsInHand[0].SetCard(cardToPlay, bIsPlayer1);
 
         if (cardToPlay.bSwift == false && bForceSwift == false)
             StartCoroutine(captainUsing.EnergizeAndExhaust(false));
@@ -237,7 +237,7 @@ public class EnemyPlayer : MonoBehaviour
         }
         else
         {
-            PlayingCardsInHand[0].SetCard(cardToPlay);
+            PlayingCardsInHand[0].SetCard(cardToPlay, bIsPlayer1);
 
             if (cardToPlay.bSwift == false)
                 StartCoroutine(captainUsing.EnergizeAndExhaust(false));

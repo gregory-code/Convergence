@@ -67,15 +67,19 @@ public class Slash : ActionCard
 
     private void RemoveLingers(bool bPlayers1Turn)
     {
-        if(bPlayers1Turn == attachedCaptain.bIsPlayer1 && bActiveInEffectLinger)
+        if(bActiveInEffectLinger)
         {
-            if(attachedCaptain.myCard is CaptainCard captain)
+            if (bPlayers1Turn == attachedCaptain.bIsPlayer1)
             {
-                bActiveInEffectLinger = false;
-                thisCard.RemoveCardAttachment(attachedCaptain);
-                captain.RemoveLinger(thisCard, attachedCaptain);
+                if (attachedCaptain.myCard is CaptainCard captain)
+                {
+                    bActiveInEffectLinger = false;
+                    thisCard.RemoveCardAttachment(attachedCaptain);
+                    captain.RemoveLinger(thisCard, attachedCaptain);
 
-                StaticGameplayDelegates.onRemoveLingers -= RemoveLingers;
+                    StaticGameplayDelegates.onRemoveLingers -= RemoveLingers;
+                    StaticGameplayDelegates.onDealtDamage -= DamageWasDealt;
+                }
             }
         }
     }
@@ -83,7 +87,5 @@ public class Slash : ActionCard
     public override void Cleanup()
     {
         base.Cleanup();
-
-        StaticGameplayDelegates.onDealtDamage -= DamageWasDealt;
     }
 }

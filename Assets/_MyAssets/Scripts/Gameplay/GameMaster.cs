@@ -107,20 +107,38 @@ public class GameMaster : MonoBehaviourPunCallbacks
         StartCoroutine(StartGame());
     }
 
-    public Transform GetDiscardPilieTransform(bool isPlayer1)
+    public Transform GetDiscardPilieTransform(bool doIOwnThis)
     {
-        return (isPlayer1 == bIsPlayer1) ? allyDiscard : enemyDiscard;
+        return (doIOwnThis) ? allyDiscard : enemyDiscard;
     }
 
-    public void AddCardToDiscard(PlayingCard cardtoAdd, bool IsPlayer1)
+    public void AddCardToDiscard(PlayingCard cardtoAdd, bool doIOwnThis)
     {
-        if (IsPlayer1)
+        if (doIOwnThis)
         {
-            Player1Discard.Add(cardtoAdd);
+            if(bIsPlayer1)
+            {
+
+                Player1Discard.Add(cardtoAdd);
+            }
+            else
+            {
+                Player2Discard.Add(cardtoAdd);
+
+            }
         }
         else
         {
-            Player2Discard.Add(cardtoAdd);
+            if (bIsPlayer1)
+            {
+                Player2Discard.Add(cardtoAdd);
+
+            }
+            else
+            {
+                Player1Discard.Add(cardtoAdd);
+
+            }
         }
     }
 

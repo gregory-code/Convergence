@@ -22,13 +22,16 @@ public abstract class BaseCard : ScriptableObject
     public bool bCaptainsOnly;
     public bool bTargetsEnemies;
     public bool bTargetsAll;
+    public bool bUnavoidable;
 
     public bool bSwift;
 
     [TextArea(3, 10)]
     public string DescriptionText;
 
+    [HideInInspector]
     public bool bActiveInEffectLinger = false;
+
     public int physicalStatLinger;
     public int magicStatLinger;
     public int defenseStatLinger;

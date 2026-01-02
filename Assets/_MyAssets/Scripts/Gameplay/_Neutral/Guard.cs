@@ -22,7 +22,7 @@ public class Guard : ReactionCard
 
         if (captainTargeting[0].myCard is CaptainCard captain)
         {
-            bIsPlayer1 = captainTargeting[0].bIsPlayer1;
+            bIsPlayer1 = captainUsing.bIsPlayer1;
             bActiveInEffectLinger = true;
             attachedCaptain = captainTargeting[0];
 

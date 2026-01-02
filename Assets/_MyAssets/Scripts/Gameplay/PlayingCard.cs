@@ -66,12 +66,10 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
         bEnergized = true;
 
-
-        this.bIsPlayer1 = bIsPlayer1;
         this.uniqueID = uniqueID;
 
         this.ownerPlayer = ownerplayer;
-        SetCard(card);
+        SetCard(card, bIsPlayer1);
         
 
         if(myCard != null)
@@ -118,12 +116,13 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         bPreventRegularMoving = true;
     }
 
-    public void SetCard(BaseCard card)
+    public void SetCard(BaseCard card, bool bIsPlayer1)
     {
         if (card == null)
             return;
 
         myCard = card;
+        this.bIsPlayer1 = bIsPlayer1;
         myCard.thisCard = this;
         myCard.predictionDamage = 0;
         GetComponent<VisibleCard>().SetCard(card);
@@ -289,22 +288,25 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
             return false;
         }
 
-        if (cardTryingToUse.myCard.bTargetsEnemies && bEnergized == false && myCard.bDead == false)
+        if (cardTryingToUse.myCard.bTargetsEnemies && myCard.bDead == false)
         {
-            if (ownerPlayer.bAllowingReactions && ownerPlayer.currentCard.myCard is ReactionCard reaction)
+            if(bEnergized == false || cardTryingToUse.myCard.bUnavoidable)
             {
-                if (reaction.reactionType == ReactionType.TargetAttackingEnemy)
+                if (ownerPlayer.bAllowingReactions && cardTryingToUse.myCard is ReactionCard reaction)
+                {
+                    if (reaction.reactionType == ReactionType.TargetAttackingEnemy)
+                    {
+                        return true;
+                    }
+                }
+                else
                 {
                     return true;
                 }
             }
-            else
-            {
-                return true;
-            }
         }
 
-        if (ownerPlayer.bAllowingReactions && ownerPlayer.currentCard.myCard is ReactionCard secondCheck)
+        if (ownerPlayer.bAllowingReactions && cardTryingToUse.myCard is ReactionCard secondCheck)
         {
             if (secondCheck.reactionType == ReactionType.TargetAttackingEnemy)
             {
@@ -392,6 +394,12 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     public void BeginEnergize()
     {
         StartCoroutine(EnergizeAndExhaust(true));
+    }
+
+    public void BeginFatigue()
+    {
+        //Also can do some vfx here
+        StartCoroutine(EnergizeAndExhaust(false));
     }
 
     public IEnumerator EnergizeAndExhaust(bool bEnergized)
@@ -515,17 +523,7 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
             img.raycastTarget = true;
         }
 
-        Transform discardPile = StaticGameplayDelegates.GetDiscardPileTransform(parentCharacter.bIsPlayer1);
-        StaticGameplayDelegates.AddCardToDiscard(this, parentCharacter.bIsPlayer1);
-        bInDiscard = true;
-
-        myCard.Cleanup();
-
-        transform.SetParent(discardPile, true);
-
-        StartCoroutine(MoveCard(0, true, 0.4f));
-        StartCoroutine(MoveCard(0, false, 0.4f));
-        StartCoroutine(ShrinkOrGrow(1.0f));
+        SendToDiscard(parentCharacter);
     }
 
     public void BeginPlayAndDiscard(PlayingCard usingCaptain)
@@ -604,12 +602,16 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
     private void SendToDiscard(PlayingCard parentCharacter)
     {
-        Transform discardPile = StaticGameplayDelegates.GetDiscardPileTransform(parentCharacter.bIsPlayer1);
-        StaticGameplayDelegates.AddCardToDiscard(this, parentCharacter.bIsPlayer1);
-        bInDiscard = true;
+        Transform discardPile = StaticGameplayDelegates.GetDiscardPileTransform(DoIOwnThis());
+        
+        if(bInDiscard == false)
+        {
+            StaticGameplayDelegates.AddCardToDiscard(this, DoIOwnThis());
+            bInDiscard = true;
 
-        if (myCard != null)
-            myCard.Cleanup();
+            if (myCard != null)
+                myCard.Cleanup();
+        }
 
         transform.SetParent(discardPile, true);
 

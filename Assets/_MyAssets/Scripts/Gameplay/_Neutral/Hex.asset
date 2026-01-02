@@ -24,8 +24,23 @@ MonoBehaviour:
   bTargetsSelf: 0
   bTargetsAllies: 0
   bTargetsAlliesExceptSelf: 0
+  bCaptainsOnly: 0
   bTargetsEnemies: 1
+  bTargetsAll: 0
+  bUnavoidable: 1
   bSwift: 0
-  DescriptionText: 
-  bAttacking: 0
-  Damage: 0
+  DescriptionText: Give an enemy Fatigue and -1 physical, -1 magic Linger
+  bActiveInEffectLinger: 0
+  physicalStatLinger: -1
+  magicStatLinger: -1
+  defenseStatLinger: 0
+  thisCard: {fileID: 0}
+  bOncePerTurn: 1
+  bWaitForReaction: 0
+  bDead: 0
+  respawnTurns: 0
+  CaptainTargeting: []
+  predictionDamage: 0
+  captainsAffectedByPredictionDamageIncrease: []
+  bAttackingCard: 0
+  bHasPredcition: 0
