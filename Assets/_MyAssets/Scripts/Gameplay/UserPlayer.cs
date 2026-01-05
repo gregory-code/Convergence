@@ -331,7 +331,9 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
 
         if(playingCardEffect.myCard is CrownOfNature)
         {
-            foreach(BaseCard card in UserDeck)
+            ChoicePanelInstructions.text = "Pick an Ally";
+
+            foreach (BaseCard card in UserDeck)
             {
                 if(card.Type.type == CardType.Ally)
                 {
@@ -342,6 +344,8 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
 
         if (playingCardEffect.myCard is INeedMore)
         {
+            ChoicePanelInstructions.text = "Play an Equipment";
+
             foreach (PlayingCard card in PlayingCardsInHand)
             {
                 if(card.myCard is EquipmentCard equipment)
@@ -358,6 +362,8 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
 
         if (playingCardEffect.myCard is DestinyStopwatch)
         {
+            ChoicePanelInstructions.text = "Parry with an Attack";
+
             foreach (PlayingCard card in PlayingCardsInHand)
             {
                 if (card.myCard is ActionCard attackingAction)
@@ -857,6 +863,13 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
             lineAttack.ShowPrediction(captainUsing.transform.position, currentTargets[i].transform.position, Color.orange);
             linePredictions.Add(lineAttack);
         }
+    }
+
+    public void TargetEnemyWithLineRenderes(PlayingCard captainUsing, PlayingCard target)
+    {
+        LineAttackPredictionScript lineAttack = Instantiate(lineAttackPredictionPrefab);
+        lineAttack.ShowPrediction(captainUsing.transform.position, target.transform.position, Color.orange);
+        linePredictions.Add(lineAttack);
     }
 
     private Vector3 GetUIToWorldPoint(Vector3 referencePoint)

@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -539,6 +540,14 @@ public class GameMaster : MonoBehaviourPunCallbacks
 
             for (int i = 0; i < reactionCaptainTargeting.Count; i++)
             {
+                if (reactionCaptainTargeting[i].myCard is CaptainCard newCaptain)
+                {
+                    reactionCaptainTargeting[i].predictingNewHealthChange = newCaptain.currentHealth;
+                }
+            }
+
+            for (int i = 0; i < reactionCaptainTargeting.Count; i++)
+            {
                 LineAttackPredictionScript lineAttack = Instantiate(lineAttackPredictionPrefab);
                 lineAttack.ShowPrediction(reactionPlayingCard.transform.position, reactionCaptainTargeting[i].transform.position, Color.red);
                 lineAttacks.Add(lineAttack);
@@ -547,7 +556,7 @@ public class GameMaster : MonoBehaviourPunCallbacks
 
                 if (reactionCaptainTargeting[i].myCard is CaptainCard captain)
                 {
-                    reactionCaptainTargeting[i].DisplayHealthChange(captain.currentHealth - context.damage);
+                    reactionCaptainTargeting[i].DisplayHealthChange(captain, context.damage);
                     reactionCaptainTargeting[i].DisplayAttackStats(false, true, reactionPlayingCard, reactionCaptainUsing);
                 }
             }
@@ -560,6 +569,15 @@ public class GameMaster : MonoBehaviourPunCallbacks
 
     public void ClearLineAttacks()
     {
+
+        for (int i = 0; i < reactionCaptainTargeting.Count; i++)
+        {
+            if (reactionCaptainTargeting[i].myCard is CaptainCard captain)
+            {
+                reactionCaptainTargeting[i].DisplayAttackStats(true, true, null, null);
+            }
+        }
+
         for (int i = 0; i < lineAttacks.Count; i++)
         {
             Destroy(lineAttacks[i].gameObject);

@@ -48,4 +48,29 @@ public static class StaticGameplayDelegates
     public static Transform GetDiscardPileTransform(bool doIOwnthis) { return GameObject.FindFirstObjectByType<GameMaster>().GetDiscardPilieTransform(doIOwnthis); }
     public static void AddCardToDiscard(PlayingCard cardtoAdd, bool doIOwnThis) { GameObject.FindFirstObjectByType<GameMaster>().AddCardToDiscard(cardtoAdd, doIOwnThis); }
     public static Sprite[] GetNumberSpriteWholes() { return GameObject.FindFirstObjectByType<GameMaster>().GetNumberSpriteWholes(); }
+
+    public static PlayingCard FindOtherAllyWithEquipment<T>(PlayingCard cardForReference) where T : EquipmentCard
+    {
+        List<PlayingCard> allies = GetTeammates(cardForReference);
+
+        foreach (PlayingCard ally in allies)
+        {
+            if (ally.uniqueID == cardForReference.uniqueID)
+                continue;
+
+            if (ally.myCard is CaptainCard captainAlly)
+            {
+                foreach (PlayingCard equipment in captainAlly.GetEquipments())
+                {
+                    if (equipment.myCard is T)
+                    {
+                        return ally;
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
 }

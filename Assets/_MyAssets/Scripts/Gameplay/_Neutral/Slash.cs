@@ -15,10 +15,10 @@ public class Slash : ActionCard
 
     public override IEnumerator PlayCard(PlayingCard thisPlayingCard, PlayingCard captainUsing, bool bTargetingEnemy, List<PlayingCard> captainTargeting)
     {
+        yield return base.PlayCard(thisPlayingCard, captainUsing, bTargetingEnemy, captainTargeting);
+
         StaticGameplayDelegates.onDealtDamage += DamageWasDealt;
         StaticGameplayDelegates.onRemoveLingers += RemoveLingers;
-
-        yield return base.PlayCard(thisPlayingCard, captainUsing, bTargetingEnemy, captainTargeting);
 
         if (CaptainTargeting[0].myCard is CaptainCard attackeeTarget)
         {

@@ -696,40 +696,38 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         }
     }
 
-    private int predictingNewHealthChange;
-    public void DisplayHealthChange(int newHealth)
+    [HideInInspector]
+    public int predictingNewHealthChange;
+    public void DisplayHealthChange(CaptainCard captainDisplayingHealth, int damage)
     {
-        if(myCard is CaptainCard captain)
+        AttackPredictionPanel.SetActive(true);
+        if (bEnergized)
         {
-            AttackPredictionPanel.SetActive(true);
-            if (bEnergized)
-            {
-                AttackPredictionPanel.transform.SetLocalPositionAndRotation(Vector3.one, Quaternion.Euler(0, 0, 0));
-                AttackPredictionPanel.transform.localScale = new Vector3(1.01f, 0.8f, 2.3f);
-            }
-            else
-            {
-                AttackPredictionPanel.transform.SetLocalPositionAndRotation(Vector3.one, Quaternion.Euler(0, 0, -90));
-                AttackPredictionPanel.transform.localScale = new Vector3(0.46f, 2.3f, 2.3f);
-            }
-
-
-            newHealth = Mathf.Min(newHealth, (captain.maxHealth + captain.GetBonusHealth()));
-            predictingNewHealthChange = newHealth;
-
-            int maxHealth = captain.maxHealth;
-            int currentHealth = captain.currentHealth;
-
-            healthPredictionLeft.text = currentHealth + "";
-            healthPredictionLeft.color = (currentHealth >= maxHealth) ? Color.green : Color.white;
-            if (currentHealth <= 2)
-                healthPredictionLeft.color = Color.red;
-
-            healthPredictionRight.text = newHealth + "";
-            healthPredictionRight.color = (newHealth >= maxHealth) ? Color.green : Color.white;
-            if (newHealth <= 2)
-                healthPredictionRight.color = Color.red;
+            AttackPredictionPanel.transform.SetLocalPositionAndRotation(Vector3.one, Quaternion.Euler(0, 0, 0));
+            AttackPredictionPanel.transform.localScale = new Vector3(1.01f, 0.8f, 2.3f);
         }
+        else
+        {
+            AttackPredictionPanel.transform.SetLocalPositionAndRotation(Vector3.one, Quaternion.Euler(0, 0, -90));
+            AttackPredictionPanel.transform.localScale = new Vector3(0.46f, 2.3f, 2.3f);
+        }
+
+        int newHealth = captainDisplayingHealth.currentHealth - damage;
+
+        predictingNewHealthChange = Mathf.Min(newHealth, (captainDisplayingHealth.maxHealth + captainDisplayingHealth.GetBonusHealth()));
+
+        int maxHealth = captainDisplayingHealth.maxHealth;
+        int currentHealth = captainDisplayingHealth.currentHealth;
+
+        healthPredictionLeft.text = currentHealth + "";
+        healthPredictionLeft.color = (currentHealth >= maxHealth) ? Color.green : Color.white;
+        if (currentHealth <= 2)
+            healthPredictionLeft.color = Color.red;
+
+        healthPredictionRight.text = newHealth + "";
+        healthPredictionRight.color = (newHealth >= maxHealth) ? Color.green : Color.white;
+        if (newHealth <= 2)
+            healthPredictionRight.color = Color.red;
     }
 
     public void DisplayHealVFX(int healthHealed)
@@ -830,6 +828,14 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
             if (action.bHasPredcition || action.bAttackingCard)
             {
+                for(int i = 0; i < ownerPlayer.currentTargets.Count; i++)
+                {
+                    if (ownerPlayer.currentTargets[i].myCard is CaptainCard captain)
+                    {
+                        ownerPlayer.currentTargets[i].predictingNewHealthChange = captain.currentHealth;
+                    }
+                }
+
                 for (int i = 0; i < ownerPlayer.currentTargets.Count; i++)
                 {
                     if (action.bAttackingCard && ownerPlayer.currentTargets[i].bEnergized == true)
@@ -837,15 +843,24 @@ public class PlayingCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
                     CardPlayContext context;
                     if (ownerPlayer.bSkipCaptainChoice)
+                    {
                         context = ownerPlayer.currentCard.myCard.PredictCard(ownerPlayer.currentCard, ownerPlayer.currentTargets[i], true, ownerPlayer.currentTargets[i]);
+
+                    }
                     else
+                    {
                         context = ownerPlayer.currentCard.myCard.PredictCard(ownerPlayer.currentCard, ownerPlayer.currentCaptain, true, ownerPlayer.currentTargets[i]);
+
+                    }
+
 
                     if (ownerPlayer.currentTargets[i].myCard is CaptainCard captain)
                     {
-                        ownerPlayer.currentTargets[i].DisplayHealthChange(captain.currentHealth - context.damage);
+                        ownerPlayer.currentTargets[i].DisplayHealthChange(captain, context.damage);
+                        ownerPlayer.currentTargets[i].DisplayAttackStats(false, true, ownerPlayer.currentCard, ownerPlayer.currentCaptain);
                     }
                 }
+
             }
         }
     }
