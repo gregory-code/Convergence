@@ -6783,17 +6783,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f7288b03a2f79c9428609f526ea683cb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  firebasePlayerInfo: {fileID: 1584138423}
   gameMaster: {fileID: 1584138419}
-  visualDeck: {fileID: 256617304}
+  allyVisualDeck: {fileID: 256617304}
+  enemyVisualDeck: {fileID: 709423604}
   lineRenderer: {fileID: 1085446866}
-  UserCaptains: []
-  UserDeck: []
+  enemySideHandTransform: {fileID: 1858297381}
   SelectCaptain: {fileID: 1418360752}
   SelectCaptainsVisible:
   - {fileID: 3278780348214181729}
   - {fileID: 579828552}
   - {fileID: 1016367703}
   allyDeckCardAmount: {fileID: 607926656}
+  enemyHandCardAmount: {fileID: 1645290892}
+  enemyDeckCardAmount: {fileID: 1605049045}
   MullgianPanel: {fileID: 1208110249}
   CaptainPanel: {fileID: 1418360752}
   InspectionPanel: {fileID: 709580522}
@@ -8537,7 +8540,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 1366958862}
-  enemy: {fileID: 1858297383}
   WhoGoesFirstText: {fileID: 2004541448}
   CurrentIDText: {fileID: 794415388}
   PlayingCardPrefab: {fileID: 1047151496080733996, guid: 0735616eb3573c94d9c7e0b8bdefaf5a, type: 3}
@@ -10246,7 +10248,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1858297381}
   - component: {fileID: 1858297384}
-  - component: {fileID: 1858297383}
   - component: {fileID: 1858297382}
   m_Layer: 5
   m_Name: Enemy
@@ -10304,24 +10305,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &1858297383
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1858297380}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 12c245e3850974243ab9e53e2e1d0924, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  enemyDeck: {fileID: 709423604}
-  gameMaster: {fileID: 1584138419}
-  firebasePlayerInfo: {fileID: 1584138423}
-  enemyHandCardAmount: {fileID: 1645290892}
-  enemyDeckCardAmount: {fileID: 1605049045}
-  playingCardPrefab: {fileID: 1047151496080733996, guid: 0735616eb3573c94d9c7e0b8bdefaf5a, type: 3}
 --- !u!222 &1858297384
 CanvasRenderer:
   m_ObjectHideFlags: 0

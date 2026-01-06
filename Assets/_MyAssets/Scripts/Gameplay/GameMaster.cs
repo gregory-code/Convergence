@@ -13,7 +13,6 @@ using UnityEngine;
 public class GameMaster : MonoBehaviourPunCallbacks
 {
     [SerializeField] private UserPlayer player;
-    [SerializeField] private EnemyPlayer enemy;
 
     [SerializeField] TextMeshProUGUI WhoGoesFirstText;
     [SerializeField] TextMeshProUGUI CurrentIDText;
@@ -147,11 +146,11 @@ public class GameMaster : MonoBehaviourPunCallbacks
     {
         if (IsPlayer1 == bIsPlayer1)
         {
-            return player.GetCardsInHand();
+            return player.GetCardCountInHand(true);
         }
         else
         {
-            return enemy.GetCardsInHand();
+            return player.GetCardCountInHand(false);
         }
     }
 
@@ -196,7 +195,7 @@ public class GameMaster : MonoBehaviourPunCallbacks
 
         bIsPlayer1 = (player1_ID == FirebasePlayer.GetUserID());
 
-        enemy.LoadOpponentID((bIsPlayer1) ? player2_ID : player1_ID, bIsPlayer1);
+        player.LoadOpponentID((bIsPlayer1) ? player2_ID : player1_ID, bIsPlayer1);
     }
 
     public void Crossroads()
@@ -372,7 +371,7 @@ public class GameMaster : MonoBehaviourPunCallbacks
             }
             else
             {
-                enemy.PlayAllyCard(card);
+                player.PlayAllyCard(card, false);
             }
         }
 
@@ -487,7 +486,7 @@ public class GameMaster : MonoBehaviourPunCallbacks
         {
             BaseCard cardToPlay = (isCaptain) ? CaptainLibrary[cardToPlayIndex] : CardAndCaptainCardLibrary[cardToPlayIndex];
 
-            enemy.PlayEnemyCard(cardToPlay, captainUsing, bTargetingEnemy, captainTarget, bForceSwift);
+            player.PlayEnemyCard(cardToPlay, captainUsing, bTargetingEnemy, captainTarget, bForceSwift);
         }
     }
 
@@ -519,7 +518,7 @@ public class GameMaster : MonoBehaviourPunCallbacks
         {
             cardToPlay.bWaitForReaction = true;
             player.AllowReaction(true);
-            enemy.EnemyIsAttackingPredicition(cardToPlay, captainUsing);
+            player.EnemyIsAttackingPredicition(cardToPlay, captainUsing);
         }
     }
 
@@ -597,13 +596,13 @@ public class GameMaster : MonoBehaviourPunCallbacks
 
         if (isPlayer1 == bIsPlayer1) // Owner, this client
         {
-            enemy.EnemyFinishReaction();
+            player.EnemyFinishReaction(true);
         }
         else // other player
         {
             WaitingForOpponent.SetActive(false);
             ClearLineAttacks();
-            player.EnemyFinishReaction();
+            player.EnemyFinishReaction(false);
         }
     }
 
@@ -725,11 +724,11 @@ public class GameMaster : MonoBehaviourPunCallbacks
     {
         if(isPlayer1 == bIsPlayer1) // Owner, this client
         {
-            player.RequestDrawCards(cardsToDraw);
+            player.RequestDrawCards(cardsToDraw, true);
         }
         else // other player
         {
-            enemy.RequestDrawCards(cardsToDraw);
+            player.RequestDrawCards(cardsToDraw, false);
         }
     }
 
@@ -748,7 +747,7 @@ public class GameMaster : MonoBehaviourPunCallbacks
     void ShowOpponentIveDrawn(bool isPlayer1, int cardIndex)
     {
         BaseCard cardToPlay = CardAndCaptainCardLibrary[cardIndex];
-        StartCoroutine(enemy.RevealCardAndDraw(cardToPlay));
+        StartCoroutine(player.EnemyRevealCardAndDraw(cardToPlay));
     }
 
     public void RequestIncreaseSpark(PlayingCard captainGainingSpark, int SparkToAdd)
@@ -840,13 +839,13 @@ public class GameMaster : MonoBehaviourPunCallbacks
     {
         if (isPlayer1 == bIsPlayer1) // Owner, this client
         {
-            player.RequestDrawCards(cardsToMulligan);
-            StartCoroutine(player.MullgianWrapUp());
+            player.RequestDrawCards(cardsToMulligan, true);
+            StartCoroutine(player.MullgianWrapUp(true, 0));
         }
         else // other player
         {
-            enemy.RequestDrawCards(cardsToMulligan);
-            StartCoroutine(enemy.MullgianWrapUp(cardsToMulligan));
+            player.RequestDrawCards(cardsToMulligan, false);
+            StartCoroutine(player.MullgianWrapUp(false, cardsToMulligan));
         }
     }
 

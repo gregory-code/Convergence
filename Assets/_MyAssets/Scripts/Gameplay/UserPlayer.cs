@@ -11,17 +11,26 @@ using UnityEngine.UI;
 
 public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler, IPointerExitHandler
 {
+    [SerializeField] protected FirebasePlayerInfo firebasePlayerInfo;
     [SerializeField] private GameMaster gameMaster;
-    [SerializeField] private VisualDeck visualDeck;
+    [SerializeField] private VisualDeck allyVisualDeck;
+    [SerializeField] private VisualDeck enemyVisualDeck;
     [SerializeField] private LineScript lineRenderer;
+    [SerializeField] private Transform enemySideHandTransform;
 
-    [SerializeField] private List<BaseCard> UserCaptains = new List<BaseCard>();
-    [SerializeField] private List<BaseCard> UserDeck = new List<BaseCard>();
+    private List<BaseCard> UserCaptains = new List<BaseCard>();
+    private List<BaseCard> UserDeck = new List<BaseCard>();
+
+    private List<BaseCard> EnemyCaptains = new List<BaseCard>();
+    private List<BaseCard> EnemyDeck = new List<BaseCard>();
 
     [SerializeField] private GameObject SelectCaptain;
     [SerializeField] private VisibleCard[] SelectCaptainsVisible;
 
     [SerializeField] private CardAmountHover allyDeckCardAmount;
+    [SerializeField] private CardAmountHover enemyHandCardAmount;
+    [SerializeField] private CardAmountHover enemyDeckCardAmount;
+
     [SerializeField] private GameObject MullgianPanel;
     [SerializeField] private GameObject CaptainPanel;
     [SerializeField] private GameObject InspectionPanel;
@@ -51,6 +60,7 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
     private Coroutine reactionTimerCorotine;
 
     private int DeckIndex;
+    private int EnemyDeckIndex;
 
     public bool bIsPlayer1 { get; private set; }
 
@@ -73,9 +83,13 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
 
     public PlayingCard currentCard { get; private set; }
 
+    private bool bObtainedDeck = false;
+    private string enemyID;
+
     [SerializeField] private PlayingCard playingCardPrefab;
     private List<PlayingCard> PlayingCardsInHand = new List<PlayingCard>();
-    public int GetCardsInHand() { return PlayingCardsInHand.Count; }
+    private List<PlayingCard> EnemyCardsInHand = new List<PlayingCard>();
+    public int GetCardCountInHand(bool bMyHand) { return (bMyHand) ? PlayingCardsInHand.Count : EnemyCardsInHand.Count; }
     public List<PlayingCard> GetPlayingCardsInHand() { return PlayingCardsInHand; }
 
     private List<PlayingCard> CardsToMulligan = new List<PlayingCard>();
@@ -94,6 +108,9 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
     private void Start()
     {
         allyDeckCardAmount.onChangeCardText += HoveredAllyDeck;
+        enemyHandCardAmount.onChangeCardText += HoveredEnemyHand;
+        enemyDeckCardAmount.onChangeCardText += HoveredEnemyDeck;
+        StartCoroutine(LoadingOpponentDeck());
     }
 
     private void Update()
@@ -130,6 +147,12 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
             return;
 
         lineRenderer.UpdateReticleLocation(GetUIToWorldPoint(Input.mousePosition));
+    }
+
+    public void LoadOpponentID(string ID, bool bIsPlayer1)
+    {
+        enemyID = ID;
+        bObtainedDeck = true;
     }
 
     public void StopInspecting()
@@ -204,19 +227,26 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
         gameMaster.RequestFinishReaction();
     }
 
-    public void EnemyFinishReaction()
+    public void EnemyFinishReaction(bool bClient)
     {
         if (gameMaster.reactionPlayingCard != null)
         {
             gameMaster.reactionPlayingCard.myCard.bWaitForReaction = false;
         }
 
-
-        if(gameMaster.bPlayer1sTurn == bIsPlayer1)
+        if(bClient)
         {
-            BlockHand(DaybreakCards.Count > 0);
-            StartCoroutine(GetPlayerOptions(DaybreakCards.Count <= 0));
+            if (gameMaster.bPlayer1sTurn == bIsPlayer1)
+            {
+                BlockHand(DaybreakCards.Count > 0);
+                StartCoroutine(GetPlayerOptions(DaybreakCards.Count <= 0));
+            }
         }
+        else
+        {
+            gameMaster.ClearLineAttacks();
+        }
+
 
         gameMaster.ResetAllDisplayAttackStats();
     }
@@ -248,7 +278,7 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
         if(currentCard.myCard.bSwift == false)
             StartCoroutine(currentCaptain.EnergizeAndExhaust(false));
 
-        StartCoroutine(RemoveCardFromHand(currentCard));
+        StartCoroutine(RemoveCardFromHand(currentCard, true));
     }
 
     public void ClickedChoicePanelButton()
@@ -391,10 +421,10 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
             if (UserDeck[i].CardName == cardToDraw.CardName)
             {
                 gameMaster.RequestShowOpponentIveDrawn(cardToDraw);
-                visualDeck.DrawTopCard();
+                allyVisualDeck.DrawTopCard();
                 yield return new WaitForSeconds(0.34f);
                 UserDeck.RemoveAt(i);
-                AddCardToHand(cardToDraw);
+                AddCardToHand(cardToDraw, true);
                 yield break;
             }
         }
@@ -574,65 +604,219 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
         gameMaster.RequestSwitchTurns();
     }
 
-    public void RequestDrawCards(int cardsToDraw)
+    public void RequestDrawCards(int cardsToDraw, bool bClientSide)
     {
-        StartCoroutine(DrawCardsToHand(cardsToDraw));
+        StartCoroutine(DrawCardsToHand(cardsToDraw, bClientSide));
     }
 
-    private IEnumerator DrawCardsToHand(int cardsToDraw)
+    private IEnumerator DrawCardsToHand(int cardsToDraw, bool bClientSide)
     {
-        for(int i = 0; i < cardsToDraw; i++)
+        if(bClientSide)
         {
-            visualDeck.DrawTopCard();
-            yield return new WaitForSeconds(0.04f);
+            for (int i = 0; i < cardsToDraw; i++)
+            {
+                allyVisualDeck.DrawTopCard();
+                yield return new WaitForSeconds(0.04f);
+            }
+
+            yield return new WaitForSeconds(0.3f);
+
+            for (int i = 0; i < cardsToDraw; i++)
+            {
+                int index = UnityEngine.Random.Range(0, UserDeck.Count);
+                BaseCard randomCard = UserDeck[index];
+                UserDeck.RemoveAt(index);
+                AddCardToHand(randomCard, bClientSide);
+                yield return new WaitForSeconds(0.1f);
+            }
         }
+        else
+        {
+            for (int i = 0; i < cardsToDraw; i++)
+            {
+                enemyVisualDeck.DrawTopCard();
+                yield return new WaitForSeconds(0.04f);
+            }
+
+            yield return new WaitForSeconds(0.3f);
+
+            for (int i = 0; i < cardsToDraw; i++)
+            {
+                AddCardToHand(null, bClientSide);
+                yield return new WaitForSeconds(0.1f);
+            }
+        }
+    }
+
+    public void AddCardToDeck(BaseCard cardsToAdd, bool bClientSide)
+    {
+        if(bClientSide)
+        {
+            BaseCard newCard = ScriptableObject.Instantiate(cardsToAdd);
+            UserDeck.Add(newCard);
+            allyVisualDeck.AddCardToVisualDeck();
+        }
+        else
+        {
+            if (cardsToAdd != null)
+            {
+                BaseCard newCard = ScriptableObject.Instantiate(cardsToAdd);
+                EnemyDeck.Add(newCard);
+            }
+            enemyVisualDeck.AddCardToVisualDeck();
+        }
+    }
+    public void AddCardToHand(BaseCard newCardToadd, bool bClientSide)
+    {
+        if(bClientSide)
+        {
+            PlayingCard newPlayingCard = Instantiate(playingCardPrefab, this.transform);
+            newPlayingCard.Init(this, newCardToadd, bIsPlayer1, gameMaster.GetNextID(), null);
+            newPlayingCard.transform.localPosition = new Vector3(0, -150, 0);
+            PlayingCardsInHand.Add(newPlayingCard);
+            newPlayingCard.StartMoveCard(-5.0f, false, 0.5f);
+
+            ReOrganizeHand(bClientSide);
+        }
+        else
+        {
+            PlayingCard newPlayingCard = Instantiate(playingCardPrefab, enemySideHandTransform);
+            newPlayingCard.Init(null, newCardToadd, bIsPlayer1, gameMaster.GetNextID(), null);
+            newPlayingCard.transform.localPosition = new Vector3(0, 150, 0);
+            EnemyCardsInHand.Add(newPlayingCard);
+            newPlayingCard.StartMoveCard(-5, false, 0.5f);
+
+            ReOrganizeHand(bClientSide);
+        }
+    }
+
+    public void PlayAllyCard(PlayingCard allyCard, bool bClientSide)
+    {
+        if (bClientSide)
+        {
+            StartCoroutine(RemoveCardFromHand(allyCard, bClientSide));
+        }
+        else
+        {
+            EnemyCardsInHand[0].StartMoveCard(350.0f, false, 0.5f);
+            StartCoroutine(RemoveCardFromHand(EnemyCardsInHand[0], bClientSide));
+        }
+    }
+
+    private IEnumerator RemoveCardFromHand(PlayingCard cardToRemove, bool bClientSide)
+    {
+        cardToRemove.PreventRegularMoving();
+
+        if (bClientSide)
+            PlayingCardsInHand.Remove(cardToRemove);
+        else
+            EnemyCardsInHand.Remove(cardToRemove);
+
+        yield return new WaitForSeconds(0.1f);
+        ReOrganizeHand(bClientSide);
+    }
+
+    public void PlayEnemyCard(BaseCard cardToPlay, PlayingCard captainUsing, bool bTargetingEnemy, List<PlayingCard> captainTargeting, bool bForceSwift)
+    {
+        if (cardToPlay is ActionCard action)
+        {
+            if (action.bAttackingCard)
+            {
+                List<PlayingCard> myTeam = StaticGameplayDelegates.GetEnemies(captainUsing);
+                bool bAllyIsEnergized = false;
+
+                foreach (PlayingCard ally in myTeam)
+                {
+                    if (ally.bEnergized)
+                        bAllyIsEnergized = true;
+                }
+
+                if (bAllyIsEnergized)
+                {
+                    StartCoroutine(cardToPlay.PlayCard(EnemyCardsInHand[0], captainUsing, bTargetingEnemy, captainTargeting));
+                    return;
+                }
+            }
+        }
+
+        if (cardToPlay is CaptainCard captain)
+        {
+            if (captain.bIsAllyCard == false)
+            {
+                // Passive Proc or activatable ability
+
+                StartCoroutine(cardToPlay.PlayCard(captainUsing, captainUsing, bTargetingEnemy, null));
+
+                if (cardToPlay.bSwift == false && bForceSwift == false)
+                    StartCoroutine(captainUsing.EnergizeAndExhaust(false));
+
+                return;
+            }
+            else
+            {
+                if (cardToPlay.bSwift == false && bForceSwift == false)
+                    StartCoroutine(captainUsing.EnergizeAndExhaust(false));
+
+                return;
+            }
+        }
+
+        EnemyCardsInHand[0].SetCard(cardToPlay, bIsPlayer1);
+
+        if (cardToPlay.bSwift == false && bForceSwift == false)
+            StartCoroutine(captainUsing.EnergizeAndExhaust(false));
+
+        StartCoroutine(cardToPlay.PlayCard(EnemyCardsInHand[0], captainUsing, bTargetingEnemy, captainTargeting));
+        StartCoroutine(RemoveCardFromHand(EnemyCardsInHand[0], false));
+    }
+
+    public IEnumerator EnemyRevealCardAndDraw(BaseCard cardToDraw)
+    {
+        enemyVisualDeck.DrawTopCard();
+        yield return new WaitForSeconds(0.04f);
+
+        PlayingCard newPlayingCard = Instantiate(playingCardPrefab, this.transform);
+        newPlayingCard.Init(null, cardToDraw, bIsPlayer1, -1, null); // THIS IS -1 BECAUSE OTHERWISE IT CREATES A UNIQUE CARD THAT THE CLIENT NEVER SEES, THUS MAKING UNIQUE ID DIFFERENT VALUES
+        newPlayingCard.transform.localPosition = new Vector3(0, 250, 0);
+        newPlayingCard.StartMoveCard(-550, false, 0.5f);
+
+        yield return new WaitForSeconds(0.8f);
+
+        newPlayingCard.StartMoveCard(250, false, 0.3f);
 
         yield return new WaitForSeconds(0.3f);
 
-        for (int i = 0; i < cardsToDraw; i++)
+        AddCardToHand(null, false);
+    }
+
+    public void EnemyIsAttackingPredicition(BaseCard cardToPlay, PlayingCard captainUsing)
+    {
+        if (captainUsing.myCard.Type.type == CardType.Ally)
         {
-            int index = UnityEngine.Random.Range(0, UserDeck.Count);
-            BaseCard randomCard = UserDeck[index];
-            UserDeck.RemoveAt(index);
-            AddCardToHand(randomCard);
-            yield return new WaitForSeconds(0.1f);
+            gameMaster.reactionPlayingCard = captainUsing;
+            captainUsing.DisplayAttackStats(false, false, captainUsing, captainUsing);
+        }
+        else
+        {
+            EnemyCardsInHand[0].SetCard(cardToPlay, bIsPlayer1);
+
+            if (cardToPlay.bSwift == false)
+                StartCoroutine(captainUsing.EnergizeAndExhaust(false));
+
+            StartCoroutine(EnemyCardsInHand[0].PlayReaction(captainUsing, captainUsing.transform.parent, cardToPlay));
+
+            //StartCoroutine(cardToPlay.PlayCard(PlayingCardsInHand[0], captainUsing, bTargetingEnemy, captainTargeting));
+            gameMaster.reactionPlayingCard = EnemyCardsInHand[0];
+            StartCoroutine(RemoveCardFromHand(EnemyCardsInHand[0], false));
+
+            captainUsing.DisplayAttackStats(false, false, EnemyCardsInHand[0], captainUsing);
         }
     }
 
-    public void AddCardToDeck(BaseCard cardsToAdd)
-    {
-        BaseCard newCard = ScriptableObject.Instantiate(cardsToAdd);
-        UserDeck.Add(newCard);
-        visualDeck.AddCardToVisualDeck();
-    }
-    public void AddCardToHand(BaseCard newCardToadd)
-    {
-        PlayingCard newPlayingCard = Instantiate(playingCardPrefab, this.transform);
-        newPlayingCard.Init(this, newCardToadd, bIsPlayer1, gameMaster.GetNextID(), null);
-        newPlayingCard.transform.localPosition = new Vector3(0, -150, 0);
-        PlayingCardsInHand.Add(newPlayingCard);
-        newPlayingCard.StartMoveCard(-5.0f, false, 0.5f);
-
-        ReOrganizeHand();
-    }
-
-    public void PlayAllyCard(PlayingCard allyCard)
-    {
-        StartCoroutine(RemoveCardFromHand(allyCard));
-    }
-
-    private IEnumerator RemoveCardFromHand(PlayingCard cardToRemove)
-    {
-        cardToRemove.PreventRegularMoving();
-        PlayingCardsInHand.Remove(cardToRemove);
-        yield return new WaitForSeconds(0.1f);
-        ReOrganizeHand();
-    }
-
-    private void ReOrganizeHand()
+    private void ReOrganizeHand(bool bClientSide)
     {
 
-        int count = PlayingCardsInHand.Count;
+        int count = (bClientSide) ? PlayingCardsInHand.Count : EnemyCardsInHand.Count;
 
         const float minCount = 2f;
         const float maxCount = 22f;
@@ -645,15 +829,31 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
 
         float spacing = Mathf.Lerp(maxValue, minValue, t);
 
-        for (int i = 0; i < count; i++)
+        if(bClientSide)
         {
-            if (PlayingCardsInHand[i] == null)
-                continue;
+            for (int i = 0; i < count; i++)
+            {
+                if (PlayingCardsInHand[i] == null)
+                    continue;
 
-            float offset = (i - (count - 1) / 2f) * spacing;
+                float offset = (i - (count - 1) / 2f) * spacing;
 
-            PlayingCardsInHand[i].transform.SetAsFirstSibling();
-            PlayingCardsInHand[i].StartMoveCard(offset, true, 0.5f);
+                PlayingCardsInHand[i].transform.SetAsFirstSibling();
+                PlayingCardsInHand[i].StartMoveCard(offset, true, 0.5f);
+            }
+        }
+        else
+        {
+            for (int i = 0; i < count; i++)
+            {
+                if (EnemyCardsInHand[i] == null)
+                    continue;
+
+                float offset = (i - (count - 1) / 2f) * spacing;
+
+                EnemyCardsInHand[i].transform.SetAsFirstSibling();
+                EnemyCardsInHand[i].StartMoveCard(offset, true, 0.5f);
+            }
         }
     }
 
@@ -718,33 +918,59 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
     }
 
 
-    public IEnumerator MullgianWrapUp()
+    public IEnumerator MullgianWrapUp(bool bClientSide, int cardsToMulligan)
     {
-        MullgianPanel.SetActive(false);
-        bInMulligan = false;
-        bBlockHand = true;
-
-        yield return new WaitForSeconds(1.0f);
-
-        for (int i = 0; i < CardsToMulligan.Count; i++)
+        if(bClientSide)
         {
-            if (CardsToMulligan[i] == null)
-                continue;
+            MullgianPanel.SetActive(false);
+            bInMulligan = false;
+            bBlockHand = true;
 
-            CardsToMulligan[i].StartMoveCard(-350, false, 0.2f);
-            yield return new WaitForSeconds(0.1f);
-            AddCardToDeck(CardsToMulligan[i].myCard);
-            PlayingCardsInHand.Remove(CardsToMulligan[i]);
-            yield return new WaitForSeconds(0.1f);
-            CardsToMulligan[i].CleanupDestroy();
+            yield return new WaitForSeconds(1.0f);
+
+            for (int i = 0; i < CardsToMulligan.Count; i++)
+            {
+                if (CardsToMulligan[i] == null)
+                    continue;
+
+                CardsToMulligan[i].StartMoveCard(-350, false, 0.2f);
+                yield return new WaitForSeconds(0.1f);
+                AddCardToDeck(CardsToMulligan[i].myCard, bClientSide);
+                PlayingCardsInHand.Remove(CardsToMulligan[i]);
+                yield return new WaitForSeconds(0.1f);
+                CardsToMulligan[i].CleanupDestroy();
+            }
+
+            ReOrganizeHand(bClientSide);
+            StartCoroutine(ReenableHand());
+            CardsToMulligan.Clear();
+
+            yield return new WaitForSeconds(0.4f);
+            StartCoroutine(allyVisualDeck.ShuffleAnimation());
         }
+        else
+        {
+            yield return new WaitForSeconds(1.4f);
 
-        ReOrganizeHand();
-        StartCoroutine(ReenableHand());
-        CardsToMulligan.Clear();
+            int desiredAmountInHand = PlayingCardsInHand.Count - cardsToMulligan;
 
-        yield return new WaitForSeconds(0.4f);
-        StartCoroutine(visualDeck.ShuffleAnimation());
+            while (PlayingCardsInHand.Count != desiredAmountInHand)
+            {
+                PlayingCardsInHand[0].StartMoveCard(350, false, 0.2f);
+                yield return new WaitForSeconds(0.1f);
+                AddCardToDeck(PlayingCardsInHand[0].myCard, bClientSide);
+                yield return new WaitForSeconds(0.1f);
+                PlayingCardsInHand[0].CleanupDestroy();
+                PlayingCardsInHand.RemoveAt(0);
+            }
+
+            yield return new WaitForSeconds(0.4f);
+
+            ReOrganizeHand(bClientSide);
+
+            yield return new WaitForSeconds(0.2f);
+            StartCoroutine(enemyVisualDeck.ShuffleAnimation());
+        }
     }
 
     public void InspectCard(PlayingCard cardToInspect, bool IOwnit)
@@ -904,6 +1130,22 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
             allyDeckCardAmount.cardAmountText.text = "" + cardsInDeck;
         }
     }
+
+    private void HoveredEnemyHand(bool bStartedHover)
+    {
+        if (bStartedHover)
+            enemyHandCardAmount.cardAmountText.text = "" + PlayingCardsInHand.Count;
+    }
+
+    private void HoveredEnemyDeck(bool bStartedHover)
+    {
+        if (bStartedHover)
+        {
+            int cardsInDeck = enemyVisualDeck.VisualDeckAmount();
+            enemyDeckCardAmount.cardAmountText.text = "" + cardsInDeck;
+        }
+    }
+
     public IEnumerator LoadData(DataSnapshot data)
     {
         DeckIndex = (data.Child("DeckIndex").Exists) ? DeckIndex = int.Parse(data.Child("DeckIndex").Value.ToString()) : 0;
@@ -938,13 +1180,77 @@ public class UserPlayer : MonoBehaviour, IDataPersistence, IPointerEnterHandler,
             {
                 if (decklist[j] == cardLibrary[i].CardName)
                 {
-                    AddCardToDeck(cardLibrary[i]);
+                    AddCardToDeck(cardLibrary[i], true);
                 }
             }
         }
 
         yield return new WaitForEndOfFrame();
     }
+
+    private IEnumerator LoadingOpponentDeck()
+    {
+
+        while (bObtainedDeck == false)
+        {
+            yield return new WaitForEndOfFrame();
+        }
+
+        var dataBaseTask = firebasePlayerInfo.DataBaseReference.Child("users").Child(enemyID).GetValueAsync();
+
+        yield return new WaitUntil(predicate: () => dataBaseTask.IsCompleted);
+
+        if (dataBaseTask.Exception != null)
+        {
+            //NotificationScript.createNotif($"Failed to load data: {dataBaseTask.Exception}", Color.red);
+        }
+        else if (dataBaseTask.Result.Value == null)
+        {
+            // No content
+        }
+        else
+        {
+            DataSnapshot snapShot = dataBaseTask.Result;
+
+            EnemyDeckIndex = (snapShot.Child("DeckIndex").Exists) ? EnemyDeckIndex = int.Parse(snapShot.Child("DeckIndex").Value.ToString()) : 0;
+
+            yield return new WaitForEndOfFrame();
+
+            List<string> decklist = new List<string>();
+            if (snapShot.Child("Deck" + EnemyDeckIndex).Exists)
+            {
+                for (int j = 0; j < snapShot.Child("Deck" + EnemyDeckIndex).ChildrenCount; ++j)
+                {
+                    decklist.Add(snapShot.Child("Deck" + EnemyDeckIndex).Child("" + j).Value.ToString());
+                }
+            }
+
+            int captainsIndex = 0;
+            foreach (BaseCard card in gameMaster.GetCaptainLibrary())
+            {
+                if (decklist.Contains(card.CardName))
+                {
+                    BaseCard newCaptain = ScriptableObject.Instantiate(card);
+                    captainsIndex++;
+                    EnemyCaptains.Add(newCaptain);
+                }
+            }
+
+            List<BaseCard> cardLibrary = gameMaster.GetEveryCardLibrary();
+            for (int i = 0; i < cardLibrary.Count; i++)
+            {
+                for (int j = 0; j < decklist.Count; j++)
+                {
+                    if (decklist[j] == cardLibrary[i].CardName)
+                    {
+                        AddCardToDeck(cardLibrary[i], false);
+                    }
+                }
+            }
+        }
+
+    }
+
 
     public void LoadOtherPlayersData(string key, object data)
     {
